@@ -78,7 +78,7 @@
 <div class="wrap">
   <div id="warn" class="warn" style="display:none"></div>
   <div class="top">
-    <div class="title"><h1>♥ AI 사업기획팀 ♥</h1><p>사랑 가득한 AI 사업기획팀 ♥</p></div>
+    <div class="title"><h1>♥ AI 사업기획팀 ♥</h1></div>
     <div class="clock"><b id="clk">--:--</b><span id="cdate"></span><br><span class="lunch" id="lunchTag" style="display:none">🍱 점심시간</span><span class="live off" id="liveTag">● 오프라인</span></div>
   </div>
   <div class="chips" id="chips"></div>
@@ -131,10 +131,10 @@ const FACES = {"thinking": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPAAAA
 const STATUSES = { working:"업무중", meeting:"회의중", resting:"휴식중" };
 const STCOLOR = { working:"#6fa8dc", meeting:"#a98fda", resting:"#f2906b" };
 const SUB = {
-  working: { busy:{l:"완전바쁨",e:"🔥",c:"#e5586e"}, free:{l:"한가함",e:"🌿",c:"#6fa8dc"} },
+  working: { busy:{l:"완전바쁨",e:"🔥",c:"#e5586e"}, angry:{l:"개빡침",e:"🤬",c:"#c0392b"}, peace:{l:"평화로움",e:"😌",c:"#6fa8dc"} },
   resting: { coffee:{l:"커피",e:"☕",c:"#b5836a"}, walk:{l:"산책",e:"🌳",c:"#7ba7b5"}, lounge:{l:"휴게실",e:"🛋️",c:"#a98fda"} },
 };
-const SUBLABEL = { working:"업무 강도", resting:"휴식 종류" };
+const SUBLABEL = { working:"지금 상태", resting:"휴식 종류" };
 const SEED = {
   u1:{name:"하이슬", status:"working", sub:"busy",   msg:"오늘 너무 바빠.....", order:1},
   u2:{name:"신지영", status:"meeting", sub:null,     msg:"월루중", order:2},
@@ -157,8 +157,8 @@ function visual(m){
   if(ek==="lunch")   return {face:"sleeping", label:"점심시간", c:"#ec6f9e"};
   if(ek==="meeting") return {face:"thinking", label:"회의중",  c:"#a98fda"};
   if(ek==="resting"){ const s=SUB.resting[m.sub]||SUB.resting.coffee; return {face:"happy", label:"휴식중", c:"#f2906b", sub:s}; }
-  const sk=(m.sub in SUB.working)? m.sub : "free"; const s=SUB.working[sk];
-  return {face: sk==="busy"?"error":"typing", label:"업무중", c: sk==="busy"?"#e5586e":"#6fa8dc", sub:s};
+  const sk=(m.sub in SUB.working)? m.sub : "peace"; const s=SUB.working[sk];
+  return {face: (sk==="busy"||sk==="angry")?"error":"typing", label:"업무중", c: s.c, sub:s};
 }
 function renderChips(){
   const order={all:"전체", working:"업무중", meeting:"회의중", resting:"휴식중", lunch:"점심시간"};
@@ -198,7 +198,7 @@ function renderChat(){
 }
 
 /* ---- modal ---- */
-function previewFace(){ const f = editStatus==="meeting"?"thinking" : editStatus==="resting"?"happy" : (editSub==="busy"?"error":"typing"); document.getElementById("mFace").src=FACES[f]; }
+function previewFace(){ const f = editStatus==="meeting"?"thinking" : editStatus==="resting"?"happy" : ((editSub==="busy"||editSub==="angry")?"error":"typing"); document.getElementById("mFace").src=FACES[f]; }
 function drawModal(){
   const ss=document.getElementById("stsel"); ss.innerHTML="";
   for(const k in STATUSES){ const b=document.createElement("button"); b.innerHTML='<span class="d" style="background:'+STCOLOR[k]+'"></span>'+STATUSES[k];
