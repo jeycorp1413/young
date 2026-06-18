@@ -58,6 +58,9 @@
   .chat-who button{border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:6px 15px; font:inherit; font-size:13px; cursor:pointer; color:#8a6670;}
   .chat-who button.on{border-color:var(--pink); background:var(--pink); color:#fff; font-weight:700;}
   .bubble .who{font-weight:800; font-size:12px; color:var(--pink-deep); margin-bottom:3px;}
+  .bctl{display:flex; gap:10px; margin-top:5px;}
+  .bctl-btn{border:0; background:none; padding:0; font:inherit; font-size:11px; color:#bba3b0; cursor:pointer; text-decoration:underline;}
+  .bctl-btn.del{color:#e08aa6;}
   .ov{position:fixed; inset:0; background:rgba(80,30,55,.4); display:none; align-items:center; justify-content:center; padding:20px; z-index:50;}
   .ov.open{display:flex;}
   .modal{background:#fff; border-radius:18px; width:100%; max-width:400px; padding:22px; box-shadow:0 24px 60px rgba(120,30,70,.3);}
@@ -159,8 +162,9 @@ function attAuto(w){
   const d=new Date(), day=d.getDay(), now=d.getHours()*60+d.getMinutes();
   if(day===0||day===6) return '🏠 휴무';
   if(now < hmToMin(w.s)) return '⏰ 출근 전 · '+w.s+' 출근';
-  if(now < hmToMin(w.e)) return '🟢 근무중 · '+w.s+'~'+w.e;
-  return '🔴 퇴근 · '+w.e+' 종료';
+  if(now >= hmToMin(w.e)) return '🔴 퇴근 · '+w.e+' 종료';
+  if(isLunch()) return '🍱 점심시간';
+  return '🟢 근무중 · '+w.s+'~'+w.e;
 }
 
 function visual(m){
@@ -199,15 +203,25 @@ function render(){
   }
   if(!list.length){ wrap.innerHTML='<div style="color:#c9b3bd;padding:40px 0;text-align:center">표시할 팀원이 없어요.</div>'; }
 }
+function mdhm(ts){ const d=new Date(ts||Date.now()); return (d.getMonth()+1)+"월 "+d.getDate()+"일 "+hm(ts); }
 function renderChat(){
   const log=document.getElementById("chatLog");
   if(!CHAT.length){ log.innerHTML='<div class="chat-empty">아직 메시지가 없어요. 첫 글을 남겨보세요!</div>'; return; }
   log.innerHTML="";
   for(const c of CHAT){ const b=document.createElement("div"); b.className="bubble";
-    b.innerHTML=(c.who?('<div class="who">'+esc(c.who)+'</div>'):"")+(c.text?("<div>"+esc(c.text)+"</div>"):"")+(c.img?('<img src="'+c.img+'">'):"")+'<div class="bt">'+hm(c.t)+'</div>';
+    b.innerHTML=(c.who?('<div class="who">'+esc(c.who)+'</div>'):"")+(c.text?("<div>"+esc(c.text)+"</div>"):"")+(c.img?('<img src="'+c.img+'">'):"")+'<div class="bt">'+mdhm(c.t)+(c.edited?' · 수정됨':'')+'</div>';
+    const ctl=document.createElement("div"); ctl.className="bctl";
+    if(c.text){ const eb=document.createElement("button"); eb.className="bctl-btn"; eb.textContent="수정"; eb.onclick=()=>editChat(c); ctl.appendChild(eb); }
+    const db2=document.createElement("button"); db2.className="bctl-btn del"; db2.textContent="삭제"; db2.onclick=()=>delChat(c); ctl.appendChild(db2);
+    b.appendChild(ctl);
     log.appendChild(b); }
   log.scrollTop=log.scrollHeight;
 }
+function editChat(c){ const nt=prompt("메시지 수정", c.text||""); if(nt===null) return; const t=nt.trim();
+  if(!t){ delChat(c); return; }
+  if(db&&c.id){ db.ref("chat/"+c.id).update({text:t, edited:true}); } else { c.text=t; c.edited=true; renderChat(); } }
+function delChat(c){ if(!confirm("이 메시지를 삭제할까요?")) return;
+  if(db&&c.id){ db.ref("chat/"+c.id).remove(); } else { CHAT=CHAT.filter(x=>x!==c); renderChat(); } }
 
 /* ---- modal ---- */
 function previewFace(){ const f = editStatus==="meeting"?"thinking" : editStatus==="resting"?"happy" : ((editSub==="busy"||editSub==="angry")?"error":"typing"); document.getElementById("mFace").src=FACES[f]; }
