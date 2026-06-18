@@ -73,18 +73,6 @@
   .mbtns .btn{flex:1; border:0; background:var(--pink); color:#fff; font:inherit; font-weight:700; font-size:13px; padding:12px 14px; border-radius:11px; cursor:pointer;}
   .ghost{background:#f6e8ef !important; color:#8a6670 !important;}
   .attline{margin-top:7px; font-size:12.5px; font-weight:700; color:#8a6670;}
-  .att-row{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px;}
-  .att-info{font-size:13px; font-weight:700; color:#7a6670;}
-  .att-btns{display:flex; gap:7px;}
-  .att-btn{border:0; border-radius:9px; padding:9px 14px; font:inherit; font-weight:700; font-size:13px; cursor:pointer;}
-  .att-btn.in{background:#e6f7ee; color:#1d9e60;}
-  .att-btn.out{background:#fdeaf0; color:#d6336c;}
-  .att-btn:disabled{opacity:.4; cursor:default;}
-  .att-sched{color:#c2adb6; font-weight:600; font-size:11.5px;}
-  .att-ctl{display:flex; gap:7px; margin-top:9px;}
-  .att-mini{border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:6px 14px; font:inherit; font-weight:700; font-size:12.5px; cursor:pointer;}
-  .att-mini.in{color:#1d9e60;} .att-mini.out{color:#d6336c;}
-  .att-mini:disabled{opacity:.38; cursor:default;}
 </style>
 </head>
 <body>
@@ -117,8 +105,6 @@
     <label>상태</label>
     <div class="opts" id="stsel" style="grid-template-columns:repeat(3,1fr)"></div>
     <div id="subWrap" style="display:none"><label id="subLabel">세부</label><div class="opts" id="subsel"></div></div>
-    <label>출퇴근</label>
-    <div class="att-row" id="attRow"></div>
     <label>오늘 한마디 💬</label>
     <textarea id="mMsg" rows="2" placeholder="오늘 하고 싶은 말 한마디!"></textarea>
     <div class="mbtns"><button class="btn ghost" id="mCancel">취소</button><button class="btn" id="mSave">저장</button></div>
@@ -166,16 +152,15 @@ function eff(m){ return isLunch()? "lunch" : m.status; }
 function ago(ts){ if(!ts) return ""; const m=Math.floor((Date.now()-ts)/60000); if(m<1) return "방금"; if(m<60) return m+"분 전"; const h=Math.floor(m/60); if(h<24) return h+"시간 전"; return Math.floor(h/24)+"일 전"; }
 function hm(ts){ const d=new Date(ts||Date.now()); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
 function esc(t){ return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
-function attToday(m){ const a=m&&m.att; if(a && a.date===todayStr()){ if(a.in&&a.out) return {state:"out", in:a.in, out:a.out}; if(a.in) return {state:"in", in:a.in}; } return {state:"none"}; }
 const WORK={ u1:{s:"08:30",e:"17:30"}, u2:{s:"08:00",e:"17:00"}, u3:{s:"08:00",e:"17:00"} };
 function workOf(m){ return WORK[m.id]||{s:"08:00",e:"17:00"}; }
 function hmToMin(s){ const p=String(s).split(":"); return (+p[0])*60+(+p[1]||0); }
-function tsMin(ts){ const d=new Date(ts); return d.getHours()*60+d.getMinutes(); }
-function attText(a,w){
-  if(a.state==="in"){ const late=w&&tsMin(a.in)>hmToMin(w.s); return '🟢 근무중 · 출근 '+hm(a.in)+(late?' ⏰지각':''); }
-  if(a.state==="out"){ const early=w&&tsMin(a.out)<hmToMin(w.e); return '🔴 퇴근 · '+hm(a.in)+' → '+hm(a.out)+(early?' 🏃조퇴':''); }
-  return '⚪ 미출근';
+function attAuto(w){
+  const d=new Date(), day=d.getDay(), now=d.getHours()*60+d.getMinutes();
+  if(day===0||day===6) return '🏠 휴무';
+  if(now < hmToMin(w.s)) return '⏰ 출근 전 · '+w.s+' 출근';
+  if(now < hmToMin(w.e)) return '🟢 근무중 · '+w.s+'~'+w.e;
+  return '🔴 퇴근 · '+w.e+' 종료';
 }
 
 function visual(m){
@@ -201,22 +186,16 @@ function render(){
   const wrap=document.getElementById("list"); wrap.innerHTML="";
   const list=DATA.filter(m=> filter==="all"||eff(m)===filter);
   for(const m of list){
-    const v=visual(m); const a=attToday(m), w=workOf(m); const row=document.createElement("div"); row.className="member"; row.style.setProperty("--c",v.c);
+    const v=visual(m); const w=workOf(m); const row=document.createElement("div"); row.className="member"; row.style.setProperty("--c",v.c);
     const subTxt = v.sub? '<span class="sub">· '+v.sub.e+' '+v.sub.l+'</span>' : "";
     const msgTxt = m.msg? esc(m.msg) : '<span class="ph">오늘 한마디를 남겨보세요</span>';
     row.innerHTML='<div class="avatar"><img src="'+FACES[v.face]+'" alt=""></div>'+
       '<div class="info"><div class="name">'+esc(m.name)+'</div>'+
       '<div class="statusline"><span class="dot"></span><span class="st">'+v.label+'</span>'+subTxt+'</div>'+
-      '<div class="attline">'+attText(a,w)+' <span class="att-sched">· 근무 '+w.s+'~'+w.e+'</span></div>'+
-      '<div class="att-ctl">'
-        +'<button class="att-mini in" data-act="in"'+(a.state==="in"?' disabled':'')+'>🟢 출근</button>'
-        +'<button class="att-mini out" data-act="out"'+(a.state==="in"?'':' disabled')+'>🔴 퇴근</button>'
-      +'</div>'+
+      '<div class="attline">'+attAuto(w)+'</div>'+
       '<div class="saying"><span class="q">💬</span>'+msgTxt+'</div></div>'+
       '<div class="time">'+ago(m.updated)+'</div>';
-    row.onclick=()=>openEdit(m.id);
-    row.querySelectorAll(".att-mini").forEach(btn=>btn.addEventListener("click",e=>{ e.stopPropagation(); clockFor(m.id, btn.dataset.act); }));
-    wrap.appendChild(row);
+    row.onclick=()=>openEdit(m.id); wrap.appendChild(row);
   }
   if(!list.length){ wrap.innerHTML='<div style="color:#c9b3bd;padding:40px 0;text-align:center">표시할 팀원이 없어요.</div>'; }
 }
@@ -248,22 +227,7 @@ function drawModal(){
 function openEdit(id){ const m=DATA.find(x=>String(x.id)===String(id)); if(!m) return; editId=m.id; editStatus=m.status; editSub=m.sub;
   document.getElementById("mTitle").textContent=m.name;
   document.getElementById("mSub").textContent = isLunch()? "지금은 자동 점심시간 — 13시 이후 이 상태로 표시돼요":"상태를 골라주세요";
-  document.getElementById("mMsg").value=m.msg||""; drawModal(); renderAttRow(); document.getElementById("ov").classList.add("open"); }
-function renderAttRow(){
-  const m=DATA.find(x=>String(x.id)===String(editId)); if(!m) return;
-  const a=attToday(m), w=workOf(m); const box=document.getElementById("attRow"); box.innerHTML="";
-  const info=document.createElement("div"); info.className="att-info"; info.innerHTML=attText(a,w)+'<br><span class="att-sched">근무 '+w.s+'~'+w.e+'</span>';
-  const btns=document.createElement("div"); btns.className="att-btns";
-  const bin=document.createElement("button"); bin.className="att-btn in"; bin.textContent="🟢 출근"; bin.disabled=(a.state==="in"); bin.onclick=()=>clockFor(editId,"in");
-  const bout=document.createElement("button"); bout.className="att-btn out"; bout.textContent="🔴 퇴근"; bout.disabled=(a.state!=="in"); bout.onclick=()=>clockFor(editId,"out");
-  btns.append(bin,bout); box.append(info,btns);
-}
-function clockFor(id, act){
-  const m=DATA.find(x=>String(x.id)===String(id)); if(!m) return;
-  if(act==="in"){ const patch={date:todayStr(), in:Date.now(), out:null}; m.att=patch; if(db) db.ref("members/"+id+"/att").set(patch); }
-  else { if(!m.att||m.att.date!==todayStr()||!m.att.in) return; m.att.out=Date.now(); if(db) db.ref("members/"+id+"/att/out").set(m.att.out); }
-  render(); if(editId===id) renderAttRow();
-}
+  document.getElementById("mMsg").value=m.msg||""; drawModal(); document.getElementById("ov").classList.add("open"); }
 function saveEdit(){
   const patch={status:editStatus, sub:editSub||null, msg:document.getElementById("mMsg").value.trim(), updated:Date.now()};
   if(db){ db.ref("members/"+editId).update(patch); }
