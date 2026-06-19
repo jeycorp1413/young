@@ -84,6 +84,12 @@
   .stampgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
   .stampgrid button{border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:14px 6px; cursor:pointer; font:inherit; font-size:13px; font-weight:700; color:#7a6670; display:flex; flex-direction:column; align-items:center; gap:6px;}
   .stampgrid button:hover{background:#fff8e6; border-color:#f3e3a8;} .stampgrid .e{font-size:24px;}
+
+  .addchip{cursor:pointer; background:#fff; border:1px dashed #f3b6cd; color:#b5446e;}
+  .tchip.evt{cursor:pointer;}
+  .spin{font-size:30px; font-weight:800; color:var(--pink-deep); text-align:center; padding:22px 0; min-height:84px; display:flex; align-items:center; justify-content:center;}
+  .modal input[type=text],.modal input[type=date]{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px; font:inherit; font-size:14px; outline:0;}
+  .modal input:focus{border-color:var(--pink);}
 </style>
 </head>
 <body>
@@ -132,6 +138,20 @@
   </div>
 </div>
 
+<div class="ov" id="eov"><div class="modal">
+  <h3 style="font-size:16px;font-weight:800;margin-bottom:12px">📌 팀 일정 추가</h3>
+  <label style="display:block;font-size:12.5px;font-weight:700;color:#7a6670;margin:0 0 7px">일정 이름</label>
+  <input type="text" id="evName" placeholder="예) 제안서 마감">
+  <label style="display:block;font-size:12.5px;font-weight:700;color:#7a6670;margin:14px 0 7px">날짜</label>
+  <input type="date" id="evDate">
+  <div class="mbtns"><button class="btn ghost" id="evCancel">취소</button><button class="btn" id="evSave">추가</button></div>
+</div></div>
+<div class="ov" id="cov"><div class="modal">
+  <h3 style="font-size:16px;font-weight:800;text-align:center">☕ 오늘 커피 룰렛</h3>
+  <div style="color:#a193a0;font-size:12px;margin:4px 0 6px;text-align:center">두구두구… 오늘 누가 쏘나!</div>
+  <div class="spin" id="spin">☕</div>
+  <div class="mbtns"><button class="btn" id="cSpin">돌리기!</button><button class="btn ghost" id="cClose">닫기</button></div>
+</div></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
@@ -166,6 +186,7 @@ const SEED = {
   u3:{name:"정서연", status:"resting", sub:"coffee", msg:"사장님 나빠요", order:3},
 };
 let DATA=[], CHAT=[], filter="all", editId=null, editStatus=null, editSub=null, editMood=null, stampTarget=null, pendingImg=null;
+let EVENTS=[], WEATHER=null, COFFEE=null; const DAYMS=86400000;
 const configured = !String(firebaseConfig.apiKey).startsWith("PASTE");
 let db=null;
 
@@ -208,10 +229,22 @@ function ticker(){
   else if(now < 13*60) main="🍱 맛점 하세요!";
   else main="💪 오후도 화이팅!";
   const dow=d.getDay(); let fri; if(dow===5) fri="🎉 오늘 불금!"; else { let dd=(5-dow+7)%7; if(dd===0) dd=7; fri="🎉 불금까지 D-"+dd; }
-  const np=nextPayday(); const t0=new Date(); t0.setHours(0,0,0,0); const ddp=Math.round((np-t0)/86400000);
+  const np=nextPayday(); const t0=new Date(); t0.setHours(0,0,0,0); const ddp=Math.round((np-t0)/DAYMS);
   const pay = ddp===0? "💰 오늘 월급날!" : "💰 월급 D-"+ddp;
-  el.innerHTML='<span class="tchip heart">'+main+'</span><span class="tchip">'+fri+'</span><span class="tchip">'+pay+'</span>';
+  el.innerHTML="";
+  el.appendChild(chip(main,"heart")); el.appendChild(chip(fri)); el.appendChild(chip(pay));
+  if(WEATHER) el.appendChild(chip(WEATHER));
+  if(COFFEE && COFFEE.t && sameDay(COFFEE.t)) el.appendChild(chip("☕ 오늘 커피: "+COFFEE.winner+"님"));
+  EVENTS.map(function(ev){return {ev:ev, dd:dday(ev.date)};}).filter(function(x){return x.dd>=0;}).sort(function(a,b){return a.dd-b.dd;}).forEach(function(x){
+    const c=chip("📌 "+x.ev.name+" "+(x.dd===0?"D-DAY":"D-"+x.dd)); c.classList.add("evt"); c.title="클릭하면 삭제";
+    c.onclick=function(){ if(confirm("'"+x.ev.name+"' 일정을 삭제할까요?")) delEvent(x.ev.id); }; el.appendChild(c);
+  });
+  const a=chip("➕ 일정"); a.classList.add("addchip"); a.onclick=openEventModal; el.appendChild(a);
+  const cf=chip("☕ 룰렛"); cf.classList.add("addchip"); cf.onclick=openCoffee; el.appendChild(cf);
 }
+function chip(txt,cls){ const sp=document.createElement("span"); sp.className="tchip"+(cls?(" "+cls):""); sp.textContent=txt; return sp; }
+function dday(dstr){ if(!dstr) return -999; const t=new Date(); t.setHours(0,0,0,0); const e=new Date(dstr+"T00:00:00"); return Math.round((e-t)/DAYMS); }
+function sameDay(ts){ const a=new Date(ts), b=new Date(); return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
 function renderChips(){
   const order={all:"전체", working:"업무중", field:"외근중", meeting:"회의중", resting:"휴식중", lunch:"점심시간"};
   const colorOf={working:"#6fa8dc",field:"#2fa39b",meeting:"#a98fda",resting:"#f2906b",lunch:"#ec6f9e"};
@@ -326,10 +359,25 @@ document.getElementById("chatWho").onchange=e=>localStorage.setItem("chatWho", e
 document.getElementById("attBtn").onclick=()=>document.getElementById("attFile").click();
 document.getElementById("attFile").onchange=(e)=>{ const f=e.target.files[0]; if(!f) return; compress(f,(d)=>{ pendingImg=d; const p=document.getElementById("attPreview"); p.style.display="block"; p.innerHTML='<img src="'+d+'"><button id="attCancel">취소</button>'; document.getElementById("attCancel").onclick=()=>{pendingImg=null;p.style.display="none";p.innerHTML="";}; }); e.target.value=""; };
 
+function openEventModal(){ document.getElementById("evName").value=""; document.getElementById("evDate").value=""; document.getElementById("eov").classList.add("open"); }
+function addEvent(){ const n=document.getElementById("evName").value.trim(); const dd=document.getElementById("evDate").value; if(!n||!dd) return; if(db) db.ref("events").push({name:n,date:dd}); else { EVENTS.push({id:"e"+Date.now(),name:n,date:dd}); render(); } document.getElementById("eov").classList.remove("open"); }
+function delEvent(id){ if(db) db.ref("events/"+id).remove(); else { EVENTS=EVENTS.filter(function(e){return e.id!==id;}); render(); } }
+document.getElementById("evSave").onclick=addEvent;
+document.getElementById("evCancel").onclick=function(){ document.getElementById("eov").classList.remove("open"); };
+document.getElementById("eov").onclick=function(e){ if(e.target.id==="eov") document.getElementById("eov").classList.remove("open"); };
+function openCoffee(){ document.getElementById("spin").textContent="☕"; document.getElementById("cov").classList.add("open"); }
+function spinCoffee(){ const names=DATA.map(function(m){return m.name;}); if(!names.length) return; const disp=document.getElementById("spin"); let k=0; const total=22;
+  const iv=setInterval(function(){ disp.textContent=names[Math.floor(Math.random()*names.length)]+" ?"; k++; if(k>=total){ clearInterval(iv); const w=names[Math.floor(Math.random()*names.length)]; disp.innerHTML="\u2615 <b>"+w+"</b>님 당첨!"; if(db) db.ref("coffee").set({winner:w, t:Date.now()}); else { COFFEE={winner:w,t:Date.now()}; render(); } } }, 85); }
+document.getElementById("cSpin").onclick=spinCoffee;
+document.getElementById("cClose").onclick=function(){ document.getElementById("cov").classList.remove("open"); };
+document.getElementById("cov").onclick=function(e){ if(e.target.id==="cov") document.getElementById("cov").classList.remove("open"); };
+function wicon(c){ if(c===0) return "\u2600\uFE0F"; if(c<=2) return "\uD83C\uDF24\uFE0F"; if(c===3) return "\u2601\uFE0F"; if(c<=48) return "\uD83C\uDF2B\uFE0F"; if(c<=57) return "\uD83C\uDF26\uFE0F"; if(c<=67) return "\uD83C\uDF27\uFE0F"; if(c<=77) return "\u2744\uFE0F"; if(c<=82) return "\uD83C\uDF26\uFE0F"; if(c<=86) return "\u2744\uFE0F"; return "\u26C8\uFE0F"; }
+function fetchWeather(){ fetch("https://api.open-meteo.com/v1/forecast?latitude=35.8714&longitude=128.6014&current=temperature_2m,weather_code&timezone=Asia%2FSeoul").then(function(r){return r.json();}).then(function(j){ if(j&&j.current){ WEATHER=wicon(j.current.weather_code)+" 대구 "+Math.round(j.current.temperature_2m)+"\u00B0"; ticker(); } }).catch(function(){}); }
 function clock(){ const d=new Date(); document.getElementById("clk").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   const wk=["일","월","화","수","목","금","토"][d.getDay()]; document.getElementById("cdate").textContent=d.getFullYear()+". "+(d.getMonth()+1)+". "+d.getDate()+" ("+wk+")"; }
 function start(){
   clock(); setInterval(()=>{ clock(); render(); }, 20000);
+  fetchWeather(); setInterval(fetchWeather, 900000);
   const live=document.getElementById("liveTag");
   if(configured){
     firebase.initializeApp(firebaseConfig); db=firebase.database();
@@ -337,6 +385,8 @@ function start(){
     db.ref("members").on("value", snap=>{ const v=snap.val(); if(!v){ db.ref("members").set(SEED); return; }
       DATA=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.order||0)-(b.order||0)); render(); });
     db.ref("chat").on("value", snap=>{ const v=snap.val()||{}; CHAT=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.t||0)-(b.t||0)); renderChat(); });
+    db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
+    db.ref("coffee").on("value", snap=>{ COFFEE=snap.val()||null; render(); });
   } else {
     DATA=Object.keys(SEED).map(k=>Object.assign({id:k}, SEED[k], {updated:Date.now()})).sort((a,b)=>a.order-b.order);
     render(); renderChat();
