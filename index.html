@@ -196,6 +196,7 @@ function ago(ts){ if(!ts) return ""; const m=Math.floor((Date.now()-ts)/60000); 
 function dt(ts){ const d=new Date(ts||Date.now()); const wk=["일","월","화","수","목","금","토"][d.getDay()]; return (d.getMonth()+1)+"/"+d.getDate()+" ("+wk+") "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
 function esc(t){ return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function fmtm(mins){ const h=Math.floor(mins/60), m=mins%60; return (h>0? h+"시간 ":"")+m+"분"; }
+function fmts(sec){ if(sec<0)sec=0; const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), x=sec%60; return (h>0? h+"시간 ":"")+((h>0||m>0)? m+"분 ":"")+x+"초"; }
 
 function visual(m){
   const ek=eff(m);
@@ -209,11 +210,11 @@ function visual(m){
 }
 function offwork(m){
   const wh=WORKHOURS[m.name]||[9,18];
-  const startMin=Math.round(wh[0]*60), endMin=Math.round(wh[1]*60);
-  const d=new Date(); const nowMin=d.getHours()*60+d.getMinutes();
-  if(nowMin < startMin) return {t:"🌅 출근 전", c:"#c2adb6"};
-  if(nowMin >= endMin) return {t:"🌙 퇴근 완료", c:"#c2adb6"};
-  return {t:"🏠 퇴근까지 "+fmtm(endMin-nowMin), c:"#b5446e"};
+  const startS=Math.round(wh[0]*3600), endS=Math.round(wh[1]*3600);
+  const d=new Date(); const nowS=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+  if(nowS < startS) return {t:"🌅 출근 전", c:"#c2adb6"};
+  if(nowS >= endS) return {t:"🌙 퇴근 완료", c:"#c2adb6"};
+  return {t:"🏠 퇴근까지 "+fmts(endS-nowS), c:"#b5446e"};
 }
 
 /* 월급날: 매월 5일, 공휴일·주말이면 다음 영업일 */
@@ -223,10 +224,10 @@ function paydayOf(y,mi){ const d=new Date(y,mi,5); while(isHol(d)) d.setDate(d.g
 function nextPayday(){ const t=new Date(); t.setHours(0,0,0,0); let p=paydayOf(t.getFullYear(),t.getMonth()); if(p<t) p=paydayOf(t.getFullYear(),t.getMonth()+1); return p; }
 
 function ticker(){
-  const d=new Date(); const now=d.getHours()*60+d.getMinutes(); const el=document.getElementById("ticker");
+  const d=new Date(); const nowS=d.getHours()*3600+d.getMinutes()*60+d.getSeconds(); const el=document.getElementById("ticker");
   let main;
-  if(now < 12*60) main="🍱 점심까지 "+fmtm(12*60-now);
-  else if(now < 13*60) main="🍱 맛점 하세요!";
+  if(nowS < 12*3600) main="🍱 점심까지 "+fmts(12*3600-nowS);
+  else if(nowS < 13*3600) main="🍱 맛점 하세요!";
   else main="💪 오후도 화이팅!";
   const dow=d.getDay(); let fri; if(dow===5) fri="🎉 오늘 불금!"; else { let dd=(5-dow+7)%7; if(dd===0) dd=7; fri="🎉 불금까지 D-"+dd; }
   const np=nextPayday(); const t0=new Date(); t0.setHours(0,0,0,0); const ddp=Math.round((np-t0)/DAYMS);
@@ -273,7 +274,7 @@ function render(){
     info.querySelector(".name").onclick=()=>openEdit(m.id);
     const ow=offwork(m);
     const rcol=document.createElement("div"); rcol.className="rcol";
-    rcol.innerHTML='<div class="time">'+ago(m.updated)+'</div><div class="offw" style="color:'+ow.c+'">'+ow.t+'</div>';
+    rcol.innerHTML='<div class="time">'+ago(m.updated)+'</div><div class="offw" data-name="'+esc(m.name)+'" style="color:'+ow.c+'">'+ow.t+'</div>';
     const sb=document.createElement("button"); sb.className="stampbtn"; sb.textContent="🏅 도장"; sb.onclick=(e)=>{ e.stopPropagation(); openStamp(m.id); };
     rcol.appendChild(sb);
     row.appendChild(av); row.appendChild(info); row.appendChild(rcol); wrap.appendChild(row);
@@ -373,10 +374,11 @@ document.getElementById("cClose").onclick=function(){ document.getElementById("c
 document.getElementById("cov").onclick=function(e){ if(e.target.id==="cov") document.getElementById("cov").classList.remove("open"); };
 function wicon(c){ if(c===0) return "\u2600\uFE0F"; if(c<=2) return "\uD83C\uDF24\uFE0F"; if(c===3) return "\u2601\uFE0F"; if(c<=48) return "\uD83C\uDF2B\uFE0F"; if(c<=57) return "\uD83C\uDF26\uFE0F"; if(c<=67) return "\uD83C\uDF27\uFE0F"; if(c<=77) return "\u2744\uFE0F"; if(c<=82) return "\uD83C\uDF26\uFE0F"; if(c<=86) return "\u2744\uFE0F"; return "\u26C8\uFE0F"; }
 function fetchWeather(){ fetch("https://api.open-meteo.com/v1/forecast?latitude=35.8714&longitude=128.6014&current=temperature_2m,weather_code&timezone=Asia%2FSeoul").then(function(r){return r.json();}).then(function(j){ if(j&&j.current){ WEATHER=wicon(j.current.weather_code)+" 대구 "+Math.round(j.current.temperature_2m)+"\u00B0"; ticker(); } }).catch(function(){}); }
-function clock(){ const d=new Date(); document.getElementById("clk").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+function tickOffwork(){ const els=document.querySelectorAll(".offw"); els.forEach(function(el){ const ow=offwork({name:el.getAttribute("data-name")}); el.textContent=ow.t; el.style.color=ow.c; }); }
+function clock(){ const d=new Date(); document.getElementById("clk").textContent=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0");
   const wk=["일","월","화","수","목","금","토"][d.getDay()]; document.getElementById("cdate").textContent=d.getFullYear()+". "+(d.getMonth()+1)+". "+d.getDate()+" ("+wk+")"; }
 function start(){
-  clock(); setInterval(()=>{ clock(); render(); }, 20000);
+  clock(); setInterval(()=>{ clock(); ticker(); tickOffwork(); }, 1000); setInterval(render, 30000);
   fetchWeather(); setInterval(fetchWeather, 900000);
   const live=document.getElementById("liveTag");
   if(configured){
