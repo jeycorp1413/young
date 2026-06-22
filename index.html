@@ -198,7 +198,15 @@ function esc(t){ return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").repla
 function fmtm(mins){ const h=Math.floor(mins/60), m=mins%60; return (h>0? h+"시간 ":"")+m+"분"; }
 function fmts(sec){ if(sec<0)sec=0; const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), x=sec%60; return (h>0? h+"시간 ":"")+((h>0||m>0)? m+"분 ":"")+x+"초"; }
 
+function isOff(m){
+  const d=new Date();
+  if(isHol(d)) return true;                 // 주말·공휴일
+  const wh=WORKHOURS[m.name]||[9,18];
+  const nowS=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+  return nowS >= Math.round(wh[1]*3600);    // 개인 퇴근시간 경과
+}
 function visual(m){
+  if(isOff(m)) return {face:"sleeping", label:"🌙 퇴근", c:"#8c84a6"};
   const ek=eff(m);
   if(ek==="lunch")   return {face:"sleeping", label:"점심시간", c:"#ec6f9e"};
   if(ek==="field")   return {face:"wave", label:"외근중", c:"#2fa39b"};
@@ -209,9 +217,11 @@ function visual(m){
   return {face, label:"업무중", c:s.c, sub:s};
 }
 function offwork(m){
+  const d=new Date();
+  if(isHol(d)) return {t:"🌙 오늘 휴무", c:"#c2adb6"};
   const wh=WORKHOURS[m.name]||[9,18];
   const startS=Math.round(wh[0]*3600), endS=Math.round(wh[1]*3600);
-  const d=new Date(); const nowS=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+  const nowS=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
   if(nowS < startS) return {t:"🌅 출근 전", c:"#c2adb6"};
   if(nowS >= endS) return {t:"🌙 퇴근 완료", c:"#c2adb6"};
   return {t:"🏠 퇴근까지 "+fmts(endS-nowS), c:"#b5446e"};
