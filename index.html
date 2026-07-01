@@ -207,7 +207,7 @@ function isOff(m){
   return nowS >= Math.round(wh[1]*3600);    // 개인 퇴근시간 경과
 }
 function visual(m){
-  if(isOff(m)) return {face:"sleeping", label:"🌙 퇴근", c:"#8c84a6"};
+  if(isOff(m)) return {face:"sleeping", label:(isHol(new Date())?"🌴 휴무":"🌙 퇴근"), c:"#8c84a6"};
   const ek=eff(m);
   if(ek==="lunch")   return {face:"sleeping", label:"점심시간", c:"#ec6f9e"};
   if(ek==="field")   return {face:"wave", label:"외근중", c:"#2fa39b"};
@@ -237,7 +237,8 @@ function nextPayday(){ const t=new Date(); t.setHours(0,0,0,0); let p=paydayOf(t
 function ticker(){
   const d=new Date(); const nowS=d.getHours()*3600+d.getMinutes()*60+d.getSeconds(); const el=document.getElementById("ticker");
   let main;
-  if(nowS < 12*3600) main="🍱 점심까지 "+fmts(12*3600-nowS);
+  if(isHol(d)) main=(d.getDay()===0||d.getDay()===6)?"🌴 즐거운 주말! 푹 쉬세요":"🌴 오늘은 휴무! 푹 쉬세요";
+  else if(nowS < 12*3600) main="🍱 점심까지 "+fmts(12*3600-nowS);
   else if(nowS < 13*3600) main="🍱 맛점 하세요!";
   else main="💪 오후도 화이팅!";
   const dow=d.getDay(); let fri; if(dow===5) fri="🎉 오늘 불금!"; else { let dd=(5-dow+7)%7; if(dd===0) dd=7; fri="🎉 불금까지 D-"+dd; }
