@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>제조AI 사업관리 · 더아이엠씨</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#f5f7fb; --card:#fff; --ink:#1c2434; --sub:#5a6781; --line:#e6eaf2;
+  --blue:#057afa; --navy:#262d43; --lblue:#e0ebff;
+  --green:#1f9d5b; --amber:#e0900a; --red:#d8453a; --gray:#8a94ab; --purple:#7a5af5;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
+  font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 80px}
+
+/* 사업 전환 스위처 */
+.pswitch{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.pbtn{flex:1;min-width:220px;text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:14px;
+  padding:13px 17px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:13px}
+.pbtn:hover{border-color:#c3d4ee}
+.pbtn.on{border-color:var(--blue);box-shadow:0 3px 14px rgba(5,122,250,.14)}
+.pbtn.on.gntp{border-color:var(--amber);box-shadow:0 3px 14px rgba(224,144,10,.16)}
+.pbtn .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;color:#fff;background:var(--blue)}
+.pbtn.gntp .ic{background:var(--amber)}
+.pbtn .pt{font-size:16px;font-weight:700;letter-spacing:-.3px}
+.pbtn .ps{font-size:12.5px;color:var(--sub);margin-top:1px}
+.pbtn .role{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--lblue);color:var(--blue);white-space:nowrap}
+.pbtn.gntp .role{background:#fdf0d9;color:var(--amber)}
+
+header.top{background:var(--navy);color:#fff;border-radius:16px;padding:20px 24px;margin-bottom:16px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+header.top h1{margin:0 0 5px;font-size:23px;letter-spacing:-.4px;font-weight:700}
+header.top .meta{font-size:14px;color:#c2cde4}
+header.top .badge{display:inline-block;background:rgba(255,255,255,.13);border-radius:999px;padding:3px 12px;font-size:13px;margin:8px 6px 0 0}
+.who-pick{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:9px 12px;font-size:15px;font-family:inherit;font-weight:600}
+.who-pick option{color:#000}
+.sync{font-size:12.5px;color:#9fb0d4;margin-top:8px;text-align:right}
+[contenteditable]{outline:none}
+[contenteditable]:focus{background:#fffbe9;border-radius:6px;box-shadow:0 0 0 2px #ffe08a;color:#1c2434}
+.editable-hint{display:inline-block;font-size:12px;font-weight:400;background:var(--lblue);color:var(--blue);border-radius:6px;padding:2px 8px;margin-left:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.kpi .lab{font-size:13px;color:var(--sub)} .kpi .num{font-size:21px;font-weight:700;margin-top:3px}
+.kpi .num small{font-size:13px;font-weight:500;color:var(--sub)}
+.kpi.urgent .num{color:var(--blue)}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--sub);padding:9px 16px;border-radius:999px;cursor:pointer;font-size:15px;font-weight:500}
+.tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+section.panel{display:none} section.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:13px}
+.card h3{margin:0 0 14px;font-size:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.muted{color:var(--sub);font-size:14.5px}
+.role-text{font-size:15.5px}
+.btn{border:0;border-radius:9px;padding:9px 15px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.pri{background:var(--blue);color:#fff} .btn.ghost{background:var(--lblue);color:var(--blue)}
+.btn.sm{padding:6px 11px;font-size:14px} .btn.del{background:#fdeceb;color:var(--red)}
+.erow{position:relative;border:1px solid var(--line);border-radius:11px;padding:12px 40px 12px 12px;margin-bottom:9px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.ed{font-family:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);background:#fff}
+input.ed{flex:1;min-width:150px} select.ed{flex:0 0 auto;font-weight:600}
+textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-height:1.5}
+.ed:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(5,122,250,.15)}
+.erow .btn.del{position:absolute;top:9px;right:9px;padding:3px 9px}
+.tag-chip{font-size:12px;font-weight:700;padding:2px 9px;border-radius:6px}
+.add-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.add-bar input,.add-bar select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:15px}
+.action{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)} .action:first-child{border-top:0}
+.action input[type=checkbox]{width:20px;height:20px;flex:none;cursor:pointer;accent-color:var(--blue)}
+.action.done .txt{text-decoration:line-through;color:var(--gray)}
+.action .txt.ed,.action .who.ed{border:1px solid transparent;background:transparent;width:100%}
+.action .txt.ed:hover,.action .who.ed:hover{border-color:var(--line);background:#fff}
+.action .who{font-size:13.5px;color:var(--sub)}
+.due{font-size:13px;font-weight:600;white-space:nowrap} .due.soon{color:var(--red)} .due.ok{color:var(--sub)}
+.action input[type=date]{border:1px solid var(--line);border-radius:7px;padding:5px 7px;font-family:inherit;font-size:13.5px}
+.wbs{padding:13px 0;border-top:1px solid var(--line)} .wbs:first-child{border-top:0}
+.wbs .hd{display:flex;justify-content:space-between;font-size:15px;align-items:center;gap:10px}
+.wbs input.nm{flex:1;border:1px solid transparent;background:transparent;font-family:inherit;font-size:15px;padding:5px 7px;border-radius:7px;color:var(--ink)}
+.wbs input.nm:hover{border-color:var(--line);background:#fff}
+.wbs .pct{font-weight:700;display:flex;align-items:center;gap:7px}
+.wbs input[type=number]{width:66px;border:1px solid var(--line);border-radius:7px;padding:5px 7px;font-family:inherit;font-size:15px}
+.bar{height:11px;background:#eef1f7;border-radius:6px;overflow:hidden;margin-top:7px} .bar>i{display:block;height:100%;background:var(--blue);border-radius:6px;transition:width .3s}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.cal-nav{display:flex;gap:7px;align-items:center}
+.cal-title{font-size:19px;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-dow{text-align:center;font-size:13px;color:var(--sub);font-weight:600;padding:5px 0}
+.cal-dow.sun{color:var(--red)} .cal-dow.sat{color:var(--blue)}
+.cell{min-height:98px;border:1px solid var(--line);border-radius:10px;padding:6px 7px;cursor:pointer;background:#fff;transition:.15s;overflow:hidden}
+.cell:hover{border-color:var(--blue);box-shadow:0 1px 7px rgba(5,122,250,.13)}
+.cell.out{background:#fafbfd;opacity:.55} .cell.today{border-color:var(--blue);background:#f3f8ff}
+.cell .dnum{font-size:14px;font-weight:600;margin-bottom:4px} .cell .dnum.sun{color:var(--red)} .cell .dnum.sat{color:var(--blue)}
+.ev{font-size:12px;padding:3px 6px;border-radius:6px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;font-weight:500}
+.ev.회의{background:var(--purple)} .ev.보고{background:var(--blue)} .ev.액션{background:var(--amber)} .ev.마감{background:var(--red)} .ev.기타{background:var(--gray)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin-top:14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+.modal-bg{position:fixed;inset:0;background:rgba(20,28,46,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px} .modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h4{margin:0 0 16px;font-size:18px}
+.fld{margin-bottom:12px} .fld label{display:block;font-size:13.5px;color:var(--sub);margin-bottom:5px;font-weight:600}
+.fld input,.fld select,.fld textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 11px;font-family:inherit;font-size:15.5px}
+.fld textarea{resize:vertical;min-height:54px}
+.modal-act{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.foot{text-align:center;color:var(--gray);font-size:13px;margin-top:20px}
+.loading{text-align:center;color:var(--sub);padding:30px;font-size:15px}
+.tl-month{font-weight:700;font-size:15.5px;color:var(--navy);margin:16px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--lblue)}
+.tl-month:first-child{margin-top:0}
+.tl-item{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.tl-item:first-of-type{border-top:0}
+.tl-dot{width:13px;height:13px;border-radius:50%;flex:none;margin-top:5px}
+.tl-dot.회의{background:var(--purple)} .tl-dot.보고{background:var(--blue)} .tl-dot.액션{background:var(--amber)} .tl-dot.마감{background:var(--red)} .tl-dot.기타{background:var(--gray)}
+.tl-item.past{opacity:.5} .tl-item.today .tl-title{color:var(--blue)}
+.tl-date{font-size:13px;color:var(--sub);font-weight:600} .tl-title{font-size:15.5px;font-weight:600}
+.infogrid{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14.5px}
+.infogrid dt{color:var(--sub);font-weight:600;white-space:nowrap}
+.infogrid dd{margin:0;font-weight:600}
+@media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}.cell{min-height:72px}body{font-size:16px}.pbtn{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="pswitch" id="pswitch">
+    <button class="pbtn dip" data-pid="dip">
+      <span class="ic">🏭</span>
+      <span><span class="pt">DIP · AI솔루션 개발·실증</span><span class="ps">헤딩·로링 공정 소리·진동 AI 불량판별 · 광역연계형</span></span>
+      <span class="role">주관</span>
+    </button>
+    <button class="pbtn gntp" data-pid="gntp">
+      <span class="ic">🔬</span>
+      <span><span class="pt">경남TP · Edge-AI 모듈 패키지</span><span class="ps">센서 활용 현장 적용형 Edge-AI · 지역혁신선도기업육성</span></span>
+      <span class="role">공동</span>
+    </button>
+  </div>
+
+  <header class="top">
+    <div>
+      <h1 contenteditable data-tk="htitle">–</h1>
+      <div class="meta" contenteditable data-tk="hsub">–</div>
+      <div id="badgeBox"></div>
+    </div>
+    <div style="text-align:right">
+      <div class="sync" id="syncInfo">연결 중…</div>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="lab">오늘</div><div class="num" id="today">–</div></div>
+    <div class="kpi urgent"><div class="lab">다음 일정</div><div class="num" id="nextEv" style="font-size:16px">–</div></div>
+    <div class="kpi"><div class="lab">사업 단계</div><div class="num" id="stage" style="font-size:15px" contenteditable data-tk="stage">–</div></div>
+    <div class="kpi"><div class="lab">열린 이슈 / 액션</div><div class="num"><span id="nIssue">–</span><small> 이슈 · </small><span id="nAct">–</span><small> 액션</small></div></div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab on" data-p="calendar">📅 달력</div>
+    <div class="tab" data-p="timeline">타임라인</div>
+    <div class="tab" data-p="overview">사업개요</div>
+    <div class="tab" data-p="schedule">정례일정</div>
+    <div class="tab" data-p="wbs">진척률</div>
+    <div class="tab" data-p="issues">이슈</div>
+    <div class="tab" data-p="actions">✅ 체크리스트</div>
+    <div class="tab" data-p="people">연락처</div>
+  </div>
+
+  <section class="panel on" data-p="calendar">
+    <div class="card">
+      <div class="cal-head">
+        <div class="cal-nav">
+          <button class="btn ghost sm" id="prevM">‹</button>
+          <div class="cal-title" id="calTitle">–</div>
+          <button class="btn ghost sm" id="nextM">›</button>
+          <button class="btn ghost sm" id="todayBtn">오늘</button>
+        </div>
+        <button class="btn pri sm" id="addEvBtn">+ 일정 추가</button>
+      </div>
+      <div class="cal-grid" id="calDow"></div>
+      <div class="cal-grid" id="calBody" style="margin-top:6px"><div class="loading">불러오는 중…</div></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--purple)"></i>회의</span>
+        <span><i class="dot" style="background:var(--blue)"></i>보고</span>
+        <span><i class="dot" style="background:var(--amber)"></i>액션</span>
+        <span><i class="dot" style="background:var(--red)"></i>마감</span>
+        <span><i class="dot" style="background:var(--gray)"></i>기타</span>
+        <span class="muted">· 날짜 칸이나 일정을 누르면 추가·수정</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-p="timeline">
+    <div class="card"><h3>타임라인 <span class="editable-hint">일정·마일스톤 시간순</span></h3>
+      <div id="timeline"><div class="loading">불러오는 중…</div></div></div>
+  </section>
+
+  <section class="panel" data-p="overview">
+    <div class="card"><h3>사업 개요</h3><dl class="infogrid" id="infoGrid"></dl></div>
+    <div class="card"><h3>우리(더아이엠씨) 역할 <span class="editable-hint">클릭해 수정</span></h3>
+      <div class="role-text" contenteditable data-tk="role">–</div></div>
+    <div class="card"><h3>최근 진행</h3>
+      <div id="recentList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar"><button class="btn ghost sm" data-add="recent">+ 항목 추가</button></div></div>
+    <div class="card"><h3>다음 기간 예정</h3>
+      <div id="upcomingList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar"><button class="btn ghost sm" data-add="upcoming">+ 항목 추가</button></div></div>
+  </section>
+
+  <section class="panel" data-p="schedule">
+    <div class="card"><h3>정례 일정 (cadence)</h3>
+      <div id="cadenceList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar"><button class="btn ghost sm" data-add="cadence">+ 항목 추가</button></div></div>
+  </section>
+
+  <section class="panel" data-p="wbs">
+    <div class="card"><h3>진척률 (WBS) <span class="editable-hint">항목명·% 직접 수정</span></h3>
+      <div class="muted" style="margin-bottom:8px">문서로 확인된 완료 항목만 100%, 나머지는 0%입니다. 실제 진행률로 직접 갱신하세요.</div>
+      <div id="wbsList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar">
+        <input id="wbsName" placeholder="WBS 항목명" style="flex:1;min-width:170px">
+        <input id="wbsPct" type="number" min="0" max="100" placeholder="%" style="width:78px">
+        <button class="btn ghost sm" id="wbsAdd">+ 항목 추가</button></div></div>
+  </section>
+
+  <section class="panel" data-p="issues">
+    <div class="card"><h3>열린 이슈 <span class="editable-hint">제목·내용·메모 수정</span></h3>
+      <div id="issueList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar"><button class="btn ghost sm" data-add="issuelist">+ 이슈 추가</button></div></div>
+  </section>
+
+  <section class="panel" data-p="actions">
+    <div class="card"><h3>체크리스트 · 액션 <span class="muted" id="actCount" style="font-weight:400"></span></h3>
+      <div id="actList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar">
+        <input id="actTitle" placeholder="할 일" style="flex:1;min-width:160px">
+        <input id="actWho" placeholder="담당/대상" style="width:130px">
+        <input id="actDue" type="date" style="width:160px">
+        <button class="btn ghost sm" id="actAdd">+ 추가</button></div>
+      <details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600;color:var(--blue);font-size:15px">📝 회의록 붙여넣어 액션 자동 추출</summary>
+        <textarea id="mmText" class="ed" style="width:100%;min-height:90px;margin-top:8px" placeholder="회의록을 붙여넣고 '액션 뽑기'를 누르세요."></textarea>
+        <button class="btn ghost sm" id="mmExtract" style="margin-top:6px">액션 뽑기</button>
+        <div id="mmResult" style="margin-top:8px"></div></details></div>
+  </section>
+
+  <section class="panel" data-p="people">
+    <div class="card"><h3>수행기관·담당자 <span class="editable-hint">기관명·담당자 수정</span></h3>
+      <div id="orgList"><div class="loading">불러오는 중…</div></div>
+      <div class="add-bar"><button class="btn ghost sm" data-add="contacts">+ 기관 추가</button></div></div>
+  </section>
+
+  <div class="foot" id="foot">–</div>
+</div>
+
+<div class="modal-bg" id="evModal">
+  <div class="modal">
+    <h4 id="evModalTitle">일정 추가</h4>
+    <div class="fld"><label>제목</label><input id="evTitle" placeholder="예: 고광산업 현장 방문"></div>
+    <div class="fld"><label>날짜</label><input id="evDate" type="date"></div>
+    <div class="fld"><label>구분</label>
+      <select id="evType"><option>회의</option><option>보고</option><option>액션</option><option>마감</option><option>기타</option></select></div>
+    <div class="fld"><label>담당/대상 (선택)</label><input id="evOwner" placeholder="예: 투스카이"></div>
+    <div class="fld"><label>메모 (선택)</label><textarea id="evMemo"></textarea></div>
+    <div class="modal-act">
+      <button class="btn del sm" id="evDelete" style="visibility:hidden">삭제</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost" id="evCancel">취소</button>
+        <button class="btn pri" id="evSave">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDerROVp0gBbuClRdhNAn42uv1FjnoaOKQ",
+  authDomain: "young-94e97.firebaseapp.com",
+  databaseURL: "https://young-94e97-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "young-94e97",
+  storageBucket: "young-94e97.firebasestorage.app",
+  messagingSenderId: "320869908269",
+  appId: "1:320869908269:web:9a204ef6ae3423e81e5da4",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---------- 공용 유틸 ---------- */
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parse=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const fmtMD=d=>`${d.getMonth()+1}/${d.getDate()}`;
+const dday=d=>Math.round((parse(typeof d==='string'?d:iso(d))-TODAY)/86400000);
+const W=['일','월','화','수','목','금','토'];
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const escA=s=>(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const sortV=o=>Object.values(o||{}).sort((a,b)=>(a.ord||0)-(b.ord||0));
+document.getElementById('today').textContent=`${fmtMD(TODAY)} (${W[TODAY.getDay()]})`;
+
+/* ==========================================================
+   사업별 설정 + 시드 데이터 (폴더 문서 실데이터)
+   ========================================================== */
+const PCONF={
+ dip:{
+  text:{
+    htitle:'DIP · AI솔루션 개발·실증 지원 (광역연계형)',
+    hsub:'헤딩·로링 공정 소리·진동 데이터 기반 AI 불량 판별 · 2025 제조업 AI융합 기반 조성',
+    stage:'2차년도 수행중',
+    role:'진동·음향 멀티모달 기반 ①AI 품질검사(불량 조기감지) ②기계 이상탐지 예지보전 AI 개발·현장실증. Autoencoder+CNN Hybrid·STFT·GCP 클라우드 파이프라인. 주관기관으로 전체 개발·실증 총괄.'
+  },
+  badges:['주관: 더아이엠씨','참여: 투스카이','수요: 고광산업','발주: 대구디지털혁신진흥원(DIP)'],
+  info:[
+    ['사업명','2025 제조업 AI융합 기반 조성 · AI솔루션 개발·실증 지원(광역연계형)'],
+    ['과제명','헤딩 및 로링 공정의 소리·진동 데이터를 통한 AI기반 불량 판별'],
+    ['수행체계','㈜더아이엠씨(주관) · ㈜투스카이(참여) · ㈜고광산업(수요)'],
+    ['수행기간','2025.05 ~ 2026.12 (2개년)'],
+    ['총 사업비','988,000천원 (정부지원 740,000 / 연 494,000)'],
+    ['참여인력','총 16명 (당해연도 12명)'],
+    ['1차년도 성과','불량판별 F1 0.88 · 불량판단율 95.56% · 설비가동률 97.1% · 납기 100% · 특허 4·저작권 2·TTA검증 2 완료']
+  ],
+  seeds:{
+   events:{
+     d1:{date:'2025-09-03',title:'1차 컨설팅 (고광산업·ETRI 자문)',type:'회의',owner:'전채남·송은지·손상우',memo:'데이터 수집·모델·사업관리 점검'},
+     d2:{date:'2025-10-17',title:'2차 컨설팅 (모델 결합·센서위치)',type:'회의',owner:'송은지·손상우',memo:'ETRI 윤민성 책임'},
+     d3:{date:'2025-10-27',title:'TTA 생산성 검증 중간점검',type:'보고',owner:'더아이엠씨',memo:''},
+     d4:{date:'2025-11-25',title:'모델성능·생산성 결과서 작성',type:'마감',owner:'손상우·송은지',memo:'F1 0.88 / 불량판단율 95.56%'},
+     d5:{date:'2025-12-08',title:'1차년도 최종발표',type:'보고',owner:'더아이엠씨 컨소시엄',memo:''},
+     d6:{date:'2026-04-06',title:'2차년도 발표',type:'보고',owner:'더아이엠씨 컨소시엄',memo:''},
+     d7:{date:'2026-12-31',title:'2차년도 사업 종료',type:'마감',owner:'전 기관',memo:''}
+   },
+   actions:{
+     a1:{title:'2차년도 헤딩기 공정 센서 설치 위치 선정',who:'더아이엠씨·고광산업',due:'',done:false,ord:1},
+     a2:{title:'2차년도 불량 케이스 확대 수집 대상 협의',who:'고광산업',due:'',done:false,ord:2},
+     a3:{title:'장비도입계획서(투스카이) 확정',who:'투스카이',due:'',done:false,ord:3}
+   },
+   recent:{
+     r1:{tag:'완료',title:'1차년도 연차평가 통과',desc:'모델성능·생산성지표·TTA검증·특허·고용 목표 달성',ord:1},
+     r2:{tag:'완료',title:'TTA 생산성·신뢰성 검증 완료',desc:'생산성 검증 결과서·인공지능 신뢰성 검증 결과서 발급',ord:2},
+     r3:{tag:'완료',title:'특허 4건 출원 · 저작권 2건 등록',desc:'멀티모달 불량탐지·산업설비 이상탐지 등 / 헤딩로링 예지보전 AI v1.0',ord:3}
+   },
+   upcoming:{
+     u1:{tag:'예정',title:'2차년도 헤딩기 공정 확장 적용',desc:'모터 한정→전체 진동으로 노후화·고장 판별 확대',ord:1},
+     u2:{tag:'예정',title:'판별 난이도 높은 불량 케이스 수집',desc:'미세결함 등 2차년도 확대',ord:2}
+   },
+   cadence:{
+     c1:{tag:'월간',title:'컨설팅·현장 점검',desc:'ETRI 자문(윤민성 책임) 및 고광산업 현장 협의',ord:1},
+     c2:{tag:'상시',title:'안전조치 이행',desc:'실증현장 출입 시 안전화·절연장갑·귀마개 착용',ord:2}
+   },
+   issuelist:{
+     i1:{title:'2차년도 센서 위치 확장',desc:'출력부·다이스 근방 센서 설치로 확장 가능성 평가 필요 (고광산업 요청)',note:'',ord:1}
+   },
+   contacts:{
+     p1:{org:'㈜더아이엠씨 (주관)',people:'전채남 대표, 송은지 팀장(AI비즈니스팀·실무책임, 070-4279-5378, songaji33@theimc.co.kr), 손상우 주임연구원(개발)',ord:1},
+     p2:{org:'㈜투스카이 (참여)',people:'유병권 대표, 이형재 이사(개발), 이호찬 수석(개발1팀)',ord:2},
+     p3:{org:'㈜고광산업 (수요기업)',people:'김인배 차장, 이대영 이사',ord:3},
+     p4:{org:'대구디지털혁신진흥원 (DIP·발주)',people:'—',ord:4},
+     p5:{org:'ETRI (컨설팅 자문)',people:'윤민성 책임연구원',ord:5}
+   },
+   wbs:{
+     w01:{name:'로링기 진동·음향 데이터 수집 환경 구축',pct:100,ord:1},
+     w02:{name:'데이터 전처리·고품질화 모듈 개발',pct:100,ord:2},
+     w03:{name:'불량 판별 AI 모델 개발 (F1 0.88)',pct:100,ord:3},
+     w04:{name:'기계 이상탐지 예지보전 AI (F1 0.71)',pct:100,ord:4},
+     w05:{name:'실시간 모니터링 SW 개발·현장적용',pct:100,ord:5},
+     w06:{name:'TTA 생산성 검증',pct:100,ord:6},
+     w07:{name:'TTA 인공지능 신뢰성 검증',pct:100,ord:7},
+     w08:{name:'특허 4건 출원 · 저작권 2건 등록',pct:100,ord:8},
+     w09:{name:'[2차년도] 헤딩기 공정 확장 적용',pct:0,ord:9},
+     w10:{name:'[2차년도] 불량 케이스 확대·장비 도입',pct:0,ord:10},
+     w11:{name:'[2차년도] 성능 고도화·최종 성능평가',pct:0,ord:11}
+   }
+  }
+ },
+ gntp:{
+  text:{
+    htitle:'경남TP · 현장 적용형 Edge-AI 모듈 패키지 개발',
+    hsub:'센서(진동·압력·소리·온도) 활용 Edge-AI · 지역혁신선도기업육성(R&D) · S3474328',
+    stage:'착수·계획 단계',
+    role:'공동연구개발기관 — Edge-AI 모델 설계·개발. TTM(Tiny Time Mixers) 초경량 시계열 파운데이션 모델·LoRA 파인튜닝 기반 설비특화 이상탐지·Residual/SMA 이상점수 산출·Auto-Calibration(정상데이터 기반 임계값 자동설정).'
+  },
+  badges:['주관: 플렛디스','공동: 더아이엠씨','중기부·TIPA','경남테크노파크'],
+  info:[
+    ['사업명','지역혁신선도기업육성(R&D) · 주력산업 생태계 구축 / 지역기업 역량강화'],
+    ['과제명','센서(진동·압력·소리·온도) 활용 현장 적용형 Edge-AI 모듈 패키지 개발'],
+    ['과제번호','S3474328 · 공고 제2026-57호 · 품목공모'],
+    ['수행체계','㈜플렛디스(주관) · ㈜더아이엠씨(공동)'],
+    ['수행기간','2026.04.01 ~ 2028.03.31 (24개월) / 1년차 2026.04~12(9개월)'],
+    ['연구개발비','533,334천원 (정부 400,000 + 기관부담 현금13,334·현물120,000)'],
+    ['기술분류','인공지능 50% · 임베디드SW 30% · 스마트팩토리 응용서비스 20%'],
+    ['더아이엠씨 담당','TTM 초경량 시계열 이상탐지 · LoRA 파인튜닝 · Auto-Calibration']
+  ],
+  seeds:{
+   events:{
+     g1:{date:'2026-04-01',title:'과제 착수 (1년차 시작)',type:'기타',owner:'플렛디스·더아이엠씨',memo:''},
+     g2:{date:'2026-05-11',title:'수정 연구개발계획서(협약용) 최종 제출',type:'보고',owner:'플렛디스',memo:''},
+     g3:{date:'2026-12-31',title:'1년차 종료',type:'마감',owner:'전 기관',memo:'9개월'},
+     g4:{date:'2027-12-31',title:'2년차 종료',type:'마감',owner:'전 기관',memo:''},
+     g5:{date:'2028-03-31',title:'과제 종료 (최종)',type:'마감',owner:'전 기관',memo:'24개월'}
+   },
+   actions:{
+     a1:{title:'실증공장 수요기업 확약서 확보',who:'플렛디스',due:'',done:false,ord:1},
+     a2:{title:'진동·소리 센서 데이터 수집 인프라 규격 협의',who:'플렛디스·더아이엠씨',due:'',done:false,ord:2},
+     a3:{title:'Edge 디바이스 전처리·추론 파이프라인 설계 착수',who:'더아이엠씨',due:'',done:false,ord:3},
+     a4:{title:'TTM 기반 초경량 시계열 이상탐지 모델 기초연구',who:'더아이엠씨',due:'',done:false,ord:4}
+   },
+   recent:{
+     r1:{tag:'완료',title:'수정 연구개발계획서 최종 제출 (2026-05-11)',desc:'협약용·일반 보안등급. 정부지원 4억 확정',ord:1},
+     r2:{tag:'협의',title:'주관(플렛디스)·공동(더아이엠씨) 역할 분담',desc:'주관=센서·HW 수집 인프라 / 공동=Edge-AI 모델',ord:2}
+   },
+   upcoming:{
+     u1:{tag:'예정',title:'1년차: 데이터 수집 인프라 구축',desc:'제조현장 진동·소리 센서 데이터 안정 수집 HW 체계 (플렛디스)',ord:1},
+     u2:{tag:'예정',title:'1년차: 초경량 AI 모델 기초연구 완료',desc:'Edge 적용 가능 전처리 엔진·TTM 기반 이상탐지 설계 (더아이엠씨)',ord:2}
+   },
+   cadence:{
+     c1:{tag:'기타',title:'연차 협약·평가',desc:'1년차 9개월(2026.04~12), 2년차 12개월, 3년차 3개월',ord:1}
+   },
+   issuelist:{
+     i1:{title:'실증공장·수요기업 확정',desc:'가공방식·설비구조·운영환경이 상이한 2개 거점으로 범용성 검증 예정, 수요기업 확약서 별도 첨부',note:'',ord:1}
+   },
+   contacts:{
+     p1:{org:'㈜플렛디스 (주관연구개발기관)',people:'전경길 수석(연구책임자, 055-724-0957, g2jeon@flatdis.co.kr) / 창원 진해',ord:1},
+     p2:{org:'㈜더아이엠씨 (공동연구개발기관)',people:'전채남 대표, 이태환 본부장, 오혜주 팀장, 손형진 책임',ord:2},
+     p3:{org:'경남테크노파크 (전담기관)',people:'—',ord:3},
+     p4:{org:'중소기업기술정보진흥원(TIPA)',people:'전문기관',ord:4}
+   },
+   wbs:{
+     w01:{name:'수정 연구개발계획서(협약용) 제출',pct:100,ord:1},
+     w02:{name:'[1년차] 진동·소리 센서 데이터 수집 인프라(플렛디스)',pct:0,ord:2},
+     w03:{name:'[1년차] Edge 전처리 엔진 개발(더아이엠씨)',pct:0,ord:3},
+     w04:{name:'[1년차] TTM 초경량 시계열 이상탐지 모델 설계',pct:0,ord:4},
+     w05:{name:'[1년차] LoRA 파인튜닝 설비특화 이상탐지',pct:0,ord:5},
+     w06:{name:'[1년차] Auto-Calibration 임계값 자동설정',pct:0,ord:6},
+     w07:{name:'[1년차] 성능평가·결과보고',pct:0,ord:7}
+   }
+  }
+ }
+};
+
+/* ==========================================================
+   상태 · 리스너 관리
+   ========================================================== */
+let PID=localStorage.getItem('mfg_pid')||'dip';
+let ROOT=db.ref('mfg_ai/'+PID);
+let LISTENERS=[];
+function bind(ref,ev,cb){ ref.on(ev,cb); LISTENERS.push([ref,ev,cb]); }
+function detachAll(){ LISTENERS.forEach(([r,e,c])=>r.off(e,c)); LISTENERS=[]; }
+function stamp(){ ROOT.child('meta').update({at:Date.now()}); }
+function seedIf(key,obj){ ROOT.child(key).once('value',s=>{ if(s.val()==null) ROOT.child(key).set(obj); }); }
+
+firebase.database().ref('.info/connected').on('value',s=>{
+  document.getElementById('syncInfo').textContent=s.val()?'● 실시간 연결됨':'○ 오프라인';
+});
+
+/* ---------- 사업 전환 ---------- */
+function setActiveSwitch(){
+  document.querySelectorAll('.pbtn').forEach(b=>b.classList.toggle('on',b.dataset.pid===PID));
+  document.documentElement.style.setProperty('--accent', PID==='gntp'?'var(--amber)':'var(--blue)');
+}
+document.querySelectorAll('.pbtn').forEach(b=>b.onclick=()=>{
+  if(b.dataset.pid===PID)return;
+  PID=b.dataset.pid; localStorage.setItem('mfg_pid',PID); boot();
+});
+
+/* ---------- 텍스트(contenteditable) 동기화 ---------- */
+document.querySelectorAll('[data-tk]').forEach(el=>{
+  let tmr; el.addEventListener('input',()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child('text/'+el.dataset.tk).set(el.innerHTML); stamp(); },450); });
+});
+function bindTexts(conf){
+  document.querySelectorAll('[data-tk]').forEach(el=>{
+    const k=el.dataset.tk, def=conf.text[k]!==undefined?conf.text[k]:el.innerHTML;
+    el.innerHTML=def;
+    seedIf('text/'+k,def);
+    bind(ROOT.child('text/'+k),'value',s=>{ if(document.activeElement!==el && s.val()!=null) el.innerHTML=s.val(); });
+  });
+}
+
+/* ---------- 배지 · 개요 · 푸터 ---------- */
+function renderStatic(conf){
+  document.getElementById('badgeBox').innerHTML=conf.badges.map(b=>`<span class="badge">${esc(b)}</span>`).join('');
+  document.getElementById('infoGrid').innerHTML=conf.info.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('');
+  document.getElementById('foot').textContent=`young-94e97 Firebase 실시간 공유 · 데이터 경로 /mfg_ai/${PID} · 편집 내용은 함께 보는 모두에게 즉시 반영됩니다`;
+}
+
+/* ==========================================================
+   컬렉션 렌더 (recent/upcoming/cadence/issues/contacts)
+   ========================================================== */
+function field(id,f,val,o){ o=o||{};
+  if(o.type==='select') return `<select class="ed" data-id="${id}" data-f="${f}">${o.options.map(op=>`<option ${op===val?'selected':''}>${op}</option>`).join('')}</select>`;
+  if(o.type==='area') return `<textarea class="ed" data-id="${id}" data-f="${f}" placeholder="${escA(o.ph)}">${esc(val)}</textarea>`;
+  return `<input class="ed" data-id="${id}" data-f="${f}" value="${escA(val)}" placeholder="${escA(o.ph)}">`;
+}
+function wireFields(scope,refKey){
+  scope.querySelectorAll('.ed[data-id]').forEach(el=>{
+    if(el.tagName==='SELECT'){ el.onchange=()=>{ ROOT.child(refKey+'/'+el.dataset.id+'/'+el.dataset.f).set(el.value); stamp(); }; }
+    else { let tmr; el.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child(refKey+'/'+el.dataset.id+'/'+el.dataset.f).set(el.value); stamp(); },400); }; }
+  });
+}
+function makeColl(refKey,mountId,fieldsDef,onData){
+  let DATA={}; const mount=document.getElementById(mountId);
+  bind(ROOT.child(refKey),'value',s=>{ DATA=s.val()||{}; if(!mount.contains(document.activeElement)) render(); if(onData) onData(DATA); });
+  mount.onfocusout=()=>setTimeout(()=>{ if(!mount.contains(document.activeElement)) render(); },70);
+  function render(){
+    const arr=Object.entries(DATA).sort((a,b)=>(a[1].ord||0)-(b[1].ord||0));
+    mount.innerHTML=arr.length? arr.map(([id,it])=>`<div class="erow">${fieldsDef.map(fd=>field(id,fd.f,it[fd.f],fd)).join('')}<button class="btn del sm" data-del="${id}">×</button></div>`).join('')
+      : '<div class="muted">항목이 없습니다. 아래 +로 추가하세요.</div>';
+    wireFields(mount,refKey);
+    mount.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child(refKey+'/'+b.dataset.del).remove(); stamp(); } });
+  }
+  document.querySelectorAll(`[data-add="${refKey}"]`).forEach(b=>b.onclick=()=>{
+    const ord=Object.values(DATA).reduce((m,w)=>Math.max(m,w.ord||0),0)+1; const obj={ord};
+    fieldsDef.forEach(fd=>obj[fd.f]=fd.type==='select'?fd.options[0]:''); ROOT.child(refKey).push(obj); stamp();
+  });
+}
+const STAGTAGS=['완료','진행','협의','예정','정보'];
+
+/* ==========================================================
+   달력 · 타임라인
+   ========================================================== */
+let curY=TODAY.getFullYear(),curM=TODAY.getMonth(),EVENTS={};
+document.getElementById('calDow').innerHTML=W.map((d,i)=>`<div class="cal-dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
+function renderCal(){
+  document.getElementById('calTitle').textContent=`${curY}년 ${curM+1}월`;
+  const first=new Date(curY,curM,1),start=new Date(first); start.setDate(1-first.getDay());
+  const byDate={}; Object.entries(EVENTS).forEach(([id,e])=>{ (byDate[e.date]=byDate[e.date]||[]).push({id,...e}); });
+  let html='';
+  for(let i=0;i<42;i++){
+    const d=new Date(start); d.setDate(start.getDate()+i);
+    const inM=d.getMonth()===curM,key=iso(d),isToday=key===iso(TODAY);
+    const evs=(byDate[key]||[]),dn=d.getDay();
+    html+=`<div class="cell ${inM?'':'out'} ${isToday?'today':''}" data-date="${key}">
+      <div class="dnum ${dn===0?'sun':dn===6?'sat':''}">${d.getDate()}</div>
+      ${evs.map(e=>`<div class="ev ${e.type}" data-id="${e.id}" title="${esc(e.title)}">${esc(e.title)}</div>`).join('')}</div>`;
+    if(i>=34 && d.getMonth()!==curM && d.getDay()===6) break;
+  }
+  const body=document.getElementById('calBody'); body.innerHTML=html;
+  body.querySelectorAll('.cell').forEach(c=>c.onclick=ev=>{
+    const evDiv=ev.target.closest('.ev'); if(evDiv){ openEv(evDiv.dataset.id); } else { openEv(null,c.dataset.date); }
+  });
+}
+function updateNextKPI(){
+  const arr=Object.values(EVENTS).filter(e=>e&&e.date&&dday(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date));
+  const el=document.getElementById('nextEv');
+  if(!arr.length){ el.textContent='예정 없음'; return; }
+  const e=arr[0],n=dday(e.date);
+  el.innerHTML=`${n===0?'오늘':'D-'+n} · ${esc(e.title)}<br><small>${e.date}</small>`;
+}
+function renderTimeline(){
+  const el=document.getElementById('timeline'); if(!el)return;
+  const arr=Object.values(EVENTS).filter(e=>e&&e.date).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!arr.length){ el.innerHTML='<div class="muted">일정이 없습니다.</div>'; return; }
+  let html='',cur='';
+  arr.forEach(e=>{
+    const m=e.date.slice(0,7);
+    if(m!==cur){ cur=m; html+=`<div class="tl-month">${Number(m.slice(0,4))}년 ${Number(m.slice(5))}월</div>`; }
+    const d=parse(e.date),n=dday(e.date);
+    const lab=n===0?'오늘':(n<0?`${-n}일 전`:`D-${n}`);
+    const klass=n<0?'past':(n===0?'today':'');
+    html+=`<div class="tl-item ${klass}"><div class="tl-dot ${e.type}"></div>
+      <div><div class="tl-date">${fmtMD(d)} (${W[d.getDay()]}) · ${lab} · ${esc(e.type)}</div>
+      <div class="tl-title">${esc(e.title)}</div>${e.owner?`<div class="muted">${esc(e.owner)}</div>`:''}</div></div>`;
+  });
+  el.innerHTML=html;
+}
+const M=document.getElementById('evModal'); let editId=null;
+function openEv(id,date){
+  editId=id;
+  document.getElementById('evModalTitle').textContent=id?'일정 수정':'일정 추가';
+  document.getElementById('evDelete').style.visibility=id?'visible':'hidden';
+  const e=id?EVENTS[id]:{date:date||iso(TODAY),title:'',type:'회의',owner:'',memo:''};
+  document.getElementById('evTitle').value=e.title||''; document.getElementById('evDate').value=e.date||'';
+  document.getElementById('evType').value=e.type||'회의'; document.getElementById('evOwner').value=e.owner||'';
+  document.getElementById('evMemo').value=e.memo||''; M.classList.add('on'); document.getElementById('evTitle').focus();
+}
+document.getElementById('prevM').onclick=()=>{ curM--; if(curM<0){curM=11;curY--;} renderCal(); };
+document.getElementById('nextM').onclick=()=>{ curM++; if(curM>11){curM=0;curY++;} renderCal(); };
+document.getElementById('todayBtn').onclick=()=>{ curY=TODAY.getFullYear();curM=TODAY.getMonth(); renderCal(); };
+document.getElementById('addEvBtn').onclick=()=>openEv(null,iso(TODAY));
+document.getElementById('evCancel').onclick=()=>M.classList.remove('on');
+M.onclick=e=>{ if(e.target===M) M.classList.remove('on'); };
+document.getElementById('evSave').onclick=()=>{
+  const obj={ title:document.getElementById('evTitle').value.trim(), date:document.getElementById('evDate').value,
+    type:document.getElementById('evType').value, owner:document.getElementById('evOwner').value.trim(), memo:document.getElementById('evMemo').value.trim() };
+  if(!obj.title||!obj.date){ alert('제목과 날짜를 입력하세요.'); return; }
+  if(editId) ROOT.child('events/'+editId).set(obj); else ROOT.child('events').push(obj);
+  stamp(); M.classList.remove('on');
+};
+document.getElementById('evDelete').onclick=()=>{ if(editId && confirm('이 일정을 삭제할까요?')){ ROOT.child('events/'+editId).remove(); stamp(); M.classList.remove('on'); } };
+
+/* ==========================================================
+   체크리스트(액션)
+   ========================================================== */
+let ACTIONS={};
+function bindActions(){
+  const list=document.getElementById('actList');
+  bind(ROOT.child('actions'),'value',s=>{ ACTIONS=s.val()||{}; if(!list.contains(document.activeElement)) renderActions(); });
+  list.onfocusout=()=>setTimeout(()=>{ if(!list.contains(document.activeElement)) renderActions(); },70);
+}
+function renderActions(){
+  const arr=Object.entries(ACTIONS).sort((a,b)=>(a[1].due||'').localeCompare(b[1].due||''));
+  const el=document.getElementById('actList');
+  el.innerHTML=arr.length? arr.map(([id,a])=>{
+    const n=a.due?dday(a.due):null, cls=(n!==null&&n<=7)?'soon':'ok';
+    return `<div class="action ${a.done?'done':''}">
+      <input type="checkbox" data-id="${id}" ${a.done?'checked':''}>
+      <div style="flex:1">
+        <input class="txt ed" data-id="${id}" data-f="title" value="${escA(a.title)}">
+        <input class="who ed" data-id="${id}" data-f="who" value="${escA(a.who)}" placeholder="담당/대상">
+      </div>
+      <input type="date" data-id="${id}" data-f="due" value="${a.due||''}">
+      <span class="due ${cls}">${a.done?'완료':(n===null?'':(n<0?'지남':'D-'+n))}</span>
+      <button class="btn del sm" data-del="${id}">×</button></div>`;
+  }).join('') : '<div class="muted">항목이 없습니다. 아래에서 추가하세요.</div>';
+  const left=arr.filter(([id,a])=>!a.done).length;
+  document.getElementById('actCount').textContent=`(남은 ${left} / 전체 ${arr.length})`;
+  document.getElementById('nAct').textContent=left;
+  el.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=()=>{ ROOT.child('actions/'+c.dataset.id+'/done').set(c.checked); stamp(); });
+  el.querySelectorAll('input[type=date]').forEach(c=>c.onchange=()=>{ ROOT.child('actions/'+c.dataset.id+'/due').set(c.value); stamp(); });
+  el.querySelectorAll('input.ed[data-f]').forEach(c=>{ let tmr; c.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child('actions/'+c.dataset.id+'/'+c.dataset.f).set(c.value); stamp(); },400); }; });
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child('actions/'+b.dataset.del).remove(); stamp(); } });
+}
+document.getElementById('actAdd').onclick=()=>{
+  const t=document.getElementById('actTitle').value.trim(); if(!t)return;
+  const ord=Object.values(ACTIONS).reduce((m,w)=>Math.max(m,w.ord||0),0)+1;
+  ROOT.child('actions').push({title:t,who:document.getElementById('actWho').value.trim(),due:document.getElementById('actDue').value,done:false,ord});
+  stamp(); document.getElementById('actTitle').value='';document.getElementById('actWho').value='';document.getElementById('actDue').value='';
+};
+
+/* ==========================================================
+   진척률(WBS)
+   ========================================================== */
+let WBS={};
+function bindWbs(){
+  const list=document.getElementById('wbsList');
+  bind(ROOT.child('wbs'),'value',s=>{ WBS=s.val()||{}; if(!list.contains(document.activeElement)) renderWbs(); });
+  list.onfocusout=()=>setTimeout(()=>{ if(!list.contains(document.activeElement)) renderWbs(); },70);
+}
+function renderWbs(){
+  const arr=Object.entries(WBS).sort((a,b)=>(a[1].ord||0)-(b[1].ord||0));
+  const el=document.getElementById('wbsList');
+  el.innerHTML=arr.length? arr.map(([id,w])=>`
+    <div class="wbs"><div class="hd">
+      <input class="nm" data-id="${id}" data-f="name" value="${escA(w.name)}">
+      <span class="pct"><input type="number" min="0" max="100" value="${w.pct||0}" data-id="${id}"> %
+      <button class="btn del sm" data-del="${id}">×</button></span></div>
+      <div class="bar"><i style="width:${w.pct||0}%"></i></div></div>`).join('') : '<div class="muted">항목이 없습니다.</div>';
+  el.querySelectorAll('input[type=number]').forEach(inp=>inp.onchange=()=>{ let v=Math.max(0,Math.min(100,Number(inp.value)||0)); ROOT.child('wbs/'+inp.dataset.id+'/pct').set(v); stamp(); });
+  el.querySelectorAll('input.nm').forEach(inp=>{ let tmr; inp.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child('wbs/'+inp.dataset.id+'/name').set(inp.value); stamp(); },400); }; });
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child('wbs/'+b.dataset.del).remove(); stamp(); } });
+}
+document.getElementById('wbsAdd').onclick=()=>{
+  const n=document.getElementById('wbsName').value.trim(); if(!n)return;
+  const ord=Object.values(WBS).reduce((m,w)=>Math.max(m,w.ord||0),0)+1;
+  ROOT.child('wbs').push({name:n,pct:Number(document.getElementById('wbsPct').value)||0,ord});
+  stamp(); document.getElementById('wbsName').value='';document.getElementById('wbsPct').value='';
+};
+
+/* ==========================================================
+   회의록 → 액션(체크리스트) 자동 추출
+   ========================================================== */
+document.getElementById('mmExtract').onclick=()=>{
+  const txt=document.getElementById('mmText').value||'';
+  const lines=txt.split(/[\n\r]+/).map(l=>l.replace(/^[\s\-\*•·\d.\)]+/,'').trim()).filter(Boolean);
+  const KW=['요청','확인','발송','조율','정의','검토','회신','제출','전달','준비','작성','협의','수령','반영','공유','선정','점검','진행'];
+  const cands=lines.filter(l=> l.length>=5 && (KW.some(k=>l.includes(k)) || /(하기로|할 것|예정|필요|바람)/.test(l)));
+  const uniq=[...new Set(cands)].slice(0,20);
+  const box=document.getElementById('mmResult');
+  if(!uniq.length){ box.innerHTML='<div class="muted">할 일처럼 보이는 문장을 찾지 못했어요. 직접 추가해 주세요.</div>'; return; }
+  box.innerHTML='<div class="muted" style="margin:6px 0">추가할 항목을 체크하고 버튼을 누르세요.</div>'+
+    uniq.map(l=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:4px 0"><input type="checkbox" class="mmc" data-t="${escA(l)}" checked style="margin-top:5px;flex:none"><span>${esc(l)}</span></label>`).join('')+
+    '<button class="btn pri sm" id="mmAdd" style="margin-top:8px">선택 항목 추가</button>';
+  document.getElementById('mmAdd').onclick=()=>{
+    const picks=[...box.querySelectorAll('.mmc:checked')].map(c=>c.dataset.t);
+    let ord=Object.values(ACTIONS).reduce((m,w)=>Math.max(m,w.ord||0),0);
+    picks.forEach(t=>{ ord++; ROOT.child('actions').push({title:t,who:'',due:'',done:false,ord}); });
+    stamp(); box.innerHTML=`<div class="muted">${picks.length}건을 추가했어요. (체크리스트 탭 확인)</div>`; document.getElementById('mmText').value='';
+  };
+};
+/* ==========================================================
+   탭
+   ========================================================== */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); document.querySelector(`.panel[data-p="${t.dataset.p}"]`).classList.add('on');
+});
+
+/* ==========================================================
+   부트스트랩 (사업 선택 시마다)
+   ========================================================== */
+function boot(){
+  detachAll();
+  ROOT=db.ref('mfg_ai/'+PID);
+  const conf=PCONF[PID];
+  setActiveSwitch();
+  renderStatic(conf);
+  bindTexts(conf);
+
+  // seed
+  const s=conf.seeds;
+  seedIf('events',s.events); seedIf('actions',s.actions); seedIf('recent',s.recent);
+  seedIf('upcoming',s.upcoming); seedIf('cadence',s.cadence); seedIf('issuelist',s.issuelist);
+  seedIf('contacts',s.contacts); seedIf('wbs',s.wbs);
+
+  // collections
+  makeColl('recent','recentList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
+  makeColl('upcoming','upcomingList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
+  makeColl('cadence','cadenceList',[{f:'tag',type:'select',options:['월간','격주','주간','상시','기타']},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
+  makeColl('issuelist','issueList',[{f:'title',ph:'이슈 제목'},{f:'desc',type:'area',ph:'이슈 내용'},{f:'note',type:'area',ph:'진행 메모'}],
+    d=>document.getElementById('nIssue').textContent=Object.keys(d).length);
+  makeColl('contacts','orgList',[{f:'org',ph:'기관명'},{f:'people',type:'area',ph:'담당자'}]);
+
+  // calendar / actions / wbs
+  bind(ROOT.child('events'),'value',s2=>{ EVENTS=s2.val()||{}; renderCal(); renderTimeline(); updateNextKPI(); });
+  bindActions();
+  bindWbs();
+}
+
+boot();
+</script>
+</body>
+</html>
