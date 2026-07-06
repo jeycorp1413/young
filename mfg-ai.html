@@ -35,6 +35,20 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .pbtn.gntp .role{background:#fdf0d9;color:var(--amber)}
 .pbtn.robot .role{background:#e2f5ea;color:var(--green)}
 
+/* WBS 간트 */
+.gwrap{overflow:auto;max-height:620px;border:1px solid var(--line);border-radius:10px}
+table.gantt{border-collapse:separate;border-spacing:0;font-size:13px}
+.gantt th,.gantt td{border-bottom:1px solid #eef1f7;border-right:1px solid #f2f4f9}
+.gantt thead th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:3;font-weight:600;padding:5px 6px;font-size:12px;text-align:center}
+.gantt thead tr:nth-child(2) th{top:27px}
+.gantt th.gt,.gantt td.gt{position:sticky;left:0;z-index:2;background:#fff;min-width:250px;max-width:250px;white-space:normal;padding:7px 10px;line-height:1.35;text-align:left}
+.gantt th.gp,.gantt td.gp{position:sticky;left:250px;z-index:2;background:#fff;min-width:52px;text-align:center;font-weight:700}
+.gantt td.gp{cursor:pointer}
+.gantt td.gp:hover{background:#f3f8ff}
+.gantt thead th.gt,.gantt thead th.gp{z-index:5;background:var(--navy);top:0}
+.gantt td.gc{min-width:32px;height:30px}
+.gantt td.tw,.gantt th.tw{box-shadow:inset 0 0 0 999px rgba(13,148,136,.2)}
+
 header.top{background:var(--navy);color:#fff;border-radius:16px;padding:20px 24px;margin-bottom:16px;
   display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 header.top h1{margin:0 0 5px;font-size:23px;letter-spacing:-.4px;font-weight:700}
@@ -169,6 +183,7 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
     <div class="tab" data-p="overview">사업개요</div>
     <div class="tab" data-p="schedule">정례일정</div>
     <div class="tab" data-p="wbs">진척률</div>
+    <div class="tab" data-p="gantt" style="display:none">📊 WBS 간트</div>
     <div class="tab" data-p="issues">이슈</div>
     <div class="tab" data-p="actions">✅ 체크리스트</div>
     <div class="tab" data-p="people">연락처</div>
@@ -229,6 +244,12 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
         <input id="wbsName" placeholder="WBS 항목명" style="flex:1;min-width:170px">
         <input id="wbsPct" type="number" min="0" max="100" placeholder="%" style="width:78px">
         <button class="btn ghost sm" id="wbsAdd">+ 항목 추가</button></div></div>
+  </section>
+
+  <section class="panel" data-p="gantt">
+    <div class="card"><h3>1차년도 WBS 간트 <select id="gOrg" class="ed" style="font-weight:600"></select></h3>
+      <div class="muted" style="margin-bottom:10px">'진척' 칸을 클릭하면 진척률(%)을 수정할 수 있어요 · 공유 반영 · 주차별 보기 · 가로 스크롤</div>
+      <div class="gwrap"><table class="gantt" id="gantt"></table></div></div>
   </section>
 
   <section class="panel" data-p="issues">
@@ -382,6 +403,54 @@ const PCONF={
  },
  gntp:{
   wbsVer:'wbs-v1-260706',
+  gantt:{tasks:[
+   {id:'1',no:'1',nm:'공통 관리',org:'공통',s:'2026-04-01',e:'2026-12-31',lvl:0},
+   {id:'1-1',no:'1.1',nm:'통합 착수 및 협약',org:'공통',s:'2026-04-01',e:'2026-04-30',lvl:1},
+   {id:'1-1-1',no:'1.1.1',nm:'1차년도 Kick-off 통합착수회의',org:'공통',s:'2026-04-01',e:'2026-04-10',lvl:2},
+   {id:'1-1-2',no:'1.1.2',nm:'주관·공동기관 역할·인터페이스 협의',org:'공통',s:'2026-04-06',e:'2026-04-30',lvl:2},
+   {id:'1-2',no:'1.2',nm:'주간·월간 업무 보고',org:'공통',s:'2026-04-01',e:'2026-12-31',lvl:1},
+   {id:'1-2-1',no:'1.2.1',nm:'주간 업무 보고',org:'공통',s:'2026-04-01',e:'2026-12-31',lvl:2},
+   {id:'1-3',no:'1.3',nm:'중간·최종 보고 및 평가',org:'공통',s:'2026-08-01',e:'2026-12-31',lvl:1},
+   {id:'1-3-1',no:'1.3.1',nm:'중간 점검 수검자료 작성 및 점검',org:'공통',s:'2026-08-01',e:'2026-09-30',lvl:2},
+   {id:'1-3-2',no:'1.3.2',nm:'1차년도 최종 보고서 작성',org:'공통',s:'2026-12-01',e:'2026-12-20',lvl:2},
+   {id:'1-3-3',no:'1.3.3',nm:'1차년도 성능평가',org:'공통',s:'2026-12-15',e:'2026-12-31',lvl:2},
+   {id:'2',no:'2',nm:'㈜플렛디스 (주관) 수행 과제',org:'플렛디스',s:'2026-04-01',e:'2026-12-31',lvl:0},
+   {id:'2-1',no:'2.1',nm:'제조 현장 요구사항 분석 및 KPI 정의',org:'플렛디스',s:'2026-04-01',e:'2026-05-31',lvl:1},
+   {id:'2-1-1',no:'2.1.1',nm:'제조 현장 요구사항 분석 및 설비별 이상 유형 정의',org:'플렛디스',s:'2026-04-01',e:'2026-05-15',lvl:2},
+   {id:'2-1-2',no:'2.1.2',nm:'성능 평가지표(KPI) 정의 (AUC·F1·추론지연·압축률)',org:'플렛디스',s:'2026-04-15',e:'2026-05-31',lvl:2},
+   {id:'2-2',no:'2.2',nm:'단일 센서 데이터 수집 체계 구축',org:'플렛디스',s:'2026-04-06',e:'2026-07-31',lvl:1},
+   {id:'2-2-1',no:'2.2.1',nm:'진동·소리 단일 센서 수집 모듈 개발 (전조기·성형기·신선기·레이저가공기)',org:'플렛디스',s:'2026-04-06',e:'2026-07-31',lvl:2},
+   {id:'2-2-2',no:'2.2.2',nm:'가속도계·고성능 마이크 16kHz 이상 고주파 샘플링 시스템 구축',org:'플렛디스',s:'2026-04-06',e:'2026-06-30',lvl:2},
+   {id:'2-2-3',no:'2.2.3',nm:'ISO 20816-3 기준 진동 측정 지점 선정 및 센서 부착',org:'플렛디스',s:'2026-04-06',e:'2026-05-31',lvl:2},
+   {id:'2-2-4',no:'2.2.4',nm:'음향 집음 깔대기 적용·방염 처리 고내구성 케이블 도입',org:'플렛디스',s:'2026-05-01',e:'2026-06-30',lvl:2},
+   {id:'2-3',no:'2.3',nm:'데이터 수집 프로토콜 및 동기화',org:'플렛디스',s:'2026-04-15',e:'2026-08-31',lvl:1},
+   {id:'2-3-1',no:'2.3.1',nm:'PLC/설비 제어 단자 가동 신호 연동 물리적 동기화',org:'플렛디스',s:'2026-05-01',e:'2026-07-31',lvl:2},
+   {id:'2-3-2',no:'2.3.2',nm:'ISO 20816-3·IEC 61672-1 기준 수집 프로토콜 수립',org:'플렛디스',s:'2026-04-15',e:'2026-06-30',lvl:2},
+   {id:'2-3-3',no:'2.3.3',nm:'노이즈 차단 체계 구축 및 실시간 데이터 정합성 검증',org:'플렛디스',s:'2026-06-01',e:'2026-08-31',lvl:2},
+   {id:'2-4',no:'2.4',nm:'온디바이스 전처리 파이프라인 구현',org:'플렛디스',s:'2026-06-01',e:'2026-10-31',lvl:1},
+   {id:'2-4-1',no:'2.4.1',nm:'진동 RMS·FFT / 소리 Band-pass·STFT 변환 엔진 개발',org:'플렛디스',s:'2026-06-01',e:'2026-09-30',lvl:2},
+   {id:'2-4-2',no:'2.4.2',nm:'Z-score 표준화 및 RevIN 정규화 적용',org:'플렛디스',s:'2026-07-01',e:'2026-09-30',lvl:2},
+   {id:'2-4-3',no:'2.4.3',nm:'Edge단 특징 벡터 추출·원본 대비 1/10~1/100 압축 구조 설계',org:'플렛디스',s:'2026-08-01',e:'2026-10-31',lvl:2},
+   {id:'2-5',no:'2.5',nm:'현장 데이터 수집 운영',org:'플렛디스',s:'2026-05-01',e:'2026-12-31',lvl:1},
+   {id:'2-5-1',no:'2.5.1',nm:'현장 원시 데이터 수집 운영 (진동·소리)',org:'플렛디스',s:'2026-05-01',e:'2026-12-31',lvl:2},
+   {id:'3',no:'3',nm:'㈜더아이엠씨 (공동) 수행 과제',org:'더아이엠씨',s:'2026-06-01',e:'2026-12-31',lvl:0},
+   {id:'3-1',no:'3.1',nm:'초경량 시계열 파운데이션 모델 설계',org:'더아이엠씨',s:'2026-06-01',e:'2026-10-31',lvl:1},
+   {id:'3-1-1',no:'3.1.1',nm:'Edge-AI 적용 데이터 구조 설계 및 온디바이스 처리 최적화',org:'더아이엠씨',s:'2026-06-01',e:'2026-08-31',lvl:2},
+   {id:'3-1-2',no:'3.1.2',nm:'IBM Granite TTM 기반 1M 파라미터 이하 초경량 모델 설계',org:'더아이엠씨',s:'2026-07-01',e:'2026-10-31',lvl:2},
+   {id:'3-1-3',no:'3.1.3',nm:'MLP-Mixer 구조(Time-mixing/Feature-mixing) 적용',org:'더아이엠씨',s:'2026-08-01',e:'2026-10-31',lvl:2},
+   {id:'3-2',no:'3.2',nm:'설비 특화 이상 탐지 알고리즘 개발',org:'더아이엠씨',s:'2026-08-01',e:'2026-12-15',lvl:1},
+   {id:'3-2-1',no:'3.2.1',nm:'LoRA 파인튜닝 기반 설비 특화 이상 탐지 알고리즘 개발',org:'더아이엠씨',s:'2026-09-01',e:'2026-11-30',lvl:2},
+   {id:'3-2-2',no:'3.2.2',nm:'Adaptive Patching 및 Multi-resolution 데이터 증강 적용',org:'더아이엠씨',s:'2026-08-01',e:'2026-10-31',lvl:2},
+   {id:'3-2-3',no:'3.2.3',nm:'진동 전용·소리 전용 모델 독립 구축',org:'더아이엠씨',s:'2026-09-01',e:'2026-11-30',lvl:2},
+   {id:'3-2-4',no:'3.2.4',nm:'Few-shot Adaptation 메커니즘 구현',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-15',lvl:2},
+   {id:'3-3',no:'3.3',nm:'이상 점수 산출 체계 구현',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-31',lvl:1},
+   {id:'3-3-1',no:'3.3.1',nm:'Residual 및 SMA 기반 이상 점수 산출 로직 구현',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-15',lvl:2},
+   {id:'3-3-2',no:'3.3.2',nm:'SMA 보정 로직 적용 및 동적 임계치 알고리즘 설계',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-31',lvl:2},
+   {id:'3-4',no:'3.4',nm:'기초 성능 검증',org:'더아이엠씨',s:'2026-07-01',e:'2026-12-31',lvl:1},
+   {id:'3-4-1',no:'3.4.1',nm:'정상데이터 레이블링·메타데이터 및 학습 데이터셋 구성 (Chronological Split 70/15/15)',org:'더아이엠씨',s:'2026-07-01',e:'2026-09-30',lvl:2},
+   {id:'3-4-2',no:'3.4.2',nm:'ETT·Weather 벤치마크 Zero-shot/Few-shot 성능 평가',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-15',lvl:2},
+   {id:'3-4-3',no:'3.4.3',nm:'SOTA 모델(PatchTST·TSMixer) 대비 AUC·F1 초기 성능 검증',org:'더아이엠씨',s:'2026-11-01',e:'2026-12-31',lvl:2}
+  ]},
   text:{
     htitle:'경남TP · 현장 적용형 Edge-AI 모듈 패키지 개발',
     hsub:'센서(진동·압력·소리·온도) 활용 Edge-AI · 지역혁신선도기업육성(R&D) · S3474328',
@@ -560,7 +629,7 @@ function bindTexts(conf){
 function renderStatic(conf){
   document.getElementById('badgeBox').innerHTML=conf.badges.map(b=>`<span class="badge">${esc(b)}</span>`).join('');
   document.getElementById('infoGrid').innerHTML=conf.info.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('');
-  document.getElementById('foot').textContent=`young-94e97 Firebase 실시간 공유 · 데이터 경로 /mfg_ai/${PID} · 편집 내용은 함께 보는 모두에게 즉시 반영됩니다 · 페이지 v260706-3prj3`;
+  document.getElementById('foot').textContent=`young-94e97 Firebase 실시간 공유 · 데이터 경로 /mfg_ai/${PID} · 편집 내용은 함께 보는 모두에게 즉시 반영됩니다 · 페이지 v260706-gantt`;
 }
 
 /* ==========================================================
@@ -758,6 +827,55 @@ document.getElementById('mmExtract').onclick=()=>{
   };
 };
 /* ==========================================================
+   WBS 간트
+   ========================================================== */
+let GPCT={}, GFILTER='';
+const GORGC={'공통':'#8a94ab','플렛디스':'#057afa','더아이엠씨':'#1f9d5b'};
+function renderGantt(){
+  const conf=PCONF[PID], mount=document.getElementById('gantt');
+  if(!conf||!conf.gantt||!mount) return;
+  const tasks=conf.gantt.tasks;
+  let mn=tasks[0].s, mx=tasks[0].e;
+  tasks.forEach(t=>{ if(t.s<mn)mn=t.s; if(t.e>mx)mx=t.e; });
+  const w0=parse(mn); w0.setDate(w0.getDate()-((w0.getDay()+6)%7));
+  const wEnd=parse(mx);
+  const weeks=[]; for(const d=new Date(w0); d<=wEnd; d.setDate(d.getDate()+7)) weeks.push(new Date(d));
+  const tISO=iso(TODAY);
+  const twIdx=weeks.findIndex(w=>{ const e2=new Date(w); e2.setDate(e2.getDate()+6); return iso(w)<=tISO&&tISO<=iso(e2); });
+  const mgroups=[]; weeks.forEach(w=>{ const m=(w.getMonth()+1)+'월'; if(mgroups.length&&mgroups[mgroups.length-1].m===m) mgroups[mgroups.length-1].n++; else mgroups.push({m,n:1}); });
+  const show=t=> !GFILTER || t.org===GFILTER || tasks.some(x=>x.org===GFILTER && x.id.indexOf(t.id+'-')===0);
+  let h='<thead><tr><th class="gt" rowspan="2">과업</th><th class="gp" rowspan="2">진척</th>'
+    +mgroups.map(g=>`<th colspan="${g.n}">${g.m}</th>`).join('')+'</tr><tr>'
+    +weeks.map((w,i)=>`<th class="${i===twIdx?'tw':''}" style="min-width:32px">${w.getMonth()+1}/${w.getDate()}</th>`).join('')+'</tr></thead><tbody>';
+  tasks.filter(show).forEach(t=>{
+    const c=GORGC[t.org]||'#8a94ab';
+    const pct=GPCT[t.id]!=null?GPCT[t.id]:0;
+    const nameStyle=t.lvl===0?`background:${c};color:#fff;font-weight:700`:(t.lvl===1?'font-weight:700':'padding-left:22px');
+    h+=`<tr><td class="gt" style="${nameStyle}" title="${escA(t.nm)} (${t.s}~${t.e}, ${escA(t.org)})">${t.lvl>0?`<span style="opacity:.6;font-size:11.5px">${t.no}</span> `:''}${esc(t.nm)}</td>`;
+    h+=`<td class="gp" data-gid="${t.id}">${pct}%</td>`;
+    weeks.forEach((w,i)=>{
+      const we=new Date(w); we.setDate(we.getDate()+6);
+      const on=iso(w)<=t.e && t.s<=iso(we);
+      h+=`<td class="gc ${i===twIdx?'tw':''}"${on?` style="background:${c}${t.lvl===0?'40':'aa'}"`:''}></td>`;
+    });
+    h+='</tr>';
+  });
+  mount.innerHTML=h+'</tbody>';
+  mount.querySelectorAll('.gp[data-gid]').forEach(td=>td.onclick=()=>{
+    const id=td.dataset.gid, v=prompt('진척률(%) 입력 (0~100)',GPCT[id]||0);
+    if(v==null)return;
+    ROOT.child('gantt/'+id).set(Math.max(0,Math.min(100,Number(v)||0))); stamp();
+  });
+}
+function bindGantt(conf){
+  const sel=document.getElementById('gOrg');
+  const orgs=[...new Set(conf.gantt.tasks.map(t=>t.org))];
+  sel.innerHTML='<option value="">전체 기관</option>'+orgs.map(o=>`<option value="${escA(o)}">${esc(o)}</option>`).join('');
+  GFILTER=''; sel.onchange=()=>{ GFILTER=sel.value; renderGantt(); };
+  bind(ROOT.child('gantt'),'value',s=>{ GPCT=s.val()||{}; renderGantt(); });
+}
+
+/* ==========================================================
    탭
    ========================================================== */
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
@@ -800,6 +918,13 @@ function boot(){
   bind(ROOT.child('events'),'value',s2=>{ EVENTS=s2.val()||{}; renderCal(); renderTimeline(); updateNextKPI(); });
   bindActions();
   bindWbs();
+
+  // WBS 간트: 간트 데이터가 있는 사업에서만 탭 노출
+  const gtab=document.querySelector('.tab[data-p="gantt"]');
+  gtab.style.display=conf.gantt?'':'none';
+  if(!conf.gantt && document.querySelector('.panel[data-p="gantt"]').classList.contains('on'))
+    document.querySelector('.tab[data-p="calendar"]').click();
+  if(conf.gantt) bindGantt(conf);
 }
 
 boot();
