@@ -380,6 +380,7 @@ const PCONF={
   }
  },
  gntp:{
+  wbsVer:'wbs-v1-260706',
   text:{
     htitle:'경남TP · 현장 적용형 Edge-AI 모듈 패키지 개발',
     hsub:'센서(진동·압력·소리·온도) 활용 Edge-AI · 지역혁신선도기업육성(R&D) · S3474328',
@@ -432,13 +433,18 @@ const PCONF={
      p4:{org:'중소기업기술정보진흥원(TIPA)',people:'전문기관',ord:4}
    },
    wbs:{
-     w01:{name:'수정 연구개발계획서(협약용) 제출',pct:100,ord:1},
-     w02:{name:'[1년차] 진동·소리 센서 데이터 수집 인프라(플렛디스)',pct:0,ord:2},
-     w03:{name:'[1년차] Edge 전처리 엔진 개발(더아이엠씨)',pct:0,ord:3},
-     w04:{name:'[1년차] TTM 초경량 시계열 이상탐지 모델 설계',pct:0,ord:4},
-     w05:{name:'[1년차] LoRA 파인튜닝 설비특화 이상탐지',pct:0,ord:5},
-     w06:{name:'[1년차] Auto-Calibration 임계값 자동설정',pct:0,ord:6},
-     w07:{name:'[1년차] 성능평가·결과보고',pct:0,ord:7}
+     w01:{name:'1.1 통합 착수·협약 (공통, 4월)',pct:0,ord:1},
+     w02:{name:'1.2 주간·월간 업무 보고 (공통, 연중)',pct:0,ord:2},
+     w03:{name:'1.3 중간·최종 보고 및 평가 (공통, 8~12월)',pct:0,ord:3},
+     w04:{name:'2.1 현장 요구사항 분석·KPI 정의 (플렛디스, 4~5월)',pct:0,ord:4},
+     w05:{name:'2.2 단일 센서 데이터 수집 체계 구축 (플렛디스, 4~7월)',pct:0,ord:5},
+     w06:{name:'2.3 데이터 수집 프로토콜·동기화 (플렛디스, 4~8월)',pct:0,ord:6},
+     w07:{name:'2.4 온디바이스 전처리 파이프라인 (플렛디스, 6~10월)',pct:0,ord:7},
+     w08:{name:'2.5 현장 데이터 수집 운영 (플렛디스, 5~12월)',pct:0,ord:8},
+     w09:{name:'3.1 초경량 시계열 파운데이션 모델 설계 (더아이엠씨, 6~10월)',pct:0,ord:9},
+     w10:{name:'3.2 설비 특화 이상탐지 알고리즘 개발 (더아이엠씨, 8~12월)',pct:0,ord:10},
+     w11:{name:'3.3 이상 점수 산출 체계 구현 (더아이엠씨, 10~12월)',pct:0,ord:11},
+     w12:{name:'3.4 기초 성능 검증 (더아이엠씨, 7~12월)',pct:0,ord:12}
    }
   }
  },
@@ -759,6 +765,11 @@ function boot(){
   seedIf('events',s.events); seedIf('actions',s.actions); seedIf('recent',s.recent);
   seedIf('upcoming',s.upcoming); seedIf('cadence',s.cadence); seedIf('issuelist',s.issuelist);
   seedIf('contacts',s.contacts); seedIf('wbs',s.wbs);
+
+  // WBS 버전 마이그레이션: 시드 이후 공식 WBS가 갱신된 사업은 1회에 한해 덮어씀
+  if(conf.wbsVer) ROOT.child('meta/wbsVer').once('value',v=>{
+    if(v.val()!==conf.wbsVer){ ROOT.child('wbs').set(s.wbs); ROOT.child('meta/wbsVer').set(conf.wbsVer); stamp(); }
+  });
 
   // collections
   makeColl('recent','recentList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
