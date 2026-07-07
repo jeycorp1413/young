@@ -192,7 +192,7 @@
   <div class="mbtns"><button class="btn ghost" id="projDelete" style="display:none;flex:0 0 auto;padding:12px 16px">삭제</button><button class="btn ghost" id="projCancel">취소</button><button class="btn" id="projSave">등록</button></div>
 </div></div>
 <div class="ov" id="calov"><div class="modal">
-  <h3 style="font-size:16px;font-weight:800;margin-bottom:4px">📅 일정 추가</h3>
+  <h3 id="calModalTitle" style="font-size:16px;font-weight:800;margin-bottom:4px">📅 일정 추가</h3>
   <div class="sub" style="color:#a193a0;font-size:12px;margin-bottom:6px">누가·무슨 일정·어디·어떤 프로젝트인지 적어주세요</div>
   <label>누구</label>
   <select id="calWho"></select>
@@ -204,7 +204,7 @@
   <input type="text" id="calProject" placeholder="예) 도시문제 플랫폼">
   <label>날짜</label>
   <input type="date" id="calDate">
-  <div class="mbtns"><button class="btn ghost" id="calCancel">취소</button><button class="btn" id="calSave">추가</button></div>
+  <div class="mbtns"><button class="btn ghost" id="calDelete" style="display:none;flex:0 0 auto;padding:12px 16px">삭제</button><button class="btn ghost" id="calCancel">취소</button><button class="btn" id="calSave">추가</button></div>
 </div></div>
 <div class="ov" id="cov"><div class="modal">
   <h3 style="font-size:16px;font-weight:800;text-align:center">☕ 오늘 커피 룰렛</h3>
@@ -470,19 +470,24 @@ function renderCal(){
     grid.appendChild(c);
   }
 }
-function showCalEvent(e){
-  const info="📅 "+(e.date||"")+"\n👤 "+(e.who||"-")+"\n📝 "+(e.title||"-")+"\n📍 "+(e.place||"-")+"\n🗂️ "+(e.project||"-");
-  if(confirm(info+"\n\n이 일정을 삭제할까요?")) delCalEvent(e.id);
-}
-function openCalModal(dateStr){
+let editCalId=null;
+function showCalEvent(e){ openCalModal(e.date, e); }
+function openCalModal(dateStr, ev){
+  editCalId = ev? ev.id : null;
   const sel=document.getElementById("calWho"); sel.innerHTML="";
   DATA.forEach(function(m){ const o=document.createElement("option"); o.value=m.name; o.textContent=m.name; sel.appendChild(o); });
   const ot=document.createElement("option"); ot.value="전체"; ot.textContent="전체/기타"; sel.appendChild(ot);
-  document.getElementById("calTitleIn").value=""; document.getElementById("calPlace").value=""; document.getElementById("calProject").value="";
-  document.getElementById("calDate").value=dateStr||"";
+  document.getElementById("calTitleIn").value = ev? (ev.title||"") : "";
+  document.getElementById("calPlace").value = ev? (ev.place||"") : "";
+  document.getElementById("calProject").value = ev? (ev.project||"") : "";
+  document.getElementById("calDate").value = ev? (ev.date||"") : (dateStr||"");
+  sel.value = ev? (ev.who||"전체") : "전체";
+  document.getElementById("calModalTitle").textContent = ev? "📅 일정 수정" : "📅 일정 추가";
+  document.getElementById("calSave").textContent = ev? "저장" : "추가";
+  document.getElementById("calDelete").style.display = ev? "block" : "none";
   document.getElementById("calov").classList.add("open");
 }
-function addCalEvent(){
+function saveCalEvent(){
   const who=document.getElementById("calWho").value;
   const title=document.getElementById("calTitleIn").value.trim();
   const place=document.getElementById("calPlace").value.trim();
@@ -490,14 +495,21 @@ function addCalEvent(){
   const date=document.getElementById("calDate").value;
   if(!title||!date){ alert("무슨 일정인지와 날짜는 꼭 입력해주세요."); return; }
   const rec={who:who||"전체", title:title, place:place||null, project:project||null, date:date};
-  if(db){ db.ref("cal").push(rec); } else { rec.id="cal"+Date.now(); CAL.push(rec); renderCal(); }
+  if(db){
+    if(editCalId){ db.ref("cal/"+editCalId).update(rec); } else { db.ref("cal").push(rec); }
+  } else {
+    if(editCalId){ const e=CAL.find(function(x){return x.id===editCalId;}); if(e) Object.assign(e,rec); }
+    else { rec.id="cal"+Date.now(); CAL.push(rec); }
+    renderCal();
+  }
   document.getElementById("calov").classList.remove("open");
 }
 function delCalEvent(id){ if(db){ db.ref("cal/"+id).remove(); } else { CAL=CAL.filter(function(e){return e.id!==id;}); renderCal(); } }
 document.getElementById("calPrev").onclick=function(){ calYM.m--; if(calYM.m<0){ calYM.m=11; calYM.y--; } renderCal(); };
 document.getElementById("calNext").onclick=function(){ calYM.m++; if(calYM.m>11){ calYM.m=0; calYM.y++; } renderCal(); };
-document.getElementById("calAdd").onclick=function(){ openCalModal(""); };
-document.getElementById("calSave").onclick=addCalEvent;
+document.getElementById("calAdd").onclick=function(){ openCalModal("", null); };
+document.getElementById("calSave").onclick=saveCalEvent;
+document.getElementById("calDelete").onclick=function(){ if(editCalId && confirm("이 일정을 삭제할까요?")){ delCalEvent(editCalId); document.getElementById("calov").classList.remove("open"); } };
 document.getElementById("calCancel").onclick=function(){ document.getElementById("calov").classList.remove("open"); };
 document.getElementById("calov").onclick=function(e){ if(e.target.id==="calov") document.getElementById("calov").classList.remove("open"); };
 document.getElementById("eov").onclick=function(e){ if(e.target.id==="eov") document.getElementById("eov").classList.remove("open"); };
