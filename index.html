@@ -117,8 +117,10 @@
   .cal-cell{min-height:80px; border:1px solid var(--line); border-radius:10px; padding:5px 5px 6px; display:flex; flex-direction:column; gap:3px; background:#fff; overflow:hidden; cursor:pointer;}
   .cal-cell:hover{border-color:#f3b6cd;} .cal-cell.empty{background:transparent; border:0; cursor:default;} .cal-cell.empty:hover{border:0;}
   .cal-cell.today{border-color:var(--pink); background:#fdf0f6;}
-  .cal-daynum{font-size:11px; font-weight:800; color:#8a6670;}
+  .cal-cell.off{background:#f4eff2;} .cal-cell.off.today{background:#fdf0f6;}
+  .cal-daynum{display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:800; color:#8a6670;}
   .cal-cell.sun .cal-daynum{color:#e5586e;} .cal-cell.sat .cal-daynum{color:#6fa8dc;}
+  .cal-off{font-size:8.5px; font-weight:800; color:#bfa9b5; background:#e9dfe6; border-radius:5px; padding:1px 4px; letter-spacing:.5px;}
   .cal-ev{font-size:10.5px; font-weight:700; color:#fff; border-radius:6px; padding:2px 5px; cursor:pointer; overflow:hidden; line-height:1.3;}
   .cal-ev .ce-who{display:block; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .cal-ev .ce-title{display:block; font-weight:600; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
@@ -460,9 +462,9 @@ function renderCal(){
   for(let i=0;i<startDow;i++){ const c=document.createElement("div"); c.className="cal-cell empty"; grid.appendChild(c); }
   for(let dnum=1; dnum<=days; dnum++){
     const dateStr=y+"-"+String(m+1).padStart(2,"0")+"-"+String(dnum).padStart(2,"0");
-    const dow=new Date(y,m,dnum).getDay();
-    const c=document.createElement("div"); c.className="cal-cell"+(dow===0?" sun":dow===6?" sat":"")+((isThisMonth&&today.getDate()===dnum)?" today":"");
-    c.innerHTML='<div class="cal-daynum">'+dnum+'</div>';
+    const dcell=new Date(y,m,dnum); const dow=dcell.getDay(); const off=isHol(dcell);
+    const c=document.createElement("div"); c.className="cal-cell"+(dow===0?" sun":dow===6?" sat":"")+(off?" off":"")+((isThisMonth&&today.getDate()===dnum)?" today":"");
+    c.innerHTML='<div class="cal-daynum">'+dnum+(off?'<span class="cal-off">휴무</span>':'')+'</div>';
     CAL.filter(function(e){return e.date===dateStr;}).forEach(function(e){
       const ev=document.createElement("div"); ev.className="cal-ev"; ev.style.background=memColor(e.who);
       ev.innerHTML=(e.who?'<span class="ce-who">'+esc(e.who)+'</span>':"")+'<span class="ce-title">'+esc(e.title||"")+'</span>'; ev.title=calTip(e);
