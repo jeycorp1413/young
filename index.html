@@ -119,7 +119,9 @@
   .cal-cell.today{border-color:var(--pink); background:#fdf0f6;}
   .cal-daynum{font-size:11px; font-weight:800; color:#8a6670;}
   .cal-cell.sun .cal-daynum{color:#e5586e;} .cal-cell.sat .cal-daynum{color:#6fa8dc;}
-  .cal-ev{font-size:10.5px; font-weight:700; color:#fff; border-radius:6px; padding:2px 5px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4;}
+  .cal-ev{font-size:10.5px; font-weight:700; color:#fff; border-radius:6px; padding:2px 5px; cursor:pointer; overflow:hidden; line-height:1.3;}
+  .cal-ev .ce-who{display:block; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cal-ev .ce-title{display:block; font-weight:600; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   @media(max-width:520px){ .cal-cell{min-height:60px;} .cal-ev{font-size:9px; padding:1px 3px;} }
 </style>
 </head>
@@ -463,7 +465,7 @@ function renderCal(){
     c.innerHTML='<div class="cal-daynum">'+dnum+'</div>';
     CAL.filter(function(e){return e.date===dateStr;}).forEach(function(e){
       const ev=document.createElement("div"); ev.className="cal-ev"; ev.style.background=memColor(e.who);
-      ev.textContent=(e.who?e.who+" ":"")+(e.title||""); ev.title=calTip(e);
+      ev.innerHTML=(e.who?'<span class="ce-who">'+esc(e.who)+'</span>':"")+'<span class="ce-title">'+esc(e.title||"")+'</span>'; ev.title=calTip(e);
       ev.onclick=function(evt){ evt.stopPropagation(); showCalEvent(e); }; c.appendChild(ev);
     });
     c.onclick=function(){ openCalModal(dateStr); };
