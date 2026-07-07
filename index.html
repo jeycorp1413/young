@@ -91,8 +91,17 @@
   .modal input[type=text],.modal input[type=date]{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px; font:inherit; font-size:14px; outline:0;}
   .modal select{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px; font:inherit; font-size:14px; outline:0; background:#fff; cursor:pointer;}
   .modal input:focus,.modal select:focus{border-color:var(--pink);}
-  .projline{margin-top:7px; font-size:12.5px; font-weight:700; color:#7a6670; display:flex; align-items:center; gap:5px;}
-  .projline b{color:var(--pink-deep); font-weight:800;} .projline .ph{color:#cdb3bf; font-weight:600;}
+  .proj-sec{margin-top:30px; border-top:1px solid var(--line); padding-top:22px;}
+  .proj-head{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .proj-title{font-weight:800; font-size:16px; color:var(--pink-deep);}
+  .proj-list{display:flex; flex-direction:column; gap:9px;}
+  .proj-item{display:flex; align-items:center; gap:10px; padding:11px 14px; border:1px solid var(--line); border-radius:12px; background:#fff;}
+  .proj-item .pj-dot{width:10px; height:10px; border-radius:50%; flex:none;}
+  .proj-item .pj-name{font-weight:800; font-size:14px; color:#5b4a52; flex:1; min-width:0;}
+  .proj-item .pj-who{font-size:12px; font-weight:700; color:#b5446e; background:#fdeef4; border-radius:999px; padding:3px 10px; flex:none;}
+  .proj-item .pj-del{border:0; background:transparent; color:#c9b3bd; cursor:pointer; font-size:15px; flex:none;}
+  .proj-item .pj-del:hover{color:#e5586e;}
+  .proj-empty{color:#cdb3bf; font-size:13px; padding:6px 2px;}
   .cal-sec{margin-top:30px; border-top:1px solid var(--line); padding-top:22px;}
   .cal-head{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
   .cal-title{font-weight:800; font-size:16px; color:var(--pink-deep); min-width:110px; text-align:center;}
@@ -119,6 +128,13 @@
   </div>
   <div class="ticker" id="ticker"></div>
   <div class="list" id="list"></div>
+  <div class="proj-sec">
+    <div class="proj-head">
+      <div class="proj-title">🗂️ 진행중 프로젝트</div>
+      <button class="cal-add" id="projAdd">➕ 프로젝트</button>
+    </div>
+    <div class="proj-list" id="projList"></div>
+  </div>
   <div class="cal-sec">
     <div class="cal-head">
       <button class="cal-nav" id="calPrev">‹</button>
@@ -128,19 +144,7 @@
     </div>
     <div class="cal-grid" id="calGrid"></div>
   </div>
-  <div class="foot">이름·캐릭터를 누르면 상태·기분·프로젝트·한마디를 바꿀 수 있어요 · 📅 날짜를 누르면 일정 추가 · 🏅 버튼으로 서로 칭찬 도장 꽝!</div>
-  <div class="chat">
-    <div class="chat-title">💬 오늘의 수다방</div>
-    <div class="chat-log" id="chatLog"></div>
-    <div id="attPreview" class="att-preview" style="display:none"></div>
-    <div class="chat-input">
-      <select class="who-sel" id="chatWho"></select>
-      <button class="att" id="attBtn" title="이미지 첨부">📷</button>
-      <input type="file" id="attFile" accept="image/*" style="display:none">
-      <input type="text" id="chatText" placeholder="메시지를 입력하세요…">
-      <button class="send" id="sendBtn">전송</button>
-    </div>
-  </div>
+  <div class="foot">이름·캐릭터를 누르면 상태·기분·한마디를 바꿀 수 있어요 · 🗂️ 프로젝트·📅 일정은 각 섹션에서 등록 · 🏅 버튼으로 서로 칭찬 도장 꽝!</div>
 </div>
 
 <div class="ov" id="ov">
@@ -151,8 +155,6 @@
     <div id="subWrap" style="display:none"><label id="subLabel">세부</label><div class="opts" id="subsel"></div></div>
     <label>오늘의 기분</label>
     <div class="opts" id="moodsel" style="grid-template-columns:repeat(4,1fr)"></div>
-    <label>🗂️ 진행중 프로젝트</label>
-    <input type="text" id="mProject" placeholder="예) JDC sLLM 구축, 도시문제 플랫폼">
     <label>오늘 한마디 💬</label>
     <textarea id="mMsg" rows="2" placeholder="오늘 하고 싶은 말 한마디!"></textarea>
     <div class="mbtns"><button class="btn ghost" id="mCancel">취소</button><button class="btn" id="mSave">저장</button></div>
@@ -174,6 +176,15 @@
   <label style="display:block;font-size:12.5px;font-weight:700;color:#7a6670;margin:14px 0 7px">날짜</label>
   <input type="date" id="evDate">
   <div class="mbtns"><button class="btn ghost" id="evCancel">취소</button><button class="btn" id="evSave">추가</button></div>
+</div></div>
+<div class="ov" id="projov"><div class="modal">
+  <h3 style="font-size:16px;font-weight:800;margin-bottom:4px">🗂️ 프로젝트 등록</h3>
+  <div class="sub" style="color:#a193a0;font-size:12px;margin-bottom:6px">진행중인 프로젝트와 담당을 적어주세요</div>
+  <label>프로젝트명</label>
+  <input type="text" id="projName" placeholder="예) JDC sLLM 구축">
+  <label>담당</label>
+  <select id="projWho"></select>
+  <div class="mbtns"><button class="btn ghost" id="projCancel">취소</button><button class="btn" id="projSave">등록</button></div>
 </div></div>
 <div class="ov" id="calov"><div class="modal">
   <h3 style="font-size:16px;font-weight:800;margin-bottom:4px">📅 일정 추가</h3>
@@ -230,7 +241,7 @@ const SEED = {
   u3:{name:"정서연", status:"resting", sub:"coffee", msg:"사장님 나빠요", order:3},
   u4:{name:"지희애", status:"working", sub:"free",   msg:"안녕하세요!", order:4},
 };
-let DATA=[], CHAT=[], filter="all", editId=null, editStatus=null, editSub=null, editMood=null, stampTarget=null, pendingImg=null;
+let DATA=[], PROJECTS=[], filter="all", editId=null, editStatus=null, editSub=null, editMood=null, stampTarget=null;
 let EVENTS=[], WEATHER=null, COFFEE=null; const DAYMS=86400000;
 let CAL=[], calYM=null; const CALPAL=["#e5586e","#6fa8dc","#2fa39b","#cf7fa8","#f2a154","#a98fda","#b5836a"];
 const configured = !String(firebaseConfig.apiKey).startsWith("PASTE");
@@ -316,7 +327,7 @@ function renderChips(){
     c.onclick=()=>{filter=k; render();}; el.appendChild(c); }
 }
 function render(){
-  ticker(); fillWhoSelect();
+  ticker(); renderProjects();
   const wrap=document.getElementById("list"); wrap.innerHTML="";
   const list=DATA.filter(m=> filter==="all"||eff(m)===filter);
   for(const m of list){
@@ -326,11 +337,9 @@ function render(){
     let moodHtml=""; if(m.mood && MOODS[m.mood]){ const mo=MOODS[m.mood]; moodHtml='<span class="mood" style="background:'+mo.c+'1a;color:'+mo.c+'">'+mo.e+' '+mo.l+'</span>'; }
     const subTxt = v.sub? '<span class="sub">· '+v.sub.e+' '+v.sub.l+'</span>' : "";
     const msgTxt = m.msg? esc(m.msg) : '<span class="ph">오늘 한마디를 남겨보세요</span>';
-    const projTxt = '<div class="projline">🗂️ '+(m.project? '<b>'+esc(m.project)+'</b>' : '<span class="ph">진행중 프로젝트 없음</span>')+'</div>';
     const info=document.createElement("div"); info.className="info";
     info.innerHTML='<div class="namerow"><span class="name">'+esc(m.name)+'</span><span class="stamps">'+stampsHtml+'</span></div>'+
       '<div class="statusline"><span class="dot"></span><span class="st">'+v.label+'</span>'+subTxt+moodHtml+'</div>'+
-      projTxt+
       '<div class="saying"><span class="q">💬</span>'+msgTxt+'</div>';
     info.querySelector(".name").onclick=()=>openEdit(m.id);
     const ow=offwork(m);
@@ -343,31 +352,41 @@ function render(){
   if(!list.length){ wrap.innerHTML='<div style="color:#c9b3bd;padding:40px 0;text-align:center">표시할 팀원이 없어요.</div>'; }
   renderCal();
 }
-function fillWhoSelect(){
-  const sel=document.getElementById("chatWho"); const prev=sel.value || localStorage.getItem("chatWho") || "";
-  const names=DATA.map(m=>m.name); names.push("익명");
-  sel.innerHTML=""; names.forEach(n=>{ const o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o); });
-  if(names.indexOf(prev)>=0) sel.value=prev;
+/* ===== 진행중 프로젝트 ===== */
+function renderProjects(){
+  const el=document.getElementById("projList"); if(!el) return; el.innerHTML="";
+  if(!PROJECTS.length){ el.innerHTML='<div class="proj-empty">아직 등록된 프로젝트가 없어요. ➕ 프로젝트로 추가해보세요!</div>'; return; }
+  PROJECTS.forEach(function(p){
+    const row=document.createElement("div"); row.className="proj-item";
+    const whoTxt=(p.who && p.who!=="팀")? esc(p.who) : "팀 공통";
+    row.innerHTML='<span class="pj-dot" style="background:'+memColor(p.who)+'"></span>'+
+      '<span class="pj-name">'+esc(p.name)+'</span>'+
+      '<span class="pj-who">'+whoTxt+'</span>'+
+      '<button class="pj-del" title="삭제">✕</button>';
+    row.querySelector(".pj-del").onclick=function(){ if(confirm("'"+p.name+"' 프로젝트를 삭제할까요?")) delProject(p.id); };
+    el.appendChild(row);
+  });
 }
-function renderChat(){
-  const log=document.getElementById("chatLog");
-  if(!CHAT.length){ log.innerHTML='<div class="chat-empty">아직 메시지가 없어요. 첫 글을 남겨보세요!</div>'; return; }
-  log.innerHTML="";
-  for(const c of CHAT){
-    const b=document.createElement("div"); b.className="bubble";
-    let inner=(c.who?('<div class="bwho">'+esc(c.who)+'</div>'):"")+
-      '<div class="bcontent">'+(c.text?("<div>"+esc(c.text)+"</div>"):"")+(c.img?('<img src="'+c.img+'">'):"")+'</div>'+
-      '<div class="bt">'+dt(c.t)+'</div><div class="reacts"></div>';
-    b.innerHTML=inner;
-    const rdiv=b.querySelector(".reacts");
-    for(const rk in REACTIONS){ const n=(c.reactions&&c.reactions[rk])||0; const btn=document.createElement("button");
-      btn.className="react"+(n>0?" has":""); btn.textContent=REACTIONS[rk]+(n>0?" "+n:""); btn.onclick=()=>react(c.id, rk); rdiv.appendChild(btn); }
-    log.appendChild(b);
-  }
-  log.scrollTop=log.scrollHeight;
+function openProjModal(){
+  const sel=document.getElementById("projWho"); sel.innerHTML="";
+  const ot=document.createElement("option"); ot.value="팀"; ot.textContent="팀 공통"; sel.appendChild(ot);
+  DATA.forEach(function(m){ const o=document.createElement("option"); o.value=m.name; o.textContent=m.name; sel.appendChild(o); });
+  document.getElementById("projName").value=""; sel.value="팀";
+  document.getElementById("projov").classList.add("open");
 }
-function react(msgId, rk){ if(db){ db.ref("chat/"+msgId+"/reactions/"+rk).transaction(x=>(x||0)+1); }
-  else { const c=CHAT.find(x=>x.id===msgId); if(c){ c.reactions=c.reactions||{}; c.reactions[rk]=(c.reactions[rk]||0)+1; renderChat(); } } }
+function addProject(){
+  const name=document.getElementById("projName").value.trim();
+  const who=document.getElementById("projWho").value||"팀";
+  if(!name){ alert("프로젝트명을 입력해주세요."); return; }
+  const rec={name:name, who:who};
+  if(db){ db.ref("projects").push(rec); } else { rec.id="p"+Date.now(); PROJECTS.push(rec); renderProjects(); }
+  document.getElementById("projov").classList.remove("open");
+}
+function delProject(id){ if(db){ db.ref("projects/"+id).remove(); } else { PROJECTS=PROJECTS.filter(function(p){return p.id!==id;}); renderProjects(); } }
+document.getElementById("projAdd").onclick=openProjModal;
+document.getElementById("projSave").onclick=addProject;
+document.getElementById("projCancel").onclick=function(){ document.getElementById("projov").classList.remove("open"); };
+document.getElementById("projov").onclick=function(e){ if(e.target.id==="projov") document.getElementById("projov").classList.remove("open"); };
 
 function previewFace(){ let f; if(editStatus==="meeting")f="thinking"; else if(editStatus==="field")f="wave"; else if(editStatus==="resting")f="happy"; else if(editStatus==="leave")f="happy"; else f=(editSub==="busy"?"error":editSub==="busy2"?"typing":"idle"); document.getElementById("mFace").src=FACES[f]; }
 function drawModal(){
@@ -390,9 +409,8 @@ function drawModal(){
 function openEdit(id){ const m=DATA.find(x=>String(x.id)===String(id)); if(!m) return; editId=m.id; editStatus=m.status; editSub=m.sub; editMood=m.mood||null;
   document.getElementById("mTitle").textContent=m.name;
   document.getElementById("mSub").textContent = isLunch()? "지금은 자동 점심시간 — 13시 이후 이 상태로 표시돼요":"상태·기분을 골라주세요";
-  document.getElementById("mProject").value=m.project||"";
   document.getElementById("mMsg").value=m.msg||""; drawModal(); document.getElementById("ov").classList.add("open"); }
-function saveEdit(){ const patch={status:editStatus, sub:editSub||null, mood:editMood||null, project:document.getElementById("mProject").value.trim()||null, msg:document.getElementById("mMsg").value.trim(), updated:Date.now()};
+function saveEdit(){ const patch={status:editStatus, sub:editSub||null, mood:editMood||null, msg:document.getElementById("mMsg").value.trim(), updated:Date.now()};
   if(db){ db.ref("members/"+editId).update(patch); } else { const m=DATA.find(x=>String(x.id)===String(editId)); if(m) Object.assign(m,patch); render(); }
   closeModal(); }
 document.getElementById("mSave").onclick=saveEdit;
@@ -410,18 +428,6 @@ function giveStamp(k){ if(db){ db.ref("members/"+stampTarget+"/stamps/"+k).trans
   document.getElementById("sov").classList.remove("open"); }
 document.getElementById("sCancel").onclick=()=>document.getElementById("sov").classList.remove("open");
 document.getElementById("sov").onclick=(e)=>{ if(e.target.id==="sov") document.getElementById("sov").classList.remove("open"); };
-
-function compress(file, cb){ const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const max=900; let w=img.width,h=img.height; const s=Math.min(1,max/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s); const cv=document.createElement("canvas"); cv.width=w; cv.height=h; cv.getContext("2d").drawImage(img,0,0,w,h); cb(cv.toDataURL("image/jpeg",0.72)); }; img.src=r.result; }; r.readAsDataURL(file); }
-function sendChat(){ const t=document.getElementById("chatText"); const txt=t.value.trim(); if(!txt && !pendingImg) return;
-  const who=document.getElementById("chatWho").value||"익명"; localStorage.setItem("chatWho", who);
-  const msg={who:who, text:txt||null, img:pendingImg||null, t:Date.now()};
-  if(db){ db.ref("chat").push(msg); } else { msg.id="c"+Date.now(); CHAT.push(msg); renderChat(); }
-  t.value=""; pendingImg=null; const p=document.getElementById("attPreview"); p.style.display="none"; p.innerHTML=""; }
-document.getElementById("sendBtn").onclick=sendChat;
-document.getElementById("chatText").addEventListener("keydown",e=>{ if(e.key==="Enter") sendChat(); });
-document.getElementById("chatWho").onchange=e=>localStorage.setItem("chatWho", e.target.value);
-document.getElementById("attBtn").onclick=()=>document.getElementById("attFile").click();
-document.getElementById("attFile").onchange=(e)=>{ const f=e.target.files[0]; if(!f) return; compress(f,(d)=>{ pendingImg=d; const p=document.getElementById("attPreview"); p.style.display="block"; p.innerHTML='<img src="'+d+'"><button id="attCancel">취소</button>'; document.getElementById("attCancel").onclick=()=>{pendingImg=null;p.style.display="none";p.innerHTML="";}; }); e.target.value=""; };
 
 function openEventModal(){ document.getElementById("evName").value=""; document.getElementById("evDate").value=""; document.getElementById("eov").classList.add("open"); }
 function addEvent(){ const n=document.getElementById("evName").value.trim(); const dd=document.getElementById("evDate").value; if(!n||!dd) return; if(db) db.ref("events").push({name:n,date:dd}); else { EVENTS.push({id:"e"+Date.now(),name:n,date:dd}); render(); } document.getElementById("eov").classList.remove("open"); }
@@ -506,13 +512,13 @@ function start(){
     live.className="live on"; live.textContent="● 실시간 연결됨";
     db.ref("members").on("value", snap=>{ const v=snap.val(); if(!v){ db.ref("members").set(SEED); return; }
       DATA=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.order||0)-(b.order||0)); render(); });
-    db.ref("chat").on("value", snap=>{ const v=snap.val()||{}; CHAT=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.t||0)-(b.t||0)); renderChat(); });
     db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
     db.ref("cal").on("value", snap=>{ const v=snap.val()||{}; CAL=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); renderCal(); });
+    db.ref("projects").on("value", snap=>{ const v=snap.val()||{}; PROJECTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); renderProjects(); });
     db.ref("coffee").on("value", snap=>{ COFFEE=snap.val()||null; render(); });
   } else {
     DATA=Object.keys(SEED).map(k=>Object.assign({id:k}, SEED[k], {updated:Date.now()})).sort((a,b)=>a.order-b.order);
-    render(); renderChat();
+    render();
   }
 }
 start();
