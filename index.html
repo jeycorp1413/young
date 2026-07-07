@@ -95,12 +95,15 @@
   .proj-head{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
   .proj-title{font-weight:800; font-size:16px; color:var(--pink-deep);}
   .proj-list{display:flex; flex-direction:column; gap:9px;}
-  .proj-item{display:flex; align-items:center; gap:10px; padding:11px 14px; border:1px solid var(--line); border-radius:12px; background:#fff;}
-  .proj-item .pj-dot{width:10px; height:10px; border-radius:50%; flex:none;}
-  .proj-item .pj-name{font-weight:800; font-size:14px; color:#5b4a52; flex:1; min-width:0;}
+  .proj-item{display:flex; align-items:flex-start; gap:11px; padding:13px 15px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer;}
+  .proj-item:hover{border-color:#f3b6cd; background:#fffafc;}
+  .proj-item .pj-dot{width:10px; height:10px; border-radius:50%; flex:none; margin-top:4px;}
+  .proj-item .pj-body{flex:1; min-width:0;}
+  .proj-item .pj-nrow{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
+  .proj-item .pj-name{font-weight:800; font-size:14.5px; color:#5b4a52;}
   .proj-item .pj-who{font-size:12px; font-weight:700; color:#b5446e; background:#fdeef4; border-radius:999px; padding:3px 10px; flex:none;}
-  .proj-item .pj-del{border:0; background:transparent; color:#c9b3bd; cursor:pointer; font-size:15px; flex:none;}
-  .proj-item .pj-del:hover{color:#e5586e;}
+  .proj-item .pj-content{margin-top:6px; font-size:13px; color:#7a6670; line-height:1.5; white-space:pre-wrap; word-break:break-word;}
+  .proj-item .pj-content.ph{color:#cdb3bf; font-style:normal;}
   .proj-empty{color:#cdb3bf; font-size:13px; padding:6px 2px;}
   .cal-sec{margin-top:30px; border-top:1px solid var(--line); padding-top:22px;}
   .cal-head{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
@@ -124,7 +127,7 @@
 <div class="wrap">
   <div class="top">
     <div class="title"><h1>♥ AI 사업기획팀 ♥</h1><p>사랑 가득한 AI 사업기획팀 ♥</p></div>
-    <div class="clock"><b id="clk">--:--</b><span id="cdate"></span><br><span class="live off" id="liveTag">● 오프라인</span></div>
+    <div class="clock"><b id="clk">--:--</b><span id="cdate"></span></div>
   </div>
   <div class="ticker" id="ticker"></div>
   <div class="list" id="list"></div>
@@ -178,13 +181,15 @@
   <div class="mbtns"><button class="btn ghost" id="evCancel">취소</button><button class="btn" id="evSave">추가</button></div>
 </div></div>
 <div class="ov" id="projov"><div class="modal">
-  <h3 style="font-size:16px;font-weight:800;margin-bottom:4px">🗂️ 프로젝트 등록</h3>
-  <div class="sub" style="color:#a193a0;font-size:12px;margin-bottom:6px">진행중인 프로젝트와 담당을 적어주세요</div>
+  <h3 id="projModalTitle" style="font-size:16px;font-weight:800;margin-bottom:4px">🗂️ 프로젝트 등록</h3>
+  <div class="sub" style="color:#a193a0;font-size:12px;margin-bottom:6px">프로젝트 정보와 진행 내용을 기재하세요</div>
   <label>프로젝트명</label>
   <input type="text" id="projName" placeholder="예) JDC sLLM 구축">
   <label>담당</label>
   <select id="projWho"></select>
-  <div class="mbtns"><button class="btn ghost" id="projCancel">취소</button><button class="btn" id="projSave">등록</button></div>
+  <label>📝 내용 (진행상황·할 일·메모)</label>
+  <textarea id="projContent" rows="6" placeholder="진행상황, 할 일, 참고사항 등을 자유롭게 적어주세요"></textarea>
+  <div class="mbtns"><button class="btn ghost" id="projDelete" style="display:none;flex:0 0 auto;padding:12px 16px">삭제</button><button class="btn ghost" id="projCancel">취소</button><button class="btn" id="projSave">등록</button></div>
 </div></div>
 <div class="ov" id="calov"><div class="modal">
   <h3 style="font-size:16px;font-weight:800;margin-bottom:4px">📅 일정 추가</h3>
@@ -300,18 +305,8 @@ function ticker(){
   else if(nowS < 13*3600) main="🍱 맛점 하세요!";
   else main="💪 오후도 화이팅!";
   const dow=d.getDay(); let fri; if(dow===5) fri="🎉 오늘 불금!"; else { let dd=(5-dow+7)%7; if(dd===0) dd=7; fri="🎉 불금까지 D-"+dd; }
-  const np=nextPayday(); const t0=new Date(); t0.setHours(0,0,0,0); const ddp=Math.round((np-t0)/DAYMS);
-  const pay = ddp===0? "💰 오늘 월급날!" : "💰 월급 D-"+ddp;
   el.innerHTML="";
-  el.appendChild(chip(main,"heart")); el.appendChild(chip(fri)); el.appendChild(chip(pay));
-  if(WEATHER) el.appendChild(chip(WEATHER));
-  if(COFFEE && COFFEE.t && sameDay(COFFEE.t)) el.appendChild(chip("☕ 오늘 커피: "+COFFEE.winner+"님"));
-  EVENTS.map(function(ev){return {ev:ev, dd:dday(ev.date)};}).filter(function(x){return x.dd>=0;}).sort(function(a,b){return a.dd-b.dd;}).forEach(function(x){
-    const c=chip("📌 "+x.ev.name+" "+(x.dd===0?"D-DAY":"D-"+x.dd)); c.classList.add("evt"); c.title="클릭하면 삭제";
-    c.onclick=function(){ if(confirm("'"+x.ev.name+"' 일정을 삭제할까요?")) delEvent(x.ev.id); }; el.appendChild(c);
-  });
-  const a=chip("➕ 일정"); a.classList.add("addchip"); a.onclick=openEventModal; el.appendChild(a);
-  const cf=chip("☕ 룰렛"); cf.classList.add("addchip"); cf.onclick=openCoffee; el.appendChild(cf);
+  el.appendChild(chip(main,"heart")); el.appendChild(chip(fri));
 }
 function chip(txt,cls){ const sp=document.createElement("span"); sp.className="tchip"+(cls?(" "+cls):""); sp.textContent=txt; return sp; }
 function dday(dstr){ if(!dstr) return -999; const t=new Date(); t.setHours(0,0,0,0); const e=new Date(dstr+"T00:00:00"); return Math.round((e-t)/DAYMS); }
@@ -353,38 +348,52 @@ function render(){
   renderCal();
 }
 /* ===== 진행중 프로젝트 ===== */
+let editProjId=null;
 function renderProjects(){
   const el=document.getElementById("projList"); if(!el) return; el.innerHTML="";
   if(!PROJECTS.length){ el.innerHTML='<div class="proj-empty">아직 등록된 프로젝트가 없어요. ➕ 프로젝트로 추가해보세요!</div>'; return; }
   PROJECTS.forEach(function(p){
     const row=document.createElement("div"); row.className="proj-item";
     const whoTxt=(p.who && p.who!=="팀")? esc(p.who) : "팀 공통";
+    const contentHtml = p.content? '<div class="pj-content">'+esc(p.content)+'</div>' : '<div class="pj-content ph">클릭해서 내용을 기재하세요</div>';
     row.innerHTML='<span class="pj-dot" style="background:'+memColor(p.who)+'"></span>'+
-      '<span class="pj-name">'+esc(p.name)+'</span>'+
-      '<span class="pj-who">'+whoTxt+'</span>'+
-      '<button class="pj-del" title="삭제">✕</button>';
-    row.querySelector(".pj-del").onclick=function(){ if(confirm("'"+p.name+"' 프로젝트를 삭제할까요?")) delProject(p.id); };
+      '<div class="pj-body"><div class="pj-nrow"><span class="pj-name">'+esc(p.name)+'</span><span class="pj-who">'+whoTxt+'</span></div>'+contentHtml+'</div>';
+    row.onclick=function(){ openProjModal(p); };
     el.appendChild(row);
   });
 }
-function openProjModal(){
+function openProjModal(p){
+  editProjId = p? p.id : null;
   const sel=document.getElementById("projWho"); sel.innerHTML="";
   const ot=document.createElement("option"); ot.value="팀"; ot.textContent="팀 공통"; sel.appendChild(ot);
   DATA.forEach(function(m){ const o=document.createElement("option"); o.value=m.name; o.textContent=m.name; sel.appendChild(o); });
-  document.getElementById("projName").value=""; sel.value="팀";
+  document.getElementById("projName").value = p? p.name : "";
+  document.getElementById("projContent").value = p? (p.content||"") : "";
+  sel.value = p? (p.who||"팀") : "팀";
+  document.getElementById("projModalTitle").textContent = p? "🗂️ 프로젝트 편집" : "🗂️ 프로젝트 등록";
+  document.getElementById("projSave").textContent = p? "저장" : "등록";
+  document.getElementById("projDelete").style.display = p? "block" : "none";
   document.getElementById("projov").classList.add("open");
 }
-function addProject(){
+function saveProject(){
   const name=document.getElementById("projName").value.trim();
   const who=document.getElementById("projWho").value||"팀";
+  const content=document.getElementById("projContent").value.trim();
   if(!name){ alert("프로젝트명을 입력해주세요."); return; }
-  const rec={name:name, who:who};
-  if(db){ db.ref("projects").push(rec); } else { rec.id="p"+Date.now(); PROJECTS.push(rec); renderProjects(); }
+  const rec={name:name, who:who, content:content||null};
+  if(db){
+    if(editProjId){ db.ref("projects/"+editProjId).update(rec); } else { db.ref("projects").push(rec); }
+  } else {
+    if(editProjId){ const p=PROJECTS.find(function(x){return x.id===editProjId;}); if(p) Object.assign(p,rec); }
+    else { rec.id="p"+Date.now(); PROJECTS.push(rec); }
+    renderProjects();
+  }
   document.getElementById("projov").classList.remove("open");
 }
 function delProject(id){ if(db){ db.ref("projects/"+id).remove(); } else { PROJECTS=PROJECTS.filter(function(p){return p.id!==id;}); renderProjects(); } }
-document.getElementById("projAdd").onclick=openProjModal;
-document.getElementById("projSave").onclick=addProject;
+document.getElementById("projAdd").onclick=function(){ openProjModal(null); };
+document.getElementById("projSave").onclick=saveProject;
+document.getElementById("projDelete").onclick=function(){ if(editProjId && confirm("이 프로젝트를 삭제할까요?")){ delProject(editProjId); document.getElementById("projov").classList.remove("open"); } };
 document.getElementById("projCancel").onclick=function(){ document.getElementById("projov").classList.remove("open"); };
 document.getElementById("projov").onclick=function(e){ if(e.target.id==="projov") document.getElementById("projov").classList.remove("open"); };
 
@@ -505,11 +514,8 @@ function clock(){ const d=new Date(); document.getElementById("clk").textContent
   const wk=["일","월","화","수","목","금","토"][d.getDay()]; document.getElementById("cdate").textContent=d.getFullYear()+". "+(d.getMonth()+1)+". "+d.getDate()+" ("+wk+")"; }
 function start(){
   clock(); setInterval(()=>{ clock(); ticker(); tickOffwork(); }, 1000); setInterval(render, 30000);
-  fetchWeather(); setInterval(fetchWeather, 900000);
-  const live=document.getElementById("liveTag");
   if(configured){
     firebase.initializeApp(firebaseConfig); db=firebase.database();
-    live.className="live on"; live.textContent="● 실시간 연결됨";
     db.ref("members").on("value", snap=>{ const v=snap.val(); if(!v){ db.ref("members").set(SEED); return; }
       DATA=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.order||0)-(b.order||0)); render(); });
     db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
