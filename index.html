@@ -89,7 +89,26 @@
   .tchip.evt{cursor:pointer;}
   .spin{font-size:30px; font-weight:800; color:var(--pink-deep); text-align:center; padding:22px 0; min-height:84px; display:flex; align-items:center; justify-content:center;}
   .modal input[type=text],.modal input[type=date]{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px; font:inherit; font-size:14px; outline:0;}
-  .modal input:focus{border-color:var(--pink);}
+  .modal select{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px; font:inherit; font-size:14px; outline:0; background:#fff; cursor:pointer;}
+  .modal input:focus,.modal select:focus{border-color:var(--pink);}
+  .projline{margin-top:7px; font-size:12.5px; font-weight:700; color:#7a6670; display:flex; align-items:center; gap:5px;}
+  .projline b{color:var(--pink-deep); font-weight:800;} .projline .ph{color:#cdb3bf; font-weight:600;}
+  .cal-sec{margin-top:30px; border-top:1px solid var(--line); padding-top:22px;}
+  .cal-head{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .cal-title{font-weight:800; font-size:16px; color:var(--pink-deep); min-width:110px; text-align:center;}
+  .cal-nav{border:1px solid var(--line); background:#fff; border-radius:9px; width:30px; height:30px; cursor:pointer; font-size:17px; color:#b5446e; font-weight:800; line-height:1;}
+  .cal-nav:hover{background:#fdeef4; border-color:var(--pink);}
+  .cal-add{margin-left:auto; border:1px dashed #f3b6cd; background:#fff; color:#b5446e; border-radius:999px; padding:7px 14px; font:inherit; font-weight:700; font-size:12.5px; cursor:pointer;}
+  .cal-add:hover{background:#fdeef4;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px;}
+  .cal-dow{text-align:center; font-size:11.5px; font-weight:800; color:#a193a0; padding:3px 0;}
+  .cal-cell{min-height:80px; border:1px solid var(--line); border-radius:10px; padding:5px 5px 6px; display:flex; flex-direction:column; gap:3px; background:#fff; overflow:hidden; cursor:pointer;}
+  .cal-cell:hover{border-color:#f3b6cd;} .cal-cell.empty{background:transparent; border:0; cursor:default;} .cal-cell.empty:hover{border:0;}
+  .cal-cell.today{border-color:var(--pink); background:#fdf0f6;}
+  .cal-daynum{font-size:11px; font-weight:800; color:#8a6670;}
+  .cal-cell.sun .cal-daynum{color:#e5586e;} .cal-cell.sat .cal-daynum{color:#6fa8dc;}
+  .cal-ev{font-size:10.5px; font-weight:700; color:#fff; border-radius:6px; padding:2px 5px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4;}
+  @media(max-width:520px){ .cal-cell{min-height:60px;} .cal-ev{font-size:9px; padding:1px 3px;} }
 </style>
 </head>
 <body>
@@ -100,7 +119,16 @@
   </div>
   <div class="ticker" id="ticker"></div>
   <div class="list" id="list"></div>
-  <div class="foot">이름·캐릭터를 누르면 상태·기분·한마디를 바꿀 수 있어요 · 🏅 버튼으로 서로 칭찬 도장 꽝!</div>
+  <div class="cal-sec">
+    <div class="cal-head">
+      <button class="cal-nav" id="calPrev">‹</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button class="cal-nav" id="calNext">›</button>
+      <button class="cal-add" id="calAdd">➕ 일정</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div class="foot">이름·캐릭터를 누르면 상태·기분·프로젝트·한마디를 바꿀 수 있어요 · 📅 날짜를 누르면 일정 추가 · 🏅 버튼으로 서로 칭찬 도장 꽝!</div>
   <div class="chat">
     <div class="chat-title">💬 오늘의 수다방</div>
     <div class="chat-log" id="chatLog"></div>
@@ -123,6 +151,8 @@
     <div id="subWrap" style="display:none"><label id="subLabel">세부</label><div class="opts" id="subsel"></div></div>
     <label>오늘의 기분</label>
     <div class="opts" id="moodsel" style="grid-template-columns:repeat(4,1fr)"></div>
+    <label>🗂️ 진행중 프로젝트</label>
+    <input type="text" id="mProject" placeholder="예) JDC sLLM 구축, 도시문제 플랫폼">
     <label>오늘 한마디 💬</label>
     <textarea id="mMsg" rows="2" placeholder="오늘 하고 싶은 말 한마디!"></textarea>
     <div class="mbtns"><button class="btn ghost" id="mCancel">취소</button><button class="btn" id="mSave">저장</button></div>
@@ -144,6 +174,21 @@
   <label style="display:block;font-size:12.5px;font-weight:700;color:#7a6670;margin:14px 0 7px">날짜</label>
   <input type="date" id="evDate">
   <div class="mbtns"><button class="btn ghost" id="evCancel">취소</button><button class="btn" id="evSave">추가</button></div>
+</div></div>
+<div class="ov" id="calov"><div class="modal">
+  <h3 style="font-size:16px;font-weight:800;margin-bottom:4px">📅 일정 추가</h3>
+  <div class="sub" style="color:#a193a0;font-size:12px;margin-bottom:6px">누가·무슨 일정·어디·어떤 프로젝트인지 적어주세요</div>
+  <label>누구</label>
+  <select id="calWho"></select>
+  <label>무슨 일정</label>
+  <input type="text" id="calTitleIn" placeholder="예) 발주처 미팅, 착수보고회">
+  <label>어디 (장소)</label>
+  <input type="text" id="calPlace" placeholder="예) 대구시청, 온라인">
+  <label>프로젝트</label>
+  <input type="text" id="calProject" placeholder="예) 도시문제 플랫폼">
+  <label>날짜</label>
+  <input type="date" id="calDate">
+  <div class="mbtns"><button class="btn ghost" id="calCancel">취소</button><button class="btn" id="calSave">추가</button></div>
 </div></div>
 <div class="ov" id="cov"><div class="modal">
   <h3 style="font-size:16px;font-weight:800;text-align:center">☕ 오늘 커피 룰렛</h3>
@@ -187,6 +232,7 @@ const SEED = {
 };
 let DATA=[], CHAT=[], filter="all", editId=null, editStatus=null, editSub=null, editMood=null, stampTarget=null, pendingImg=null;
 let EVENTS=[], WEATHER=null, COFFEE=null; const DAYMS=86400000;
+let CAL=[], calYM=null; const CALPAL=["#e5586e","#6fa8dc","#2fa39b","#cf7fa8","#f2a154","#a98fda","#b5836a"];
 const configured = !String(firebaseConfig.apiKey).startsWith("PASTE");
 let db=null;
 
@@ -280,9 +326,11 @@ function render(){
     let moodHtml=""; if(m.mood && MOODS[m.mood]){ const mo=MOODS[m.mood]; moodHtml='<span class="mood" style="background:'+mo.c+'1a;color:'+mo.c+'">'+mo.e+' '+mo.l+'</span>'; }
     const subTxt = v.sub? '<span class="sub">· '+v.sub.e+' '+v.sub.l+'</span>' : "";
     const msgTxt = m.msg? esc(m.msg) : '<span class="ph">오늘 한마디를 남겨보세요</span>';
+    const projTxt = '<div class="projline">🗂️ '+(m.project? '<b>'+esc(m.project)+'</b>' : '<span class="ph">진행중 프로젝트 없음</span>')+'</div>';
     const info=document.createElement("div"); info.className="info";
     info.innerHTML='<div class="namerow"><span class="name">'+esc(m.name)+'</span><span class="stamps">'+stampsHtml+'</span></div>'+
       '<div class="statusline"><span class="dot"></span><span class="st">'+v.label+'</span>'+subTxt+moodHtml+'</div>'+
+      projTxt+
       '<div class="saying"><span class="q">💬</span>'+msgTxt+'</div>';
     info.querySelector(".name").onclick=()=>openEdit(m.id);
     const ow=offwork(m);
@@ -293,6 +341,7 @@ function render(){
     row.appendChild(av); row.appendChild(info); row.appendChild(rcol); wrap.appendChild(row);
   }
   if(!list.length){ wrap.innerHTML='<div style="color:#c9b3bd;padding:40px 0;text-align:center">표시할 팀원이 없어요.</div>'; }
+  renderCal();
 }
 function fillWhoSelect(){
   const sel=document.getElementById("chatWho"); const prev=sel.value || localStorage.getItem("chatWho") || "";
@@ -341,8 +390,9 @@ function drawModal(){
 function openEdit(id){ const m=DATA.find(x=>String(x.id)===String(id)); if(!m) return; editId=m.id; editStatus=m.status; editSub=m.sub; editMood=m.mood||null;
   document.getElementById("mTitle").textContent=m.name;
   document.getElementById("mSub").textContent = isLunch()? "지금은 자동 점심시간 — 13시 이후 이 상태로 표시돼요":"상태·기분을 골라주세요";
+  document.getElementById("mProject").value=m.project||"";
   document.getElementById("mMsg").value=m.msg||""; drawModal(); document.getElementById("ov").classList.add("open"); }
-function saveEdit(){ const patch={status:editStatus, sub:editSub||null, mood:editMood||null, msg:document.getElementById("mMsg").value.trim(), updated:Date.now()};
+function saveEdit(){ const patch={status:editStatus, sub:editSub||null, mood:editMood||null, project:document.getElementById("mProject").value.trim()||null, msg:document.getElementById("mMsg").value.trim(), updated:Date.now()};
   if(db){ db.ref("members/"+editId).update(patch); } else { const m=DATA.find(x=>String(x.id)===String(editId)); if(m) Object.assign(m,patch); render(); }
   closeModal(); }
 document.getElementById("mSave").onclick=saveEdit;
@@ -378,6 +428,63 @@ function addEvent(){ const n=document.getElementById("evName").value.trim(); con
 function delEvent(id){ if(db) db.ref("events/"+id).remove(); else { EVENTS=EVENTS.filter(function(e){return e.id!==id;}); render(); } }
 document.getElementById("evSave").onclick=addEvent;
 document.getElementById("evCancel").onclick=function(){ document.getElementById("eov").classList.remove("open"); };
+
+/* ===== 팀 캘린더 ===== */
+function memColor(name){ const i=DATA.findIndex(function(m){return m.name===name;}); return i>=0? CALPAL[i%CALPAL.length] : "#b5a0ab"; }
+function calTip(e){ return [e.who, e.title, e.place?("@"+e.place):"", e.project?("["+e.project+"]"):""].filter(Boolean).join(" · "); }
+function renderCal(){
+  if(!calYM){ const t=new Date(); calYM={y:t.getFullYear(), m:t.getMonth()}; }
+  const y=calYM.y, m=calYM.m;
+  document.getElementById("calTitle").textContent=y+"년 "+(m+1)+"월";
+  const grid=document.getElementById("calGrid"); grid.innerHTML="";
+  ["일","월","화","수","목","금","토"].forEach(function(d,i){ const el=document.createElement("div"); el.className="cal-dow"; el.textContent=d; if(i===0)el.style.color="#e5586e"; if(i===6)el.style.color="#6fa8dc"; grid.appendChild(el); });
+  const startDow=new Date(y,m,1).getDay(); const days=new Date(y,m+1,0).getDate();
+  const today=new Date(); const isThisMonth=(today.getFullYear()===y && today.getMonth()===m);
+  for(let i=0;i<startDow;i++){ const c=document.createElement("div"); c.className="cal-cell empty"; grid.appendChild(c); }
+  for(let dnum=1; dnum<=days; dnum++){
+    const dateStr=y+"-"+String(m+1).padStart(2,"0")+"-"+String(dnum).padStart(2,"0");
+    const dow=new Date(y,m,dnum).getDay();
+    const c=document.createElement("div"); c.className="cal-cell"+(dow===0?" sun":dow===6?" sat":"")+((isThisMonth&&today.getDate()===dnum)?" today":"");
+    c.innerHTML='<div class="cal-daynum">'+dnum+'</div>';
+    CAL.filter(function(e){return e.date===dateStr;}).forEach(function(e){
+      const ev=document.createElement("div"); ev.className="cal-ev"; ev.style.background=memColor(e.who);
+      ev.textContent=(e.who?e.who+" ":"")+(e.title||""); ev.title=calTip(e);
+      ev.onclick=function(evt){ evt.stopPropagation(); showCalEvent(e); }; c.appendChild(ev);
+    });
+    c.onclick=function(){ openCalModal(dateStr); };
+    grid.appendChild(c);
+  }
+}
+function showCalEvent(e){
+  const info="📅 "+(e.date||"")+"\n👤 "+(e.who||"-")+"\n📝 "+(e.title||"-")+"\n📍 "+(e.place||"-")+"\n🗂️ "+(e.project||"-");
+  if(confirm(info+"\n\n이 일정을 삭제할까요?")) delCalEvent(e.id);
+}
+function openCalModal(dateStr){
+  const sel=document.getElementById("calWho"); sel.innerHTML="";
+  DATA.forEach(function(m){ const o=document.createElement("option"); o.value=m.name; o.textContent=m.name; sel.appendChild(o); });
+  const ot=document.createElement("option"); ot.value="전체"; ot.textContent="전체/기타"; sel.appendChild(ot);
+  document.getElementById("calTitleIn").value=""; document.getElementById("calPlace").value=""; document.getElementById("calProject").value="";
+  document.getElementById("calDate").value=dateStr||"";
+  document.getElementById("calov").classList.add("open");
+}
+function addCalEvent(){
+  const who=document.getElementById("calWho").value;
+  const title=document.getElementById("calTitleIn").value.trim();
+  const place=document.getElementById("calPlace").value.trim();
+  const project=document.getElementById("calProject").value.trim();
+  const date=document.getElementById("calDate").value;
+  if(!title||!date){ alert("무슨 일정인지와 날짜는 꼭 입력해주세요."); return; }
+  const rec={who:who||"전체", title:title, place:place||null, project:project||null, date:date};
+  if(db){ db.ref("cal").push(rec); } else { rec.id="cal"+Date.now(); CAL.push(rec); renderCal(); }
+  document.getElementById("calov").classList.remove("open");
+}
+function delCalEvent(id){ if(db){ db.ref("cal/"+id).remove(); } else { CAL=CAL.filter(function(e){return e.id!==id;}); renderCal(); } }
+document.getElementById("calPrev").onclick=function(){ calYM.m--; if(calYM.m<0){ calYM.m=11; calYM.y--; } renderCal(); };
+document.getElementById("calNext").onclick=function(){ calYM.m++; if(calYM.m>11){ calYM.m=0; calYM.y++; } renderCal(); };
+document.getElementById("calAdd").onclick=function(){ openCalModal(""); };
+document.getElementById("calSave").onclick=addCalEvent;
+document.getElementById("calCancel").onclick=function(){ document.getElementById("calov").classList.remove("open"); };
+document.getElementById("calov").onclick=function(e){ if(e.target.id==="calov") document.getElementById("calov").classList.remove("open"); };
 document.getElementById("eov").onclick=function(e){ if(e.target.id==="eov") document.getElementById("eov").classList.remove("open"); };
 function openCoffee(){ document.getElementById("spin").textContent="☕"; document.getElementById("cov").classList.add("open"); }
 function spinCoffee(){ const names=DATA.map(function(m){return m.name;}); if(!names.length) return; const disp=document.getElementById("spin"); let k=0; const total=22;
@@ -401,6 +508,7 @@ function start(){
       DATA=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.order||0)-(b.order||0)); render(); });
     db.ref("chat").on("value", snap=>{ const v=snap.val()||{}; CHAT=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.t||0)-(b.t||0)); renderChat(); });
     db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
+    db.ref("cal").on("value", snap=>{ const v=snap.val()||{}; CAL=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); renderCal(); });
     db.ref("coffee").on("value", snap=>{ COFFEE=snap.val()||null; render(); });
   } else {
     DATA=Object.keys(SEED).map(k=>Object.assign({id:k}, SEED[k], {updated:Date.now()})).sort((a,b)=>a.order-b.order);
