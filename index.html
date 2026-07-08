@@ -208,7 +208,8 @@
   <label>어디 (장소)</label>
   <input type="text" id="calPlace" placeholder="예) 대구시청, 온라인">
   <label>프로젝트</label>
-  <input type="text" id="calProject" placeholder="예) 도시문제 플랫폼">
+  <select id="calProjSel" style="margin-bottom:8px"><option value="">— 등록된 프로젝트에서 선택 —</option></select>
+  <input type="text" id="calProject" placeholder="직접 입력하거나 위에서 선택">
   <label>날짜</label>
   <input type="date" id="calDate">
   <div class="mbtns"><button class="btn ghost" id="calDelete" style="display:none;flex:0 0 auto;padding:12px 16px">삭제</button><button class="btn ghost" id="calCancel">취소</button><button class="btn" id="calSave">추가</button></div>
@@ -493,6 +494,9 @@ function openCalModal(dateStr, ev){
   document.getElementById("calTitleIn").value = ev? (ev.title||"") : "";
   document.getElementById("calPlace").value = ev? (ev.place||"") : "";
   document.getElementById("calProject").value = ev? (ev.project||"") : "";
+  const psel=document.getElementById("calProjSel"); psel.innerHTML='<option value="">— 등록된 프로젝트에서 선택 —</option>';
+  PROJECTS.forEach(function(p){ const o=document.createElement("option"); o.value=p.name; o.textContent=p.name; psel.appendChild(o); });
+  psel.value = (ev && ev.project && PROJECTS.some(function(p){return p.name===ev.project;})) ? ev.project : "";
   document.getElementById("calDate").value = ev? (ev.date||"") : (dateStr||"");
   sel.value = ev? (ev.who||"전체") : "전체";
   document.getElementById("calModalTitle").textContent = ev? "📅 일정 수정" : "📅 일정 추가";
@@ -521,6 +525,7 @@ function delCalEvent(id){ if(db){ db.ref("cal/"+id).remove(); } else { CAL=CAL.f
 document.getElementById("calPrev").onclick=function(){ calYM.m--; if(calYM.m<0){ calYM.m=11; calYM.y--; } renderCal(); };
 document.getElementById("calNext").onclick=function(){ calYM.m++; if(calYM.m>11){ calYM.m=0; calYM.y++; } renderCal(); };
 document.getElementById("calAdd").onclick=function(){ openCalModal("", null); };
+document.getElementById("calProjSel").onchange=function(){ if(this.value) document.getElementById("calProject").value=this.value; };
 document.getElementById("calSave").onclick=saveCalEvent;
 document.getElementById("calDelete").onclick=function(){ if(editCalId && confirm("이 일정을 삭제할까요?")){ delCalEvent(editCalId); document.getElementById("calov").classList.remove("open"); } };
 document.getElementById("calCancel").onclick=function(){ document.getElementById("calov").classList.remove("open"); };
