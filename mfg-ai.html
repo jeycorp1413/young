@@ -24,30 +24,12 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .pbtn:hover{border-color:#c3d4ee}
 .pbtn.on{border-color:var(--blue);box-shadow:0 3px 14px rgba(5,122,250,.14)}
 .pbtn.on.gntp{border-color:var(--amber);box-shadow:0 3px 14px rgba(224,144,10,.16)}
-.pbtn.on.robot{border-color:var(--green);box-shadow:0 3px 14px rgba(31,157,91,.16)}
 .pbtn .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;color:#fff;background:var(--blue)}
 .pbtn.gntp .ic{background:var(--amber)}
-.pbtn.robot .ic{background:var(--green)}
-.pbtn>span:not(.ic):not(.role){flex:1;min-width:0}
-.pbtn .pt{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pbtn .ps{display:block;font-size:12.5px;color:var(--sub);margin-top:2px}
+.pbtn .pt{font-size:16px;font-weight:700;letter-spacing:-.3px}
+.pbtn .ps{font-size:12.5px;color:var(--sub);margin-top:1px}
 .pbtn .role{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--lblue);color:var(--blue);white-space:nowrap}
 .pbtn.gntp .role{background:#fdf0d9;color:var(--amber)}
-.pbtn.robot .role{background:#e2f5ea;color:var(--green)}
-
-/* WBS 간트 */
-.gwrap{overflow:auto;max-height:620px;border:1px solid var(--line);border-radius:10px}
-table.gantt{border-collapse:separate;border-spacing:0;font-size:13px}
-.gantt th,.gantt td{border-bottom:1px solid #eef1f7;border-right:1px solid #f2f4f9}
-.gantt thead th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:3;font-weight:600;padding:5px 6px;font-size:12px;text-align:center}
-.gantt thead tr:nth-child(2) th{top:27px}
-.gantt th.gt,.gantt td.gt{position:sticky;left:0;z-index:2;background:#fff;min-width:250px;max-width:250px;white-space:normal;padding:7px 10px;line-height:1.35;text-align:left}
-.gantt th.gp,.gantt td.gp{position:sticky;left:250px;z-index:2;background:#fff;min-width:52px;text-align:center;font-weight:700}
-.gantt td.gp{cursor:pointer}
-.gantt td.gp:hover{background:#f3f8ff}
-.gantt thead th.gt,.gantt thead th.gp{z-index:5;background:var(--navy);top:0}
-.gantt td.gc{min-width:32px;height:30px}
-.gantt td.tw,.gantt th.tw{box-shadow:inset 0 0 0 999px rgba(13,148,136,.2)}
 
 header.top{background:var(--navy);color:#fff;border-radius:16px;padding:20px 24px;margin-bottom:16px;
   display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
@@ -152,11 +134,6 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
       <span><span class="pt">경남TP · Edge-AI 모듈 패키지</span><span class="ps">센서 활용 현장 적용형 Edge-AI · 지역혁신선도기업육성</span></span>
       <span class="role">공동</span>
     </button>
-    <button class="pbtn robot" data-pid="robot">
-      <span class="ic">🤖</span>
-      <span><span class="pt">유엔디 · 자율주행 양팔 로봇</span><span class="ps">비전기반 프레임리스 유연생산 로봇시스템 · 지역혁신선도기업육성</span></span>
-      <span class="role">공동</span>
-    </button>
   </div>
 
   <header class="top">
@@ -183,7 +160,6 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
     <div class="tab" data-p="overview">사업개요</div>
     <div class="tab" data-p="schedule">정례일정</div>
     <div class="tab" data-p="wbs">진척률</div>
-    <div class="tab" data-p="gantt" style="display:none">📊 WBS 간트</div>
     <div class="tab" data-p="issues">이슈</div>
     <div class="tab" data-p="actions">✅ 체크리스트</div>
     <div class="tab" data-p="people">연락처</div>
@@ -244,12 +220,6 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
         <input id="wbsName" placeholder="WBS 항목명" style="flex:1;min-width:170px">
         <input id="wbsPct" type="number" min="0" max="100" placeholder="%" style="width:78px">
         <button class="btn ghost sm" id="wbsAdd">+ 항목 추가</button></div></div>
-  </section>
-
-  <section class="panel" data-p="gantt">
-    <div class="card"><h3>1차년도 WBS 간트 <select id="gOrg" class="ed" style="font-weight:600"></select></h3>
-      <div class="muted" style="margin-bottom:10px">'진척' 칸을 클릭하면 진척률(%)을 수정할 수 있어요 · 공유 반영 · 주차별 보기 · 가로 스크롤</div>
-      <div class="gwrap"><table class="gantt" id="gantt"></table></div></div>
   </section>
 
   <section class="panel" data-p="issues">
@@ -402,55 +372,6 @@ const PCONF={
   }
  },
  gntp:{
-  wbsVer:'wbs-v1-260706',
-  gantt:{tasks:[
-   {id:'1',no:'1',nm:'공통 관리',org:'공통',s:'2026-04-01',e:'2026-12-31',lvl:0},
-   {id:'1-1',no:'1.1',nm:'통합 착수 및 협약',org:'공통',s:'2026-04-01',e:'2026-04-30',lvl:1},
-   {id:'1-1-1',no:'1.1.1',nm:'1차년도 Kick-off 통합착수회의',org:'공통',s:'2026-04-01',e:'2026-04-10',lvl:2},
-   {id:'1-1-2',no:'1.1.2',nm:'주관·공동기관 역할·인터페이스 협의',org:'공통',s:'2026-04-06',e:'2026-04-30',lvl:2},
-   {id:'1-2',no:'1.2',nm:'주간·월간 업무 보고',org:'공통',s:'2026-04-01',e:'2026-12-31',lvl:1},
-   {id:'1-2-1',no:'1.2.1',nm:'주간 업무 보고',org:'공통',s:'2026-04-01',e:'2026-12-31',lvl:2},
-   {id:'1-3',no:'1.3',nm:'중간·최종 보고 및 평가',org:'공통',s:'2026-08-01',e:'2026-12-31',lvl:1},
-   {id:'1-3-1',no:'1.3.1',nm:'중간 점검 수검자료 작성 및 점검',org:'공통',s:'2026-08-01',e:'2026-09-30',lvl:2},
-   {id:'1-3-2',no:'1.3.2',nm:'1차년도 최종 보고서 작성',org:'공통',s:'2026-12-01',e:'2026-12-20',lvl:2},
-   {id:'1-3-3',no:'1.3.3',nm:'1차년도 성능평가',org:'공통',s:'2026-12-15',e:'2026-12-31',lvl:2},
-   {id:'2',no:'2',nm:'㈜플렛디스 (주관) 수행 과제',org:'플렛디스',s:'2026-04-01',e:'2026-12-31',lvl:0},
-   {id:'2-1',no:'2.1',nm:'제조 현장 요구사항 분석 및 KPI 정의',org:'플렛디스',s:'2026-04-01',e:'2026-05-31',lvl:1},
-   {id:'2-1-1',no:'2.1.1',nm:'제조 현장 요구사항 분석 및 설비별 이상 유형 정의',org:'플렛디스',s:'2026-04-01',e:'2026-05-15',lvl:2},
-   {id:'2-1-2',no:'2.1.2',nm:'성능 평가지표(KPI) 정의 (AUC·F1·추론지연·압축률)',org:'플렛디스',s:'2026-04-15',e:'2026-05-31',lvl:2},
-   {id:'2-2',no:'2.2',nm:'단일 센서 데이터 수집 체계 구축',org:'플렛디스',s:'2026-04-06',e:'2026-07-31',lvl:1},
-   {id:'2-2-1',no:'2.2.1',nm:'진동·소리 단일 센서 수집 모듈 개발 (전조기·성형기·신선기·레이저가공기)',org:'플렛디스',s:'2026-04-06',e:'2026-07-31',lvl:2},
-   {id:'2-2-2',no:'2.2.2',nm:'가속도계·고성능 마이크 16kHz 이상 고주파 샘플링 시스템 구축',org:'플렛디스',s:'2026-04-06',e:'2026-06-30',lvl:2},
-   {id:'2-2-3',no:'2.2.3',nm:'ISO 20816-3 기준 진동 측정 지점 선정 및 센서 부착',org:'플렛디스',s:'2026-04-06',e:'2026-05-31',lvl:2},
-   {id:'2-2-4',no:'2.2.4',nm:'음향 집음 깔대기 적용·방염 처리 고내구성 케이블 도입',org:'플렛디스',s:'2026-05-01',e:'2026-06-30',lvl:2},
-   {id:'2-3',no:'2.3',nm:'데이터 수집 프로토콜 및 동기화',org:'플렛디스',s:'2026-04-15',e:'2026-08-31',lvl:1},
-   {id:'2-3-1',no:'2.3.1',nm:'PLC/설비 제어 단자 가동 신호 연동 물리적 동기화',org:'플렛디스',s:'2026-05-01',e:'2026-07-31',lvl:2},
-   {id:'2-3-2',no:'2.3.2',nm:'ISO 20816-3·IEC 61672-1 기준 수집 프로토콜 수립',org:'플렛디스',s:'2026-04-15',e:'2026-06-30',lvl:2},
-   {id:'2-3-3',no:'2.3.3',nm:'노이즈 차단 체계 구축 및 실시간 데이터 정합성 검증',org:'플렛디스',s:'2026-06-01',e:'2026-08-31',lvl:2},
-   {id:'2-4',no:'2.4',nm:'온디바이스 전처리 파이프라인 구현',org:'플렛디스',s:'2026-06-01',e:'2026-10-31',lvl:1},
-   {id:'2-4-1',no:'2.4.1',nm:'진동 RMS·FFT / 소리 Band-pass·STFT 변환 엔진 개발',org:'플렛디스',s:'2026-06-01',e:'2026-09-30',lvl:2},
-   {id:'2-4-2',no:'2.4.2',nm:'Z-score 표준화 및 RevIN 정규화 적용',org:'플렛디스',s:'2026-07-01',e:'2026-09-30',lvl:2},
-   {id:'2-4-3',no:'2.4.3',nm:'Edge단 특징 벡터 추출·원본 대비 1/10~1/100 압축 구조 설계',org:'플렛디스',s:'2026-08-01',e:'2026-10-31',lvl:2},
-   {id:'2-5',no:'2.5',nm:'현장 데이터 수집 운영',org:'플렛디스',s:'2026-05-01',e:'2026-12-31',lvl:1},
-   {id:'2-5-1',no:'2.5.1',nm:'현장 원시 데이터 수집 운영 (진동·소리)',org:'플렛디스',s:'2026-05-01',e:'2026-12-31',lvl:2},
-   {id:'3',no:'3',nm:'㈜더아이엠씨 (공동) 수행 과제',org:'더아이엠씨',s:'2026-06-01',e:'2026-12-31',lvl:0},
-   {id:'3-1',no:'3.1',nm:'초경량 시계열 파운데이션 모델 설계',org:'더아이엠씨',s:'2026-06-01',e:'2026-10-31',lvl:1},
-   {id:'3-1-1',no:'3.1.1',nm:'Edge-AI 적용 데이터 구조 설계 및 온디바이스 처리 최적화',org:'더아이엠씨',s:'2026-06-01',e:'2026-08-31',lvl:2},
-   {id:'3-1-2',no:'3.1.2',nm:'IBM Granite TTM 기반 1M 파라미터 이하 초경량 모델 설계',org:'더아이엠씨',s:'2026-07-01',e:'2026-10-31',lvl:2},
-   {id:'3-1-3',no:'3.1.3',nm:'MLP-Mixer 구조(Time-mixing/Feature-mixing) 적용',org:'더아이엠씨',s:'2026-08-01',e:'2026-10-31',lvl:2},
-   {id:'3-2',no:'3.2',nm:'설비 특화 이상 탐지 알고리즘 개발',org:'더아이엠씨',s:'2026-08-01',e:'2026-12-15',lvl:1},
-   {id:'3-2-1',no:'3.2.1',nm:'LoRA 파인튜닝 기반 설비 특화 이상 탐지 알고리즘 개발',org:'더아이엠씨',s:'2026-09-01',e:'2026-11-30',lvl:2},
-   {id:'3-2-2',no:'3.2.2',nm:'Adaptive Patching 및 Multi-resolution 데이터 증강 적용',org:'더아이엠씨',s:'2026-08-01',e:'2026-10-31',lvl:2},
-   {id:'3-2-3',no:'3.2.3',nm:'진동 전용·소리 전용 모델 독립 구축',org:'더아이엠씨',s:'2026-09-01',e:'2026-11-30',lvl:2},
-   {id:'3-2-4',no:'3.2.4',nm:'Few-shot Adaptation 메커니즘 구현',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-15',lvl:2},
-   {id:'3-3',no:'3.3',nm:'이상 점수 산출 체계 구현',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-31',lvl:1},
-   {id:'3-3-1',no:'3.3.1',nm:'Residual 및 SMA 기반 이상 점수 산출 로직 구현',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-15',lvl:2},
-   {id:'3-3-2',no:'3.3.2',nm:'SMA 보정 로직 적용 및 동적 임계치 알고리즘 설계',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-31',lvl:2},
-   {id:'3-4',no:'3.4',nm:'기초 성능 검증',org:'더아이엠씨',s:'2026-07-01',e:'2026-12-31',lvl:1},
-   {id:'3-4-1',no:'3.4.1',nm:'정상데이터 레이블링·메타데이터 및 학습 데이터셋 구성 (Chronological Split 70/15/15)',org:'더아이엠씨',s:'2026-07-01',e:'2026-09-30',lvl:2},
-   {id:'3-4-2',no:'3.4.2',nm:'ETT·Weather 벤치마크 Zero-shot/Few-shot 성능 평가',org:'더아이엠씨',s:'2026-10-01',e:'2026-12-15',lvl:2},
-   {id:'3-4-3',no:'3.4.3',nm:'SOTA 모델(PatchTST·TSMixer) 대비 AUC·F1 초기 성능 검증',org:'더아이엠씨',s:'2026-11-01',e:'2026-12-31',lvl:2}
-  ]},
   text:{
     htitle:'경남TP · 현장 적용형 Edge-AI 모듈 패키지 개발',
     hsub:'센서(진동·압력·소리·온도) 활용 Edge-AI · 지역혁신선도기업육성(R&D) · S3474328',
@@ -502,86 +423,7 @@ const PCONF={
      p3:{org:'경남테크노파크 (전담기관)',people:'—',ord:3},
      p4:{org:'중소기업기술정보진흥원(TIPA)',people:'전문기관',ord:4}
    },
-   wbs:{
-     w01:{name:'1.1 통합 착수·협약 (공통, 4월)',pct:0,ord:1},
-     w02:{name:'1.2 주간·월간 업무 보고 (공통, 연중)',pct:0,ord:2},
-     w03:{name:'1.3 중간·최종 보고 및 평가 (공통, 8~12월)',pct:0,ord:3},
-     w04:{name:'2.1 현장 요구사항 분석·KPI 정의 (플렛디스, 4~5월)',pct:0,ord:4},
-     w05:{name:'2.2 단일 센서 데이터 수집 체계 구축 (플렛디스, 4~7월)',pct:0,ord:5},
-     w06:{name:'2.3 데이터 수집 프로토콜·동기화 (플렛디스, 4~8월)',pct:0,ord:6},
-     w07:{name:'2.4 온디바이스 전처리 파이프라인 (플렛디스, 6~10월)',pct:0,ord:7},
-     w08:{name:'2.5 현장 데이터 수집 운영 (플렛디스, 5~12월)',pct:0,ord:8},
-     w09:{name:'3.1 초경량 시계열 파운데이션 모델 설계 (더아이엠씨, 6~10월)',pct:0,ord:9},
-     w10:{name:'3.2 설비 특화 이상탐지 알고리즘 개발 (더아이엠씨, 8~12월)',pct:0,ord:10},
-     w11:{name:'3.3 이상 점수 산출 체계 구현 (더아이엠씨, 10~12월)',pct:0,ord:11},
-     w12:{name:'3.4 기초 성능 검증 (더아이엠씨, 7~12월)',pct:0,ord:12}
-   }
-  }
- },
- robot:{
-  text:{
-    htitle:'유엔디 · 비전기반 자율주행 양팔 로봇시스템 개발',
-    hsub:'비전기반 프레임리스 작업을 위한 유연생산용 자율주행 양팔 로봇시스템 · 지역혁신선도기업육성(R&amp;D) · S3474172',
-    stage:'1차년도 수행중',
-    role:'공동연구개발기관(공동1) — 온디바이스 하이브리드 AI 비전 기술 개발. 경량 VLM(Vision-Language Model) 상황 추론 + 고속 비전 모델 실시간 추적 결합, 초저지연 객체 탐지(동적 장애물 200ms 이내), 고정밀 3D 공간 인지(깊이 오차 ±20mm). 1차년도: 경량 VLM 객체 인식·3차원 위치 산출·파지점 생성 기초 개발, 작업자 행동 데이터 수집·1차적 안전 판단 기준 수립, 단일 로봇 팔 상황 추론·기초 파지 명령 테스트. 기술기여도 30%.'
-  },
-  badges:['주관: 유엔디','공동: 더아이엠씨·한양대 ERICA·섬기연','수요: 고광메탈','중기부·TIPA'],
-  info:[
-    ['사업명','지역혁신선도기업육성(R&D) · 주력산업 생태계 구축 / 품목지정'],
-    ['과제명','비전기반 프레임리스 작업을 위한 유연생산용 자율주행 양팔 로봇시스템'],
-    ['과제번호','S3474172 · 공고 제2026-57호 · 대구 제조(로봇)'],
-    ['수행체계','㈜유엔디(주관) · ㈜더아이엠씨(공동1) · 한양대 ERICA(공동2) · 한국섬유기계융합연구원(공동3) · 고광메탈(수요)'],
-    ['수행기간','2026.04.01 ~ 2028.03.31 (24개월) / 1년차 2026.04~12 (9개월)'],
-    ['연구개발비','총 1,739,000천원 (정부 1,400,000) / 1년차 652,000천원 (정부 525,000)'],
-    ['더아이엠씨 담당','온디바이스 하이브리드 AI 비전 — 경량 VLM 상황추론 · 초저지연 탐지(200ms) · 3D 정밀인지(±20mm)'],
-    ['핵심 KPI','장애물 인식 200ms · 회피율 80% · 깊이오차 ±20mm · VLM 추론 5s · 가상작업 성공률 80% · 가반하중 3kg']
-  ],
-  seeds:{
-   events:{
-     r1:{date:'2026-04-01',title:'과제 착수 (1년차 시작)',type:'기타',owner:'전 기관',memo:'1년차 9개월 (2026.04~12)'},
-     r2:{date:'2026-12-31',title:'1년차 종료',type:'마감',owner:'전 기관',memo:''},
-     r3:{date:'2027-12-31',title:'2년차 종료',type:'마감',owner:'전 기관',memo:''},
-     r4:{date:'2028-03-31',title:'과제 종료 (24개월 최종)',type:'마감',owner:'전 기관',memo:''}
-   },
-   actions:{
-     a1:{title:'경량 VLM 추론 모델 설계·데이터셋 수집',who:'더아이엠씨',due:'',done:false,ord:1},
-     a2:{title:'3D 어포던스 기반 파지점 생성·능동 시점(NBV) 로직 설계',who:'더아이엠씨',due:'',done:false,ord:2},
-     a3:{title:'작업자 3D 관절 추적 파이프라인·행동 데이터셋 구축',who:'더아이엠씨',due:'',done:false,ord:3},
-     a4:{title:'경량 VLM 아키텍처·온톨로지 지식 베이스 설계',who:'더아이엠씨',due:'',done:false,ord:4}
-   },
-   recent:{
-     r1:{tag:'완료',title:'연구개발계획서(협약용) 제출',desc:'2026.05 · 중기부·TIPA · 품목지정 S3474172',ord:1}
-   },
-   upcoming:{
-     u1:{tag:'예정',title:'1년차: 경량 VLM 객체 인식·3차원 위치 산출 기초 개발',desc:'더아이엠씨 — 파지점 생성 기술 기초, 안전 판단 기준 수립',ord:1},
-     u2:{tag:'예정',title:'1년차: V-SLAM AMR 베이스·양팔 마운트 설계',desc:'유엔디 — 150kg급 자율주행 AMR, 5kg급 양팔 프레임',ord:2}
-   },
-   cadence:{
-     c1:{tag:'기타',title:'연차 구성',desc:'1년차 9개월(2026.04~12) · 2년차 12개월(2027) · 3년차 3개월(2028.01~03)',ord:1}
-   },
-   issuelist:{},
-   contacts:{
-     p1:{org:'㈜유엔디 (주관연구개발기관)',people:'이철수 대표(연구책임자, 053-795-5466, bruce@unde.co.kr), 배성철 팀장(실무, 010-2654-7755, jacob@unde.co.kr)',ord:1},
-     p2:{org:'㈜더아이엠씨 (공동1)',people:'이태환 수석 (010-5446-0997, azurebeluga@theimc.co.kr)',ord:2},
-     p3:{org:'한양대학교 ERICA (공동2)',people:'고병진 조교수 (010-9226-9326)',ord:3},
-     p4:{org:'한국섬유기계융합연구원 (공동3)',people:'배규현 책임 (010-9362-4774)',ord:4},
-     p5:{org:'고광메탈 (수요기업)',people:'성석천 이사 (010-5568-0995)',ord:5},
-     p6:{org:'중소기업기술정보진흥원 (TIPA)',people:'전문기관',ord:6}
-   },
-   wbs:{
-     w01:{name:'[HW·유엔디] AMR 베이스 상세설계·인휠모터 구동유닛 제작',pct:0,ord:1},
-     w02:{name:'[HW·유엔디] 볼스크류 리프트 승강 메커니즘·브레이크 설계',pct:0,ord:2},
-     w03:{name:'[HW·유엔디] 5kg급 양팔 마운트 프레임·내부 배선 설계',pct:0,ord:3},
-     w04:{name:'[HW·유엔디] Magbot 무선 제어부·툴체인저 연동 설계',pct:0,ord:4},
-     w05:{name:'[HW·섬기연] 로봇 적용 그리퍼 설계',pct:0,ord:5},
-     w06:{name:'[SW·유엔디] 6채널 비전 배치·VIO 동기화 아키텍처 (V-SLAM)',pct:0,ord:6},
-     w07:{name:'[SW·더아이엠씨] 경량 VLM 추론 모델 설계·데이터셋 수집',pct:0,ord:7},
-     w08:{name:'[SW·유엔디] 양팔 로봇 전용 RCS 시나리오 에디터 설계',pct:0,ord:8},
-     w09:{name:'[SW·더아이엠씨] 3D 어포던스 파지점 생성·능동시점(NBV) 로직 설계',pct:0,ord:9},
-     w10:{name:'[SW·더아이엠씨] 작업자 3D 관절 추적·행동 데이터셋 구축',pct:0,ord:10},
-     w11:{name:'[SW·한양대] 통합 동역학 모델링·디지털트윈 기초 검증 환경 구축',pct:0,ord:11},
-     w12:{name:'[모델·더아이엠씨] 경량 VLM 아키텍처·온톨로지 지식베이스 설계',pct:0,ord:12}
-   }
+   wbs:{w00:{name:"■ 1. 공통 관리 [공통]",pct:30,ord:1},w01:{name:"1.1 통합 착수 및 협약",pct:100,ord:2},w02:{name:"· 1.1.1 1차년도 과제 착수 및 제안서 분석",pct:100,ord:3},w03:{name:"· 1.1.2 더아이엠씨 역할 협의 (ONNX 변환·양자화/모델 탑재 역할 분담 합의)",pct:100,ord:4},w04:{name:"1.2 월간 업무 보고",pct:0,ord:5},w05:{name:"· 1.2.1 월간 업무 보고",pct:0,ord:6},w06:{name:"1.3 중간·최종 보고 및 평가",pct:0,ord:7},w07:{name:"· 1.3.1 중간 점검 수검자료 작성 및 점검",pct:0,ord:8},w08:{name:"· 1.3.2 1차년도 최종 보고서 작성",pct:0,ord:9},w09:{name:"· 1.3.3 1차년도 성능평가",pct:0,ord:10},w10:{name:"■ 2. 플렛디스 수행 과제 [플렛디스]",pct:8,ord:11},w11:{name:"2.1 센서 스펙 확정 및 조달",pct:0,ord:12},w12:{name:"· 2.1.1 센서 스펙 확정 (더아이엠씨 고강산업 테스트 완료 후)",pct:0,ord:13},w13:{name:"· 2.1.2 현장단말 하드웨어 설계 (스페이스코어 협력)",pct:0,ord:14},w14:{name:"· 2.1.3 센서 구매 및 조달",pct:0,ord:15},w15:{name:"2.2 단일 센서 데이터 수집 체계 구축",pct:25,ord:16},w16:{name:"· 2.2.1 진동·소리 단일 센서 수집 모듈 개발",pct:100,ord:17},w17:{name:"· 2.2.2 PLC/설비 제어 단자 가동 신호 연동 물리적 동기화",pct:0,ord:18},w18:{name:"· 2.2.3 가속도계·고성능 마이크 16kHz 이상 고주파 샘플링 시스템 구축",pct:0,ord:19},w19:{name:"· 2.2.4 ISO 20816-3·IEC 61672-1 기준 수집 프로토콜 수립",pct:0,ord:20},w20:{name:"2.3 온디바이스 전처리 파이프라인 구현",pct:0,ord:21},w21:{name:"· 2.3.1 진동 RMS·FFT / 소리 Band-pass·STFT 변환 엔진 개발",pct:0,ord:22},w22:{name:"· 2.3.2 Z-score 표준화 및 RevIN 정규화 적용",pct:0,ord:23},w23:{name:"· 2.3.3 Edge단 특징 벡터 추출·원본 대비 1/10~1/100 압축 구조 설계",pct:0,ord:24},w24:{name:"2.4 경량화 모델 탑재 및 적용 (더아이엠씨 ONNX 완료 후)",pct:0,ord:25},w25:{name:"· 2.4.1 경량화 모델 현장단말 탑재 환경 구축",pct:0,ord:26},w26:{name:"· 2.4.2 센서~전처리~추론~이상 판단 통합 파이프라인 구현 (더아이엠씨 협력)",pct:0,ord:27},w27:{name:"2.5 실증 준비 및 현장 적용",pct:0,ord:28},w28:{name:"· 2.5.1 실증 공장 환경 파악 (부광산업·정아정밀·행성사 현장 방문)",pct:0,ord:29},w29:{name:"· 2.5.2 센서 설치 위치 및 수량 확정",pct:0,ord:30},w30:{name:"· 2.5.3 현장단말 설치 및 데이터 수집 착수",pct:0,ord:31},w31:{name:"2.6 현장 원시 데이터 수집 운영",pct:0,ord:32},w32:{name:"· 2.6.1 현장 원시 데이터 수집 운영 (진동·소리)",pct:0,ord:33},w33:{name:"■ 3.0. 더아이엠씨 수행 과제 [더아이엠씨]",pct:0,ord:34},w34:{name:"3.1 초경량 시계열 파운데이션 모델 설계",pct:0,ord:35},w35:{name:"· 3.1.1 Edge-AI 적용 데이터 구조 설계 및 온디바이스 처리 최적화",pct:0,ord:36},w36:{name:"· 3.1.2 IBM Granite TTM 기반 1M 파라미터 이하 초경량 모델 설계",pct:0,ord:37},w37:{name:"· 3.1.3 MLP-Mixer 구조(Time-mixing/Feature-mixing) 적용",pct:0,ord:38},w38:{name:"3.2 설비 특화 이상 탐지 알고리즘 개발",pct:0,ord:39},w39:{name:"· 3.2.1 LoRA 파인튜닝 기반 설비 특화 이상 탐지 알고리즘 개발",pct:0,ord:40},w40:{name:"· 3.2.2 Adaptive Patching 및 Multi-resolution 데이터 증강 적용",pct:0,ord:41},w41:{name:"· 3.2.3 진동 전용·소리 전용 모델 독립 구축",pct:0,ord:42},w42:{name:"· 3.2.4 Few-shot Adaptation 메커니즘 구현",pct:0,ord:43},w43:{name:"3.3 이상 점수 산출 체계 구현",pct:0,ord:44},w44:{name:"· 3.3.1 Residual 및 SMA 기반 이상 점수 산출 로직 구현",pct:0,ord:45},w45:{name:"· 3.3.2 SMA 보정 로직 적용 및 동적 임계치 알고리즘 설계",pct:0,ord:46},w46:{name:"3.4 기초 성능 검증",pct:0,ord:47},w47:{name:"· 3.4.1 정상데이터 레이블링·메타데이터 및 학습 데이터셋 구성 (Chronological Split 70/15/15)",pct:0,ord:48},w48:{name:"· 3.4.2 ETT·Weather 벤치마크 Zero-shot/Few-shot 성능 평가",pct:0,ord:49},w49:{name:"· 3.4.3 SOTA 모델(PatchTST·TSMixer) 대비 AUC·F1 초기 성능 검증",pct:0,ord:50}}
   }
  }
 };
@@ -590,7 +432,6 @@ const PCONF={
    상태 · 리스너 관리
    ========================================================== */
 let PID=localStorage.getItem('mfg_pid')||'dip';
-if(!PCONF[PID]) PID='dip';
 let ROOT=db.ref('mfg_ai/'+PID);
 let LISTENERS=[];
 function bind(ref,ev,cb){ ref.on(ev,cb); LISTENERS.push([ref,ev,cb]); }
@@ -605,7 +446,7 @@ firebase.database().ref('.info/connected').on('value',s=>{
 /* ---------- 사업 전환 ---------- */
 function setActiveSwitch(){
   document.querySelectorAll('.pbtn').forEach(b=>b.classList.toggle('on',b.dataset.pid===PID));
-  document.documentElement.style.setProperty('--accent', PID==='gntp'?'var(--amber)':PID==='robot'?'var(--green)':'var(--blue)');
+  document.documentElement.style.setProperty('--accent', PID==='gntp'?'var(--amber)':'var(--blue)');
 }
 document.querySelectorAll('.pbtn').forEach(b=>b.onclick=()=>{
   if(b.dataset.pid===PID)return;
@@ -629,7 +470,7 @@ function bindTexts(conf){
 function renderStatic(conf){
   document.getElementById('badgeBox').innerHTML=conf.badges.map(b=>`<span class="badge">${esc(b)}</span>`).join('');
   document.getElementById('infoGrid').innerHTML=conf.info.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('');
-  document.getElementById('foot').textContent=`young-94e97 Firebase 실시간 공유 · 데이터 경로 /mfg_ai/${PID} · 편집 내용은 함께 보는 모두에게 즉시 반영됩니다 · 페이지 v260706-gantt`;
+  document.getElementById('foot').textContent=`young-94e97 Firebase 실시간 공유 · 데이터 경로 /mfg_ai/${PID} · 편집 내용은 함께 보는 모두에게 즉시 반영됩니다`;
 }
 
 /* ==========================================================
@@ -827,55 +668,6 @@ document.getElementById('mmExtract').onclick=()=>{
   };
 };
 /* ==========================================================
-   WBS 간트
-   ========================================================== */
-let GPCT={}, GFILTER='';
-const GORGC={'공통':'#8a94ab','플렛디스':'#057afa','더아이엠씨':'#1f9d5b'};
-function renderGantt(){
-  const conf=PCONF[PID], mount=document.getElementById('gantt');
-  if(!conf||!conf.gantt||!mount) return;
-  const tasks=conf.gantt.tasks;
-  let mn=tasks[0].s, mx=tasks[0].e;
-  tasks.forEach(t=>{ if(t.s<mn)mn=t.s; if(t.e>mx)mx=t.e; });
-  const w0=parse(mn); w0.setDate(w0.getDate()-((w0.getDay()+6)%7));
-  const wEnd=parse(mx);
-  const weeks=[]; for(const d=new Date(w0); d<=wEnd; d.setDate(d.getDate()+7)) weeks.push(new Date(d));
-  const tISO=iso(TODAY);
-  const twIdx=weeks.findIndex(w=>{ const e2=new Date(w); e2.setDate(e2.getDate()+6); return iso(w)<=tISO&&tISO<=iso(e2); });
-  const mgroups=[]; weeks.forEach(w=>{ const m=(w.getMonth()+1)+'월'; if(mgroups.length&&mgroups[mgroups.length-1].m===m) mgroups[mgroups.length-1].n++; else mgroups.push({m,n:1}); });
-  const show=t=> !GFILTER || t.org===GFILTER || tasks.some(x=>x.org===GFILTER && x.id.indexOf(t.id+'-')===0);
-  let h='<thead><tr><th class="gt" rowspan="2">과업</th><th class="gp" rowspan="2">진척</th>'
-    +mgroups.map(g=>`<th colspan="${g.n}">${g.m}</th>`).join('')+'</tr><tr>'
-    +weeks.map((w,i)=>`<th class="${i===twIdx?'tw':''}" style="min-width:32px">${w.getMonth()+1}/${w.getDate()}</th>`).join('')+'</tr></thead><tbody>';
-  tasks.filter(show).forEach(t=>{
-    const c=GORGC[t.org]||'#8a94ab';
-    const pct=GPCT[t.id]!=null?GPCT[t.id]:0;
-    const nameStyle=t.lvl===0?`background:${c};color:#fff;font-weight:700`:(t.lvl===1?'font-weight:700':'padding-left:22px');
-    h+=`<tr><td class="gt" style="${nameStyle}" title="${escA(t.nm)} (${t.s}~${t.e}, ${escA(t.org)})">${t.lvl>0?`<span style="opacity:.6;font-size:11.5px">${t.no}</span> `:''}${esc(t.nm)}</td>`;
-    h+=`<td class="gp" data-gid="${t.id}">${pct}%</td>`;
-    weeks.forEach((w,i)=>{
-      const we=new Date(w); we.setDate(we.getDate()+6);
-      const on=iso(w)<=t.e && t.s<=iso(we);
-      h+=`<td class="gc ${i===twIdx?'tw':''}"${on?` style="background:${c}${t.lvl===0?'40':'aa'}"`:''}></td>`;
-    });
-    h+='</tr>';
-  });
-  mount.innerHTML=h+'</tbody>';
-  mount.querySelectorAll('.gp[data-gid]').forEach(td=>td.onclick=()=>{
-    const id=td.dataset.gid, v=prompt('진척률(%) 입력 (0~100)',GPCT[id]||0);
-    if(v==null)return;
-    ROOT.child('gantt/'+id).set(Math.max(0,Math.min(100,Number(v)||0))); stamp();
-  });
-}
-function bindGantt(conf){
-  const sel=document.getElementById('gOrg');
-  const orgs=[...new Set(conf.gantt.tasks.map(t=>t.org))];
-  sel.innerHTML='<option value="">전체 기관</option>'+orgs.map(o=>`<option value="${escA(o)}">${esc(o)}</option>`).join('');
-  GFILTER=''; sel.onchange=()=>{ GFILTER=sel.value; renderGantt(); };
-  bind(ROOT.child('gantt'),'value',s=>{ GPCT=s.val()||{}; renderGantt(); });
-}
-
-/* ==========================================================
    탭
    ========================================================== */
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
@@ -901,11 +693,6 @@ function boot(){
   seedIf('upcoming',s.upcoming); seedIf('cadence',s.cadence); seedIf('issuelist',s.issuelist);
   seedIf('contacts',s.contacts); seedIf('wbs',s.wbs);
 
-  // WBS 버전 마이그레이션: 시드 이후 공식 WBS가 갱신된 사업은 1회에 한해 덮어씀
-  if(conf.wbsVer) ROOT.child('meta/wbsVer').once('value',v=>{
-    if(v.val()!==conf.wbsVer){ ROOT.child('wbs').set(s.wbs); ROOT.child('meta/wbsVer').set(conf.wbsVer); stamp(); }
-  });
-
   // collections
   makeColl('recent','recentList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
   makeColl('upcoming','upcomingList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
@@ -918,13 +705,6 @@ function boot(){
   bind(ROOT.child('events'),'value',s2=>{ EVENTS=s2.val()||{}; renderCal(); renderTimeline(); updateNextKPI(); });
   bindActions();
   bindWbs();
-
-  // WBS 간트: 간트 데이터가 있는 사업에서만 탭 노출
-  const gtab=document.querySelector('.tab[data-p="gantt"]');
-  gtab.style.display=conf.gantt?'':'none';
-  if(!conf.gantt && document.querySelector('.panel[data-p="gantt"]').classList.contains('on'))
-    document.querySelector('.tab[data-p="calendar"]').click();
-  if(conf.gantt) bindGantt(conf);
 }
 
 boot();
