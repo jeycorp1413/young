@@ -54,25 +54,23 @@ async function arxivLatest(keyword) {
   return { ver: title.length > 70 ? title.slice(0, 70) + "…" : title, date, url: link };
 }
 
-// 조달청 나라장터 입찰공고(용역) 키워드 검색 — best effort (API 스펙 상이 시 G2B_ENDPOINT로 조정)
-async function g2bLatest(keyword) {
-  if (!G2B_KEY) return null;
+// 조달청 나라장터 입찰공고 — 용역조회(getBidPblancListInfoServc). 최근 30일 용역공고를 받아 키워드로 로컬 필터.
+const G2B_BASE = process.env.G2B_ENDPOINT ||
+  "https://apis.data.go.kr/1230000/ad/BidPublicInfoService/getBidPblancListInfoServc";
+
+async function g2bRecentServc() {
+  if (!G2B_KEY) return [];
   const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, "") + "0000";
-  const bgn = fmt(new Date(Date.now() - 90 * 864e5));
+  const bgn = fmt(new Date(Date.now() - 30 * 864e5));
   const end = fmt(new Date());
-  const base = process.env.G2B_ENDPOINT ||
-    "https://apis.data.go.kr/1230000/ao/BidPublicInfoService/getBidPblancListInfoServcPPSSrch";
-  const url = `${base}?serviceKey=${encodeURIComponent(G2B_KEY)}&pageNo=1&numOfRows=1&inqryDiv=1&type=json&inqryBgnDt=${bgn}&inqryEndDt=${end}&bidNtceNm=${encodeURIComponent(keyword)}`;
+  const url = `${G2B_BASE}?serviceKey=${encodeURIComponent(G2B_KEY)}&pageNo=1&numOfRows=100&inqryDiv=1&type=json&inqryBgnDt=${bgn}&inqryEndDt=${end}`;
   try {
-    const r = await fetch(url); if (!r.ok) { console.log("g2b http", r.status); return null; }
+    const r = await fetch(url); if (!r.ok) { console.log("g2b http", r.status); return []; }
     const j = await r.json();
-    let item = j?.response?.body?.items;
-    if (item?.item) item = item.item;
-    const it = Array.isArray(item) ? item[0] : item;
-    if (!it) return null;
-    return { ver: (it.bidNtceNm || "").slice(0, 55), date: (it.bidNtceDt || "").slice(0, 10),
-             url: it.bidNtceDtlUrl || it.bidNtceUrl || "", org: it.ntceInsttNm || "" };
-  } catch (e) { console.log("g2b error", e.message); return null; }
+    let it = j?.response?.body?.items;
+    if (it?.item) it = it.item;
+    return Array.isArray(it) ? it : (it ? [it] : []);
+  } catch (e) { console.log("g2b error", e.message); return []; }
 }
 
 const items = await getItems();
@@ -92,14 +90,22 @@ for (const [id, it] of Object.entries(items)) {
   } catch (e) { console.log("item error", id, e.message); }
 }
 
-// 조달청: 고정 키워드로 최신 공고 1건 → g2b-keyword 항목에 표기
+// 조달청: 최근 용역공고 중 AI 키워드 매칭 최신 1건 → g2b-keyword 항목에 표기
 if (G2B_KEY && items["g2b-keyword"]) {
-  for (const kw of ["생성형 AI", "AI 에이전트", "지능형 민원", "내부지식 검색"]) {
-    const l = await g2bLatest(kw);
-    if (l) {
-      await patchItem("g2b-keyword", { autoLatest: `[${kw}] ${l.ver}`, autoDate: l.date, autoUrl: l.url, autoAt: now });
-      g2++; break;
-    }
+  const KW = ["생성형AI", "생성형 AI", "AI에이전트", "AI 에이전트", "LLM", "sLLM", "지능형민원", "내부지식", "챗봇", "인공지능"];
+  const norm = s => (s || "").replace(/\s/g, "");
+  const list = await g2bRecentServc();
+  const hit = list.find(it => KW.some(k => norm(it.bidNtceNm).includes(norm(k))));
+  if (hit) {
+    await patchItem("g2b-keyword", {
+      autoLatest: `${(hit.ntceInsttNm || "").slice(0, 12)} · ${(hit.bidNtceNm || "").slice(0, 45)}`,
+      autoDate: (hit.bidNtceDt || "").slice(0, 10),
+      autoUrl: hit.bidNtceDtlUrl || hit.bidNtceUrl || "",
+      autoAt: now,
+    });
+    g2 = 1;
+  } else {
+    console.log(`g2b: 최근 용역공고 ${list.length}건 중 키워드 매칭 없음`);
   }
 }
 
