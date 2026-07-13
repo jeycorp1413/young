@@ -128,6 +128,25 @@
   .cal-ev .ce-who{display:block; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .cal-ev .ce-title{display:block; font-weight:600; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   @media(max-width:520px){ .cal-cell{min-height:60px;} .cal-ev{font-size:9px; padding:1px 3px;} }
+  .nara-sec{margin-top:30px; border-top:1px solid var(--line); padding-top:22px;}
+  .nara-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; flex-wrap:wrap; gap:6px; cursor:pointer; user-select:none;}
+  #naraCaret{font-size:12px; color:var(--pink); margin-right:3px;}
+  .nara-title{font-size:16px; font-weight:800; color:var(--pink-deep);}
+  .nara-title .nara-subt{font-size:12px; font-weight:600; color:var(--muted); margin-left:6px;}
+  .nara-upd{font-size:11.5px; color:var(--muted);}
+  .nara-list{display:flex; flex-direction:column; gap:9px;}
+  .nara-item{display:flex; align-items:center; gap:11px; background:#fff; border:1px solid var(--line); border-radius:13px; padding:11px 14px; text-decoration:none; color:var(--ink);}
+  .nara-item:hover{border-color:var(--pink); box-shadow:0 2px 10px rgba(236,111,158,.13);}
+  .nara-score{flex:0 0 auto; width:46px; height:46px; border-radius:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:16px; line-height:1;}
+  .nara-score small{font-size:8.5px; font-weight:700; opacity:.95; margin-top:2px;}
+  .nara-main{flex:1; min-width:0;}
+  .nara-name{font-weight:700; font-size:13.5px; line-height:1.35; margin-bottom:4px;}
+  .nara-meta{font-size:11.5px; color:var(--muted); display:flex; gap:9px; flex-wrap:wrap; align-items:center;}
+  .axis{font-size:10.5px; font-weight:800; padding:2px 9px; border-radius:20px;}
+  .axis-g{background:#e6f7ec; color:#127a3e;} .axis-c{background:#fff3e0; color:#b25e00;} .axis-o{background:#eef1f6; color:#5b6472;}
+  .nara-dday{font-weight:800; color:#2f7d3e;}
+  .nara-dday.urgent{color:#d6336c;}
+  .nara-empty{color:var(--muted); font-size:13px; text-align:center; padding:18px; background:#fff; border:1px dashed var(--line); border-radius:13px;}
 </style>
 </head>
 <body>
@@ -144,6 +163,13 @@
       <button class="cal-add" id="projAdd">➕ 프로젝트</button>
     </div>
     <div class="proj-list" id="projList"></div>
+  </div>
+  <div class="nara-sec">
+    <div class="nara-head" id="naraHead">
+      <div class="nara-title"><span id="naraCaret">▾</span>📋 오늘의 나라장터<span class="nara-subt">4축 · 2억↑ · 마감 2주+ 자동 스크리닝</span></div>
+      <div class="nara-upd" id="naraUpd"></div>
+    </div>
+    <div class="nara-list" id="naraList"></div>
   </div>
   <div class="cal-sec">
     <div class="cal-head">
@@ -359,6 +385,41 @@ function render(){
 }
 /* ===== 진행중 프로젝트 ===== */
 let editProjId=null;
+(function(){
+  var head=document.getElementById("naraHead"), list=document.getElementById("naraList"), caret=document.getElementById("naraCaret");
+  if(!head||!list) return;
+  var collapsed=localStorage.getItem("naraCollapsed")==="1";
+  function apply(){ list.style.display=collapsed?"none":"flex"; if(caret) caret.textContent=collapsed?"▸":"▾"; }
+  apply();
+  head.addEventListener("click", function(){ collapsed=!collapsed; localStorage.setItem("naraCollapsed", collapsed?"1":"0"); apply(); });
+})();
+function naraEsc(s){return String(s||"").replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function renderNara(data){
+  var el=document.getElementById("naraList"); if(!el) return;
+  var upd=document.getElementById("naraUpd");
+  var cand=(data&&data.candidates)||{};
+  var arr=Object.keys(cand).map(function(k){return cand[k];}).sort(function(a,b){return (b.score||0)-(a.score||0);});
+  if(upd) upd.textContent=(data&&data.meta&&data.meta.updatedAt)?("🔄 자동갱신 "+data.meta.updatedAt):"";
+  if(!arr.length){ el.innerHTML='<div class="nara-empty">오늘 매칭된 공고가 없어요 · 매일 아침 자동 수집됩니다 ☀️</div>'; return; }
+  var today=new Date(); today.setHours(0,0,0,0);
+  el.innerHTML="";
+  arr.slice(0,20).forEach(function(c){
+    var band=c.score>=70?"#2fb36b":c.score>=40?"#f2a53a":"#b0b0b0";
+    var axisCls=c.axisType==="growth"?"axis-g":c.axisType==="cash"?"axis-c":"axis-o";
+    var ddHtml="";
+    if(c.deadline){ var p=String(c.deadline).split("-"); if(p.length===3){ var d=Math.round((new Date(+p[0],+p[1]-1,+p[2])-today)/864e5); var urgent=d<14; ddHtml='<span class="nara-dday'+(urgent?" urgent":"")+'">마감 D-'+d+(urgent?" ⏰촉박":"")+'</span>'; } }
+    var a=document.createElement("a");
+    a.className="nara-item"; a.href=c.url||"#"; a.target="_blank"; a.rel="noopener";
+    a.innerHTML='<div class="nara-score" style="background:'+band+'">'+(c.score||0)+'<small>'+(c.band||"")+'</small></div>'+
+      '<div class="nara-main"><div class="nara-name">'+naraEsc(c.name)+'</div>'+
+      '<div class="nara-meta"><span class="axis '+axisCls+'">'+naraEsc(c.axis)+'</span>'+
+      '<span>'+naraEsc(c.org)+'</span>'+
+      (c.amount?'<span>💰 '+naraEsc(c.amount)+(c.amount==="미공개"?"":"원")+'</span>':'')+
+      ddHtml+
+      '</div></div>';
+    el.appendChild(a);
+  });
+}
 function renderProjects(){
   const el=document.getElementById("projList"); if(!el) return; el.innerHTML="";
   if(!PROJECTS.length){ el.innerHTML='<div class="proj-empty">아직 등록된 프로젝트가 없어요. ➕ 프로젝트로 추가해보세요!</div>'; return; }
@@ -551,6 +612,7 @@ function start(){
     db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
     db.ref("cal").on("value", snap=>{ const v=snap.val()||{}; CAL=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); renderCal(); });
     db.ref("projects").on("value", snap=>{ const v=snap.val()||{}; PROJECTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); renderProjects(); });
+    db.ref("narajangteo").on("value", snap=>{ renderNara(snap.val()||{}); });
     db.ref("coffee").on("value", snap=>{ COFFEE=snap.val()||null; render(); });
   } else {
     DATA=Object.keys(SEED).map(k=>Object.assign({id:k}, SEED[k], {updated:Date.now()})).sort((a,b)=>a.order-b.order);
