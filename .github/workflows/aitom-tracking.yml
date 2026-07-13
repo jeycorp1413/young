@@ -1,0 +1,20 @@
+name: AITOM 트래킹 자동 갱신
+
+on:
+  schedule:
+    - cron: '0 0 * * *'      # 매일 00:00 UTC = 09:00 KST
+  workflow_dispatch:          # 수동 실행 버튼
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run tracker
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          G2B_SERVICE_KEY: ${{ secrets.G2B_SERVICE_KEY }}
+        run: node scripts/update-tracking.mjs

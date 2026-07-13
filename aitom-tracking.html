@@ -40,6 +40,9 @@ header.top .sub{color:var(--muted);font-size:14.5px;margin-top:5px}
 .plain{background:#eff6ff;border:1px solid #dbeafe;color:#1e40af;border-radius:9px;padding:12px 15px;
   font-size:14.5px;line-height:1.65;margin:2px 0 13px;font-weight:500}
 .plain b{color:#1e3a8a;font-weight:800}
+.auto{font-size:12.5px;color:#0a7d3c;margin-top:5px;font-weight:600}
+.auto a{color:#0a7d3c;text-decoration:none}.auto a:hover{text-decoration:underline}
+.auto b{background:#d7f5e3;color:#0a7d3c;font-size:10px;padding:1px 6px;border-radius:5px;border:1px solid #b6e6c8;margin-right:5px;font-weight:800}
 table{width:100%;border-collapse:collapse;font-size:14.7px}
 th{background:#f8fafc;color:#475569;font-weight:600;padding:11px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);font-size:14px}
 th:first-child{border-top-left-radius:8px}th:last-child{border-top-right-radius:8px}
@@ -95,7 +98,7 @@ select.st[data-v="보류"]{background:#f1f5f9;color:#94a3b8}
 <header class="top">
   <div>
     <h1>AITOM 고도화 · 경쟁·유사기술 트래킹</h1>
-    <div class="sub">기술 원천(GitHub·Hugging Face·arXiv) 실시간 감시 · 오늘 <span id="today"></span> · 팀 공동편집</div>
+    <div class="sub">기술 원천(GitHub·Hugging Face·arXiv) 실시간 감시 · 오늘 <span id="today"></span> · 팀 공동편집 · 🔄 자동갱신 <span id="autorun">–</span></div>
   </div>
   <div class="who">👤 <select id="who">
     <option value="">이름 선택</option>
@@ -418,6 +421,7 @@ function renderItems(items){
           <div class="pt-main">${esc(it.point)}</div>
           ${it.why?`<div class="pt-why"><b>왜</b>${esc(it.why)}</div>`:''}
           ${it.todo?`<div class="pt-do"><b>할 일</b>${esc(it.todo)}</div>`:''}
+          ${it.autoLatest?`<div class="auto"><b>자동</b><a href="${esc(it.autoUrl||'#')}" target="_blank" rel="noopener">🔄 ${esc(it.autoLatest)}</a>${it.autoDate?` · ${esc(it.autoDate)}`:''}</div>`:''}
         </td>
         <td>${linkify(it.url)}</td>
         <td><span class="rel ${it.rel}">${it.rel}</span></td>
@@ -448,6 +452,7 @@ function renderLogs(logs){
 }
 db.ref(ROOT+'/items').on('value',s=>renderItems(s.val()));
 db.ref(ROOT+'/logs').on('value',s=>renderLogs(s.val()));
+db.ref(ROOT+'/auto/meta/lastRun').on('value',s=>{const el=document.getElementById('autorun');if(el)el.textContent=s.val()||'–';});
 
 /* ---------- 수정/추가/삭제 ---------- */
 window.upd=(id,f,v)=>db.ref(`${ROOT}/items/${id}`).update({[f]:v});
