@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AITOM 고도화 · 경쟁·유사기술 트래킹</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+<style>
+/* ===== TypeUI · Shadcn ===== */
+:root{
+  --bg:#f8fafc; --card:#ffffff; --border:#e5e7eb;
+  --ink:#0f172a; --muted:#64748b; --primary:#0f172a;
+  --red:#dc2626; --blue:#2563eb; --amber:#c2410c; --green:#16a34a;
+  --sh:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif;
+  font-size:16px;line-height:1.55;padding:18px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto}
+header.top{background:var(--card);color:var(--ink);border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh);
+  padding:20px 24px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+header.top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}
+header.top .sub{color:var(--muted);font-size:14.5px;margin-top:5px}
+.who{display:flex;align-items:center;gap:8px;font-size:15px;color:#334155;font-weight:600}
+.who select{background:#f8fafc;border:1px solid var(--border);color:var(--ink);border-radius:8px;padding:9px 12px;
+  font-family:inherit;font-size:15px;font-weight:600;width:134px}
+.help{background:#f8fafc;border:1px solid var(--border);border-left:3px solid var(--ink);border-radius:10px;padding:16px 20px;margin-bottom:18px}
+.help b{color:var(--ink);font-size:16px;font-weight:700}
+.help ol{margin:9px 0 0;padding-left:22px;font-size:14.5px;color:#334155;line-height:1.9}
+.help ol b{color:#334155;font-size:14px;background:#eef2f7;padding:0 5px;border-radius:5px;border:1px solid var(--border)}
+.stats{display:flex;gap:13px;flex-wrap:wrap;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh);padding:15px 18px;flex:1;min-width:125px}
+.stat b{display:block;font-size:32px;font-weight:700;color:var(--ink);line-height:1.15}
+.stat span{font-size:14px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--sh);padding:18px 20px;margin-bottom:18px}
+.card h2{margin:0 0 7px;font-size:19px;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .desc{color:var(--muted);font-size:14px;margin-bottom:12px}
+.plain{background:#eff6ff;border:1px solid #dbeafe;color:#1e40af;border-radius:9px;padding:12px 15px;
+  font-size:14.5px;line-height:1.65;margin:2px 0 13px;font-weight:500}
+.plain b{color:#1e3a8a;font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:14.7px}
+th{background:#f8fafc;color:#475569;font-weight:600;padding:11px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);font-size:14px}
+th:first-child{border-top-left-radius:8px}th:last-child{border-top-right-radius:8px}
+td{border-bottom:1px solid #f1f5f9;padding:10px 10px;vertical-align:middle}
+tbody tr:hover td{background:#f8fafc}
+td .nm{font-weight:600}
+td a{color:#2563eb;text-decoration:none;font-size:14px;font-weight:500}
+td a:hover{text-decoration:underline}
+.pt-main{color:var(--ink);font-size:14.5px;font-weight:600;margin-bottom:4px}
+.pt-why,.pt-do{font-size:13.6px;line-height:1.55;margin-top:3px}
+.pt-why{color:var(--muted)}.pt-do{color:#1d4ed8}
+.pt-why b,.pt-do b{font-size:12px;padding:1px 7px;margin-right:5px;font-weight:700;border-radius:5px;border:1px solid var(--border)}
+.pt-why b{background:#f1f5f9;color:#475569}
+.pt-do b{background:#eff6ff;color:#1d4ed8;border-color:#dbeafe}
+select,input.ed{font-family:inherit;font-size:14px;border:1px solid var(--border);border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink)}
+input.date{width:146px}
+input.memo{width:100%;min-width:120px}
+.rel{display:inline-block;padding:3px 11px;border-radius:6px;font-size:13.5px;font-weight:600;border:1px solid transparent}
+.rel.최상{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.rel.상{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.rel.중{background:#f1f5f9;color:#475569;border-color:#e2e8f0}
+select.st{font-weight:600;border:1px solid var(--border);border-radius:7px;padding:5px 10px}
+select.st[data-v="신규변화"]{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+select.st[data-v="도입검토"]{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+select.st[data-v="주시"]{background:#f8fafc;color:#475569}
+select.st[data-v="보류"]{background:#f1f5f9;color:#94a3b8}
+.del{border:1px solid var(--border);background:#fff;color:#94a3b8;cursor:pointer;font-size:15px;border-radius:7px;padding:4px 9px}
+.del:hover{background:#fef2f2;color:#dc2626;border-color:#fecaca}
+.addbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.addbar input,.addbar select{font-family:inherit;font-size:14px;border:1px solid var(--border);border-radius:8px;padding:9px 12px}
+.btn{border:1px solid var(--ink);border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600;cursor:pointer;
+  background:var(--primary);color:#fff;font-family:inherit;transition:opacity .12s}
+.btn:hover{opacity:.88}
+.btn.sm{padding:9px 14px;font-size:13.5px}
+.logrow td{vertical-align:top}
+.prio{display:inline-block;padding:3px 11px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent}
+.prio.높음{background:#fef2f2;color:#b91c1c;border-color:#fecaca}.prio.보통{background:#fff7ed;color:#c2410c;border-color:#fed7aa}.prio.낮음{background:#f1f5f9;color:#475569;border-color:#e2e8f0}
+.foot{color:var(--muted);font-size:13px;text-align:center;margin:12px 0 24px}
+.tag{font-size:12.5px;background:#f1f5f9;color:#475569;padding:3px 9px;border-radius:6px;font-weight:600;border:1px solid var(--border)}
+.chan{margin:30px 2px 13px;font-size:17.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chan span{font-size:13.5px;font-weight:500;color:var(--muted)}
+.chan:before{content:"";width:5px;height:19px;background:var(--ink);border-radius:2px;display:inline-block}
+.rec{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px}
+.rec h2{margin:0 0 13px;color:var(--ink);font-size:19px;font-weight:700}
+.rec ol{margin:0;padding-left:22px;line-height:1.65}
+.rec li{margin-bottom:11px;font-size:14.5px;color:#334155}
+.rec li b{color:var(--ink);font-weight:700}
+.rec .k{display:inline-block;background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:2px 9px;border-radius:5px;margin-right:7px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div>
+    <h1>AITOM 고도화 · 경쟁·유사기술 트래킹</h1>
+    <div class="sub">기술 원천(GitHub·Hugging Face·arXiv) 실시간 감시 · 오늘 <span id="today"></span> · 팀 공동편집</div>
+  </div>
+  <div class="who">👤 <select id="who">
+    <option value="">이름 선택</option>
+    <option>하이슬</option><option>신지영</option><option>지희애</option><option>정서연</option>
+  </select></div>
+</header>
+
+<div class="help">
+  <b>📖 사용방법</b>
+  <ol>
+    <li><b>이름 선택</b> — 우측 상단에서 본인 이름을 고르세요 (로그 작성 시 담당자로 기록)</li>
+    <li><b>확인 후 표기</b> — 기술을 확인했으면 <b>상태</b>를 바꾸고(주시 → 신규변화 / 도입검토), <b>최근확인</b> 날짜·<b>메모</b>를 입력 <i>(저장 버튼 없음 — 자동 저장·팀 실시간 공유)</i></li>
+    <li><b>대상 추가</b> — 새로 감시할 기술은 각 표 아래 <b>+ 추가</b>로 등록, ✕로 삭제</li>
+    <li><b>격주 로그</b> — 2주마다 담당자가 맨 아래 <b>격주 트래킹 로그</b>에 "바뀐 것 3줄 + AITOM 반영 아이디어"를 기록</li>
+  </ol>
+</div>
+
+<div class="stats">
+  <div class="stat"><b id="s-total">–</b><span>총 감시 대상</span></div>
+  <div class="stat"><b id="s-new" style="color:var(--red)">–</b><span>신규 변화</span></div>
+  <div class="stat"><b id="s-review" style="color:var(--blue)">–</b><span>도입 검토</span></div>
+  <div class="stat"><b id="s-log">–</b><span>트래킹 로그</span></div>
+</div>
+
+<div class="chan">채널 ① · 기술 원천 트래킹 <span>오픈소스·논문·모델 — 기술 갭 조기 감지</span></div>
+<div class="card">
+  <h2>🛠️ GitHub — 에이전트·RAG·서빙 프레임워크 <span class="tag">Watch › Releases</span></h2>
+  <div class="plain">💡 <b>GitHub</b>는 전 세계 개발자가 코드를 공개·공유하는 사이트예요. AI 신기술은 논문보다 먼저 여기 <b>'작동하는 코드'</b>로 올라옵니다 → 경쟁 기술을 가장 빨리 감지하려고 봅니다. (구독=Watch › Releases 눌러 새 버전 알림만 받기)</div>
+  <div class="desc">경쟁 프레임워크의 릴리스만 구독해 기술 변화를 조기 감지. AITOM의 오케스트레이션·RAG·가드레일·서빙 축과 직결.</div>
+  <table><thead><tr>
+    <th style="width:150px">대상</th><th>트래킹 포인트</th><th style="width:210px">링크 / 구독</th>
+    <th style="width:70px">관련도</th><th style="width:110px">상태</th><th style="width:132px">최근확인</th><th style="width:150px">메모</th><th style="width:34px"></th>
+  </tr></thead><tbody id="tb-github"></tbody></table>
+  <div class="addbar" data-cat="github">
+    <input class="a-name" placeholder="대상명"><input class="a-point" placeholder="트래킹 포인트" style="min-width:180px">
+    <input class="a-url" placeholder="github.com/..."><select class="a-rel"><option>중</option><option>상</option><option>최상</option></select>
+    <button class="btn sm" onclick="addItem(this)">+ 추가</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🤗 Hugging Face — 모델·리더보드 <span class="tag">월 1회 / Follow</span></h2>
+  <div class="plain">💡 <b>Hugging Face</b>는 AI 모델을 올리고 비교하는 사이트예요(모델계의 앱스토어). <b>어떤 AI 모델이 제일 똑똑한지 순위</b>로 확인 → 우리 제품(AITOM)에 넣을 모델을 고르려고 봅니다.</div>
+  <div class="desc">온프레 sLLM·임베딩 모델의 성능 순위 변화 추적. RAG 품질과 서빙 모델 선정에 직접 반영.</div>
+  <table><thead><tr>
+    <th style="width:150px">대상</th><th>트래킹 포인트</th><th style="width:210px">링크 / 구독</th>
+    <th style="width:70px">관련도</th><th style="width:110px">상태</th><th style="width:132px">최근확인</th><th style="width:150px">메모</th><th style="width:34px"></th>
+  </tr></thead><tbody id="tb-hf"></tbody></table>
+  <div class="addbar" data-cat="hf">
+    <input class="a-name" placeholder="대상명"><input class="a-point" placeholder="트래킹 포인트" style="min-width:180px">
+    <input class="a-url" placeholder="huggingface.co/..."><select class="a-rel"><option>중</option><option>상</option><option>최상</option></select>
+    <button class="btn sm" onclick="addItem(this)">+ 추가</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>📄 arXiv · 논문 — 키워드 알림 <span class="tag">Scholar Alert</span></h2>
+  <div class="plain">💡 <b>arXiv</b>는 전 세계 AI 연구 논문이 올라오는 곳이에요. <b>다음에 뜰 기술 방향</b>을 미리 볼 수 있습니다 → 키워드 알림(Google Scholar Alert)만 걸어두면 자동으로 옵니다.</div>
+  <div class="desc">에이전트 설계·툴 사용·RAG 고도화·LLMOps 최신 연구 흐름. Google Scholar Alert / Papers with Code로 자동 수집.</div>
+  <table><thead><tr>
+    <th style="width:150px">키워드</th><th>트래킹 포인트</th><th style="width:210px">소스 / 방식</th>
+    <th style="width:70px">관련도</th><th style="width:110px">상태</th><th style="width:132px">최근확인</th><th style="width:150px">메모</th><th style="width:34px"></th>
+  </tr></thead><tbody id="tb-arxiv"></tbody></table>
+  <div class="addbar" data-cat="arxiv">
+    <input class="a-name" placeholder="키워드"><input class="a-point" placeholder="트래킹 포인트" style="min-width:180px">
+    <input class="a-url" placeholder="소스(예: Scholar Alert)"><select class="a-rel"><option>중</option><option>상</option><option>최상</option></select>
+    <button class="btn sm" onclick="addItem(this)">+ 추가</button>
+  </div>
+</div>
+
+<div class="chan">채널 ② · 경쟁사 사업 트래킹 <span>조달·입찰 데이터 — 누가·뭘·얼마에 파는가</span></div>
+<div class="card">
+  <h2>🏛️ 나라장터·낙찰 — 경쟁사 수주 시그널 <span class="tag">G2B OpenAPI / 격주</span></h2>
+  <div class="plain">💡 <b>나라장터</b>는 공공 입찰 공고·낙찰 결과가 모이는 사이트예요. <b>경쟁사가 어떤 AI 사업을 얼마에 땄는지</b> 확인 → 우리 참여 전략·가격에 반영하려고 봅니다.</div>
+  <div class="desc">입찰로 경쟁하는 구조라 경쟁사 수주 이력이 가장 현실적인 신호. RFP 판정 시트와 연결해 "이 유형은 누가·얼마에·어떤 기술로 땄나" 벤치마크로 축적.</div>
+  <table><thead><tr>
+    <th style="width:150px">대상</th><th>트래킹 포인트</th><th style="width:210px">링크 / 소스</th>
+    <th style="width:70px">관련도</th><th style="width:110px">상태</th><th style="width:132px">최근확인</th><th style="width:150px">메모</th><th style="width:34px"></th>
+  </tr></thead><tbody id="tb-g2b"></tbody></table>
+  <div class="addbar" data-cat="g2b">
+    <input class="a-name" placeholder="대상명"><input class="a-point" placeholder="트래킹 포인트" style="min-width:180px">
+    <input class="a-url" placeholder="소스/링크"><select class="a-rel"><option>중</option><option>상</option><option>최상</option></select>
+    <button class="btn sm" onclick="addItem(this)">+ 추가</button>
+  </div>
+</div>
+
+<div class="chan">채널 ③ · 제품·시장 신호 트래킹 <span>특허·채용·마케팅 — 경쟁사 '방향' 포착</span></div>
+<div class="card">
+  <h2>📈 특허·채용·보도 — 경쟁사 방향 선행지표 <span class="tag">월 1회 요약</span></h2>
+  <div class="plain">💡 <b>특허·채용공고·뉴스</b>는 경쟁사가 <b>'앞으로 뭘 만들지'</b>가 제품 출시보다 먼저 새어 나오는 곳이에요 → 경쟁사 방향을 미리 포착하려고 봅니다.</div>
+  <div class="desc">경쟁사가 앞으로 뭘 만들지는 제품 릴리스보다 특허·채용·보도에서 먼저 새어 나옴. 월 1회 "경쟁사 동향 1페이지"로 요약 → 대표 보고·전략회의 인풋.</div>
+  <table><thead><tr>
+    <th style="width:150px">대상</th><th>트래킹 포인트</th><th style="width:210px">링크 / 소스</th>
+    <th style="width:70px">관련도</th><th style="width:110px">상태</th><th style="width:132px">최근확인</th><th style="width:150px">메모</th><th style="width:34px"></th>
+  </tr></thead><tbody id="tb-signal"></tbody></table>
+  <div class="addbar" data-cat="signal">
+    <input class="a-name" placeholder="대상명"><input class="a-point" placeholder="트래킹 포인트" style="min-width:180px">
+    <input class="a-url" placeholder="소스/링크"><select class="a-rel"><option>중</option><option>상</option><option>최상</option></select>
+    <button class="btn sm" onclick="addItem(this)">+ 추가</button>
+  </div>
+</div>
+
+<div class="chan">운영 · 종합 <span>로그와 추천 방안</span></div>
+<div class="card">
+  <h2>📝 격주 트래킹 로그 <span class="tag">담당자가 2주마다 3줄 요약</span></h2>
+  <div class="desc">"이번에 바뀐 것"을 요약하고 AITOM 반영 아이디어로 연결. 스터디 AI 에이전트 영역 담당자가 운영.</div>
+  <table><thead><tr>
+    <th style="width:110px">날짜</th><th style="width:90px">담당</th><th style="width:120px">소스</th>
+    <th>핵심 변화 (3줄)</th><th>AITOM 반영 아이디어</th><th style="width:80px">우선순위</th><th style="width:34px"></th>
+  </tr></thead><tbody id="tb-log"></tbody></table>
+  <div class="addbar">
+    <input id="lg-date" type="date"><input id="lg-src" placeholder="소스(예: LangGraph)">
+    <input id="lg-change" placeholder="핵심 변화 요약" style="min-width:220px">
+    <input id="lg-idea" placeholder="AITOM 반영 아이디어" style="min-width:200px">
+    <select id="lg-prio"><option>보통</option><option>높음</option><option>낮음</option></select>
+    <button class="btn sm" onclick="addLog()">+ 로그 추가</button>
+  </div>
+</div>
+
+<div class="rec">
+  <h2>⭐ 추천 — AITOM 발전을 위한 트래킹 운영 방안</h2>
+  <ol>
+    <li><span class="k">우선순위</span><b>①기술 + ②입찰을 먼저</b> 돌리세요 — AITOM 고도화·수주에 직결됩니다. ③(제품·시장)은 월 1회 요약으로 가볍게.</li>
+    <li><span class="k">오너십</span>스터디 <b>'AI 에이전트 영역 담당자'가 오너</b>. 격주 로그 작성을 담당제 업무로 고정 (스터디 운영안의 "기술 트렌드 포함" 지적을 이걸로 충족).</li>
+    <li><span class="k">개발 연결</span>상태를 <b>'도입검토'로 바꾼 항목은 그 주에 AITOM 개발 백로그 티켓으로 전환</b> — 트래킹이 관찰로 끝나지 않고 실제 개발로 이어지게.</li>
+    <li><span class="k">핵심 무기</span><b>AITOM 골든 평가셋(회귀 테스트) 구축</b> — 우리 대표 시나리오 20~30개로 평가셋을 만들어, 새 sLLM·RAG기법·프레임워크가 나올 때마다 동일 셋으로 비교. 기술 갭을 '느낌'이 아니라 <b>'점수'로 측정</b>.</li>
+    <li><span class="k">분기 1회</span><b>경쟁제품 Teardown</b> — Dify·Langflow를 실제 설치해 AITOM과 기능 대조표 작성 → 차별화·따라잡기 항목 도출.</li>
+    <li><span class="k">표준 선점</span><b>MCP는 지켜보지 말고 선제 지원</b> — 커넥터 지원을 로드맵 상단에. 표준이 기본이 되면 미지원은 곧 탈락 요건.</li>
+    <li><span class="k">역트래킹</span><b>실주 사유·데모 실패·고객 불만을 기술 백로그로 환류</b> — "왜 졌나"가 다음 고도화 항목이 됩니다.</li>
+    <li><span class="k">보고 리듬</span>월 1회 <b>'경쟁·기술 동향 1페이지'</b>(②낙찰 + ③신호 + 골든셋 점수 추이)로 대표 보고.</li>
+  </ol>
+</div>
+
+<div class="foot">더아이엠씨 AI사업기획팀 · 데이터는 실시간 공유(Firebase) · 변경 즉시 팀 전체 반영</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDerROVp0gBbuClRdhNAn42uv1FjnoaOKQ",
+  authDomain: "young-94e97.firebaseapp.com",
+  databaseURL: "https://young-94e97-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "young-94e97",
+  storageBucket: "young-94e97.firebasestorage.app",
+  messagingSenderId: "320869908269",
+  appId: "1:320869908269:web:9a204ef6ae3423e81e5da4",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ROOT='aitom-track';
+
+const TODAY=new Date();
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const W=['일','월','화','수','목','금','토'];
+document.getElementById('today').textContent=`${TODAY.getMonth()+1}/${TODAY.getDate()} (${W[TODAY.getDay()]})`;
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const linkify=u=>{if(!u)return '';const href=/^https?:/.test(u)?u:'https://'+u;return `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(u)}</a>`;};
+const sortV=o=>Object.entries(o||{}).map(([id,v])=>({id,...v})).sort((a,b)=>(a.ord||0)-(b.ord||0));
+
+/* 이름 기억 */
+const whoEl=document.getElementById('who');
+whoEl.value=localStorage.getItem('aitom-who')||'';
+whoEl.onchange=()=>localStorage.setItem('aitom-who',whoEl.value);
+document.getElementById('lg-date').value=iso(TODAY);
+
+const STATUS=['주시','신규변화','도입검토','보류'];
+
+/* ---------- 시드(①번 내용) : 트래킹 포인트 + 왜 + 할 일 ---------- */
+const SEED=[
+ // ===== GitHub =====
+ {id:'gh-langgraph',cat:'github',name:'LangGraph',rel:'상',url:'github.com/langchain-ai/langgraph',
+  point:'에이전트 오케스트레이션(그래프·상태 기반) 실행 모델',
+  why:'AITOM 에이전트 실행 엔진의 대안 설계. 상태·분기·휴먼인더루프 처리 방식이 우리 오케스트레이터 한계를 보완',
+  todo:'릴리스에서 체크포인트·서브그래프·HITL 기능 확인 → AITOM 워크플로 엔진 반영 여부 판단'},
+ {id:'gh-autogen',cat:'github',name:'Microsoft AutoGen',rel:'상',url:'github.com/microsoft/autogen',
+  point:'멀티에이전트 협업(대화형) 패턴',
+  why:'여러 에이전트 분업 구조가 단일 에이전트 대비 복잡업무 처리력에서 우위',
+  todo:'새 협업 패턴·GroupChat 구조 확인 → AITOM 멀티에이전트 기능 로드맵에 반영'},
+ {id:'gh-crewai',cat:'github',name:'CrewAI',rel:'상',url:'github.com/crewAIInc/crewAI',
+  point:'역할 기반 경량 멀티에이전트 구조',
+  why:'도입·구축이 빠른 구조라 SI 납기 단축에 유리',
+  todo:'역할/태스크 정의 방식 벤치마크 → AITOM 에이전트 빌더 UX 단순화 아이디어 도출'},
+ {id:'gh-llamaindex',cat:'github',name:'LlamaIndex',rel:'상',url:'github.com/run-llama/llama_index',
+  point:'RAG·에이전틱 RAG 인덱싱/검색',
+  why:'인덱싱·검색 품질이 AITOM RAG 정확도와 직결',
+  todo:'새 리트리버·에이전틱 RAG 기법 확인 → AITOM RAG 파이프라인 성능 개선에 적용'},
+ {id:'gh-mcp',cat:'github',name:'MCP (Model Context Protocol)',rel:'최상',url:'github.com/modelcontextprotocol',
+  point:'툴·데이터 커넥터 표준 생태계',
+  why:'이 표준이 시장 기본이 되면 미지원 시 호환성에서 밀림 — 사실상 경쟁 필수 요건화',
+  todo:'신규 서버·SDK·보안 스펙 추적 → AITOM에 MCP 커넥터 지원 우선 반영'},
+ {id:'gh-dify',cat:'github',name:'Dify',rel:'최상',url:'github.com/langgenius/dify',
+  point:'노코드 LLM앱·에이전트 빌더 (경쟁 제품형)',
+  why:'AITOM과 정면 경쟁하는 제품. 기능·UX 격차 파악이 차별화의 출발점',
+  todo:'새 기능(에이전트/워크플로/지식베이스)·릴리스 비교 → AITOM 따라잡기·차별화 항목 정리'},
+ {id:'gh-langflow',cat:'github',name:'Langflow',rel:'상',url:'github.com/langflow-ai/langflow',
+  point:'시각적 에이전트 플로우 빌더 (경쟁 제품형)',
+  why:'노코드 UX 트렌드의 기준점. 고객이 기대하는 편의 수준을 좌우',
+  todo:'플로우 편집 UX·노드 구성 벤치마크 → AITOM 빌더 사용성 개선'},
+ {id:'gh-haystack',cat:'github',name:'Haystack',rel:'중',url:'github.com/deepset-ai/haystack',
+  point:'검증된 RAG 파이프라인·검색 품질',
+  why:'성숙한 RAG 컴포넌트·평가 방법의 참고 사례',
+  todo:'파이프라인·평가 기능 확인 → 필요한 기법만 선별 반영'},
+ {id:'gh-vllm',cat:'github',name:'vLLM',rel:'상',url:'github.com/vllm-project/vllm',
+  point:'온프레 추론·서빙 최적화(처리량·지연)',
+  why:'구축형 사업의 GPU 비용·처리량·지연을 좌우 → 수익성과 직결',
+  todo:'신규 서빙 기능(양자화·배치·PagedAttention 개선) 확인 → AITOM 온프레 서빙 원가 절감 적용'},
+ {id:'gh-ollama',cat:'github',name:'Ollama',rel:'중',url:'github.com/ollama/ollama',
+  point:'온프레 로컬 LLM 런타임·배포 편의',
+  why:'소규모 온프레 구축·PoC·데모를 빠르게 세팅',
+  todo:'지원 모델·배포 편의 기능 확인 → 소형 구축/데모 환경에 활용'},
+ {id:'gh-guardrails',cat:'github',name:'NeMo Guardrails',rel:'상',url:'github.com/NVIDIA/NeMo-Guardrails',
+  point:'안전필터·정책 가드레일',
+  why:'공공 RFP의 환각·안전 요구(가드레일) 대응에 필수',
+  todo:'신규 정책·필터 기능 확인 → AITOM 가드레일 강화 + 제안서 안전성 근거로 활용'},
+ {id:'gh-ragas',cat:'github',name:'Ragas',rel:'중',url:'github.com/explodinggradients/ragas',
+  point:'RAG 검색·답변 품질 자동평가',
+  why:'성능 검증·평가방안(제안서 필수 항목)의 정량 근거',
+  todo:'새 평가지표 확인 → AITOM RAG 품질 리포트·제안서 성능검증 계획에 반영'},
+ // ===== Hugging Face =====
+ {id:'hf-openllm',cat:'hf',name:'Open LLM Leaderboard',rel:'상',url:'huggingface.co/spaces/open-llm-leaderboard',
+  point:'오픈 sLLM 성능 순위 변화',
+  why:'온프레 구축에 탑재할 모델 선정 기준',
+  todo:'월 1회 상위 모델 변화 확인 → AITOM 기본 탑재 sLLM 후보 갱신'},
+ {id:'hf-mteb',cat:'hf',name:'MTEB Leaderboard',rel:'상',url:'huggingface.co/spaces/mteb/leaderboard',
+  point:'RAG용 임베딩 모델 순위',
+  why:'임베딩 성능이 RAG 검색 정확도의 핵심 변수',
+  todo:'상위 임베딩(특히 한국어) 확인 → AITOM RAG 임베딩 교체 검토'},
+ {id:'hf-exaone',cat:'hf',name:'LG EXAONE',rel:'상',url:'huggingface.co/LGAI-EXAONE',
+  point:'국산 온프레 sLLM(한국어) 릴리스',
+  why:'공공·보안 사업에서 국산·한국어 강점을 어필할 수 있는 카드',
+  todo:'신규 버전·라이선스 확인 → AITOM 한국어 구축 옵션 반영, 제안 레퍼런스화'},
+ {id:'hf-qwen',cat:'hf',name:'Qwen',rel:'상',url:'huggingface.co/Qwen',
+  point:'다국어·툴콜 강한 오픈 sLLM',
+  why:'에이전트의 툴 사용(function calling) 성능이 우수',
+  todo:'신모델·툴콜 성능 확인 → AITOM 에이전트용 모델 후보 평가'},
+ {id:'hf-gemma',cat:'hf',name:'Gemma / Llama',rel:'중',url:'huggingface.co/google',
+  point:'온프레 서빙 기반 대표 모델',
+  why:'라이선스·성능의 기준선 역할',
+  todo:'신버전·라이선스 변화 확인 → 구축 모델 선택지 갱신'},
+ // ===== arXiv / 논문 =====
+ {id:'ax-agent',cat:'arxiv',name:'"LLM agent / agentic"',rel:'상',url:'Google Scholar Alert',
+  point:'에이전트 설계·툴 사용 최신 연구',
+  why:'AITOM 에이전트 능력의 이론적 상한과 다음 방향을 파악',
+  todo:'월 알림 검토 → 적용 가능한 기법 1개를 격주 로그에 정리'},
+ {id:'ax-tool',cat:'arxiv',name:'"tool use / function calling"',rel:'상',url:'Scholar Alert',
+  point:'툴 호출 정확도·구조 연구',
+  why:'툴 호출 신뢰도가 에이전트 실사용 품질을 좌우',
+  todo:'정확도 향상 기법 확인 → AITOM 툴 호출 안정성 개선에 반영'},
+ {id:'ax-rag',cat:'arxiv',name:'"agentic RAG / long-context"',rel:'상',url:'Scholar Alert',
+  point:'RAG 고도화(에이전틱·롱컨텍스트) 연구',
+  why:'검색 정확도·대용량 문서 처리력 개선의 원천',
+  todo:'신기법 확인 → AITOM RAG 개선 백로그에 추가'},
+ {id:'ax-multi',cat:'arxiv',name:'"multi-agent orchestration"',rel:'중',url:'Scholar Alert',
+  point:'멀티에이전트 협업 연구',
+  why:'복잡 업무 자동화 확장의 설계 근거',
+  todo:'유망 구조 스크랩 → 멀티에이전트 기능 설계에 참고'},
+ {id:'ax-eval',cat:'arxiv',name:'"LLM eval / LLMOps"',rel:'중',url:'paperswithcode.com',
+  point:'평가·운영(LLMOps) 방법론',
+  why:'구축형 사업의 운영·모니터링·성능검증 역량과 직결',
+  todo:'신규 평가·운영 기법 확인 → AITOM LLMOps·운영 대시보드에 반영'},
+ // ===== 채널② 조달·입찰 =====
+ {id:'g2b-keyword',cat:'g2b',name:'나라장터 키워드 모니터',rel:'최상',url:'g2b.go.kr / 조달청 OpenAPI',
+  point:'"생성형 AI·AI 에이전트·지능형 민원·내부지식 검색" 공고·낙찰 자동수집',
+  why:'경쟁사가 어떤 AI에이전트/sLLM 사업을 수주하는지가 가장 현실적인 시그널',
+  todo:'G2B OpenAPI/낙찰정보에서 키워드 수집 → 신규 공고·낙찰사·금액을 격주 정리'},
+ {id:'g2b-rivals',cat:'g2b',name:'경쟁사 수주 이력',rel:'상',url:'나라장터 낙찰정보 / 조달정보개방포털',
+  point:'온투원·플랙싱크 등 sLLM 구축사 수주 건 추적',
+  why:'수주 이력에서 경쟁사의 기술스택·과업범위·가격대가 역으로 드러남',
+  todo:'경쟁사별 낙찰건 리스트업 → 기술스택·투찰가 벤치마크'},
+ {id:'g2b-reqtrend',cat:'g2b',name:'RFP 요구사항 변화 트렌드',rel:'상',url:'더아이엠씨 RFP 아카이브 / 나라장터',
+  point:'MCP·멀티에이전트·가드레일 등 요구 증가 추이',
+  why:'요구사항 트렌드가 곧 AITOM이 갖춰야 할 기능 목록',
+  todo:'최근 RFP 요구 키워드 빈도 축적 → AITOM 기능 우선순위·제안 표준문구에 반영'},
+ // ===== 채널③ 제품·시장 신호 =====
+ {id:'sig-kipris',cat:'signal',name:'KIPRIS 특허 모니터링',rel:'상',url:'kipris.or.kr',
+  point:'경쟁사명 + "AI에이전트/RAG/sLLM" 특허 출원',
+  why:'특허 출원은 경쟁사 기술 방향의 선행지표',
+  todo:'KIPRIS 정기검색 → 경쟁사 신규 출원 발견 시 기술방향 메모'},
+ {id:'sig-hiring',cat:'signal',name:'채용공고 모니터링',rel:'중',url:'원티드 / 잡코리아 / 경쟁사 채용페이지',
+  point:'"멀티에이전트 엔지니어·LLMOps" 등 채용 직무',
+  why:'어떤 직무를 뽑는지가 확장 방향의 신호',
+  todo:'경쟁사 채용페이지 주기 확인 → 확장 영역 추정'},
+ {id:'sig-alerts',cat:'signal',name:'Google Alerts + 제품 changelog',rel:'중',url:'Google Alerts / 각 제품 changelog·RSS',
+  point:'제품 업데이트·보도자료·도입 사례',
+  why:'경쟁 제품 동향·레퍼런스를 자동으로 수집',
+  todo:'경쟁 제품 changelog RSS·Google Alerts 구독 → 월 1회 요약'},
+];
+/* 업서트 시드: 없는 항목은 생성, 있는 항목은 참고필드(포인트·왜·할일 등)만 동기화.
+   사용자 편집필드(상태·확인일·메모)와 직접 추가한 항목은 절대 건드리지 않음 */
+function upsertSeed(){
+  db.ref(ROOT+'/items').once('value',s=>{
+    const cur=s.val()||{},up={};
+    SEED.forEach((r,i)=>{
+      const e=cur[r.id];
+      if(!e){up[r.id]={ord:i,cat:r.cat,name:r.name,point:r.point,why:r.why,todo:r.todo,
+        url:r.url,rel:r.rel,status:'주시',checked:'',memo:''};}
+      else{['ord','cat','name','point','why','todo','url','rel'].forEach(f=>{
+        const v=(f==='ord')?i:r[f];if(e[f]!==v)up[`${r.id}/${f}`]=v;});}
+    });
+    if(Object.keys(up).length)db.ref(ROOT+'/items').update(up);
+  });
+}
+upsertSeed();
+
+/* ---------- 렌더 ---------- */
+function opt(v,cur){return `<option ${v===cur?'selected':''}>${v}</option>`;}
+function renderItems(items){
+  const by={github:[],hf:[],arxiv:[],g2b:[],signal:[]};
+  sortV(items).forEach(it=>{(by[it.cat]||by.github).push(it);});
+  let total=0,nw=0,rv=0;
+  ['github','hf','arxiv','g2b','signal'].forEach(cat=>{
+    const tb=document.getElementById('tb-'+cat);if(!tb)return;tb.innerHTML='';
+    by[cat].forEach(it=>{
+      total++; if(it.status==='신규변화')nw++; if(it.status==='도입검토')rv++;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td><span class="nm">${esc(it.name)}</span></td>
+        <td class="pt">
+          <div class="pt-main">${esc(it.point)}</div>
+          ${it.why?`<div class="pt-why"><b>왜</b>${esc(it.why)}</div>`:''}
+          ${it.todo?`<div class="pt-do"><b>할 일</b>${esc(it.todo)}</div>`:''}
+        </td>
+        <td>${linkify(it.url)}</td>
+        <td><span class="rel ${it.rel}">${it.rel}</span></td>
+        <td><select class="st" data-v="${it.status}" onchange="upd('${it.id}','status',this.value);this.dataset.v=this.value">${STATUS.map(v=>opt(v,it.status)).join('')}</select></td>
+        <td><input class="ed date" type="date" value="${it.checked||''}" onchange="upd('${it.id}','checked',this.value)"></td>
+        <td><input class="ed memo" value="${esc(it.memo)}" placeholder="변화·메모" onchange="upd('${it.id}','memo',this.value)"></td>
+        <td><button class="del" title="삭제" onclick="delItem('${it.id}')">✕</button></td>`;
+      tb.appendChild(tr);
+    });
+  });
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-new').textContent=nw;
+  document.getElementById('s-review').textContent=rv;
+}
+function renderLogs(logs){
+  const tb=document.getElementById('tb-log');tb.innerHTML='';
+  const arr=sortV(logs).reverse();
+  document.getElementById('s-log').textContent=arr.length;
+  arr.forEach(l=>{
+    const tr=document.createElement('tr');tr.className='logrow';
+    tr.innerHTML=`
+      <td>${esc(l.date)}</td><td>${esc(l.who)||'-'}</td><td>${esc(l.source)}</td>
+      <td>${esc(l.change)}</td><td>${esc(l.idea)}</td>
+      <td><span class="prio ${l.prio}">${l.prio}</span></td>
+      <td><button class="del" onclick="delLog('${l.id}')">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+db.ref(ROOT+'/items').on('value',s=>renderItems(s.val()));
+db.ref(ROOT+'/logs').on('value',s=>renderLogs(s.val()));
+
+/* ---------- 수정/추가/삭제 ---------- */
+window.upd=(id,f,v)=>db.ref(`${ROOT}/items/${id}`).update({[f]:v});
+window.delItem=id=>{if(confirm('이 항목을 삭제할까요?'))db.ref(`${ROOT}/items/${id}`).remove();};
+window.delLog=id=>{if(confirm('이 로그를 삭제할까요?'))db.ref(`${ROOT}/logs/${id}`).remove();};
+window.addItem=btn=>{
+  const bar=btn.closest('.addbar'),cat=bar.dataset.cat;
+  const name=bar.querySelector('.a-name').value.trim();
+  if(!name){alert('대상명을 입력하세요');return;}
+  db.ref(ROOT+'/items').push({ord:Date.now()/1000,cat,name,
+    point:bar.querySelector('.a-point').value.trim(),
+    url:bar.querySelector('.a-url').value.trim(),
+    rel:bar.querySelector('.a-rel').value,status:'주시',checked:'',memo:''});
+  bar.querySelectorAll('input').forEach(i=>i.value='');
+};
+window.addLog=()=>{
+  const change=document.getElementById('lg-change').value.trim();
+  if(!change){alert('핵심 변화를 입력하세요');return;}
+  db.ref(ROOT+'/logs').push({ord:Date.now()/1000,
+    date:document.getElementById('lg-date').value||iso(TODAY),
+    who:whoEl.value.trim(),
+    source:document.getElementById('lg-src').value.trim(),
+    change, idea:document.getElementById('lg-idea').value.trim(),
+    prio:document.getElementById('lg-prio').value});
+  ['lg-src','lg-change','lg-idea'].forEach(id=>document.getElementById(id).value='');
+};
+</script>
+</body>
+</html>
