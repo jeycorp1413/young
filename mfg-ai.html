@@ -19,8 +19,8 @@ body{margin:0;background:var(--bg);color:var(--ink);
 
 /* 사업 전환 스위처 */
 .pswitch{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:stretch}
-.pbtn{flex:1;min-width:220px;text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:14px;
-  padding:13px 17px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:13px}
+.pbtn{position:relative;flex:1;min-width:220px;text-align:left;border:1.5px solid var(--line);background:var(--card);border-radius:14px;
+  padding:13px 58px 13px 17px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:13px}
 .pbtn:hover{border-color:#c3d4ee}
 .pbtn.on{border-color:var(--blue);box-shadow:0 3px 14px rgba(5,122,250,.14)}
 .pbtn.on.gntp{border-color:var(--amber);box-shadow:0 3px 14px rgba(224,144,10,.16)}
@@ -33,7 +33,7 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .pbtn>span{min-width:0}
 .pbtn .pt{display:block;font-size:16px;font-weight:700;letter-spacing:-.3px;line-height:1.3}
 .pbtn .ps{display:block;font-size:12.5px;color:var(--sub);margin-top:3px;line-height:1.35}
-.pbtn .role{margin-left:auto;align-self:flex-start;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--lblue);color:var(--blue);white-space:nowrap;line-height:1.5}
+.pbtn .role{position:absolute;top:12px;right:13px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--lblue);color:var(--blue);white-space:nowrap;line-height:1.5}
 .pbtn.gntp .role{background:#fdf0d9;color:var(--amber)}
 .pbtn.robot .role{background:#e4f5ec;color:var(--green)}
 .pbtn.rag .role{background:#ece8fe;color:var(--purple)}
@@ -305,7 +305,7 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
       <div class="filedrop" id="fileDrop">
         <input type="file" id="fileInput" multiple hidden>
         <div>📎 파일을 여기로 끌어다 놓거나 <button class="btn ghost sm" id="filePick">파일 선택</button></div>
-        <div class="muted" style="font-size:12.5px;margin-top:7px">최대 5MB (한글·워드 문서 권장) · 첨부자는 상단에서 선택한 작성자 이름으로 기록됩니다 · 이 사업 탭에만 표시</div>
+        <div class="muted" style="font-size:12.5px;margin-top:7px">최대 30MB (한글·워드·PPT 등) · 첨부자는 상단에서 선택한 작성자 이름으로 기록됩니다 · 이 사업 탭에만 표시</div>
       </div>
       <div id="fileUploading"></div>
       <div id="fileList"><div class="loading">불러오는 중…</div></div></div>
@@ -975,36 +975,42 @@ function renderFiles(){
     ROOT.child('files/'+id).remove(); ROOT.child('fileblobs/'+id).remove(); stamp();
   });
 }
-function downloadFile(id,btn){
+const F_CHUNK=7000000;      // 조각당 base64 문자수 (RTDB 단일 노드 ~10MB 한계 미만)
+const F_MAXRAW=31457280;    // 원본 파일 최대 30MB
+async function downloadFile(id,btn){
   const f=FILES[id]; if(!f)return;
   const old=btn.textContent; btn.textContent='준비중…'; btn.disabled=true;
-  ROOT.child('fileblobs/'+id).once('value',s=>{
-    btn.textContent=old; btn.disabled=false;
-    const data=s.val(); if(!data){ alert('파일 데이터를 찾을 수 없습니다.'); return; }
-    fetch(data).then(r=>r.blob()).then(blob=>{
-      const url=URL.createObjectURL(blob), a=document.createElement('a');
-      a.href=url; a.download=f.name||'file'; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),1500);
-    }).catch(()=>alert('다운로드에 실패했습니다.'));
-  });
+  try{
+    let data='';
+    if(f.chunks){ for(let i=0;i<f.chunks;i++){ const s=await ROOT.child('fileblobs/'+id+'/c'+i).once('value'); const v=s.val(); if(v==null) throw new Error('파일 조각 누락'); data+=v; } }
+    else { const s=await ROOT.child('fileblobs/'+id).once('value'); data=s.val(); }   // 구버전(단일 저장) 호환
+    if(!data) throw new Error('파일 데이터를 찾을 수 없습니다');
+    const blob=await (await fetch(data)).blob();
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download=f.name||'file'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(e){ alert('다운로드 실패: '+((e&&e.message)||e)); }
+  finally{ btn.textContent=old; btn.disabled=false; }
 }
 function uploadFiles(fileArr){
   const up=document.getElementById('fileUploading');
   [...fileArr].forEach(file=>{
-    if(file.size>5242880){ alert(`"${file.name}"은(는) 5MB를 넘어 올릴 수 없습니다.\n(현재 저장 방식은 5MB 이하 문서용입니다)`); return; }
+    if(file.size>F_MAXRAW){ alert(`"${file.name}"은(는) 30MB를 넘어 올릴 수 없습니다.\n(현재 저장 방식의 안전 한도는 30MB)`); return; }
     const key=ROOT.child('files').push().key;
     const box=document.createElement('div'); box.className='frow';
     box.innerHTML=`<div class="fic">${fileIcon(file.name)}</div><div class="fmeta"><div class="fname">${esc(file.name)}</div><div class="fprog"><i></i></div><div class="fsub">올리는 중…</div></div>`;
     up.appendChild(box); const bar=box.querySelector('.fprog>i'), sub=box.querySelector('.fsub');
     const rd=new FileReader();
-    rd.onprogress=e=>{ if(e.lengthComputable) bar.style.width=(e.loaded/e.total*70)+'%'; };
+    rd.onprogress=e=>{ if(e.lengthComputable) bar.style.width=(e.loaded/e.total*35)+'%'; };
     rd.onerror=()=>{ sub.textContent='읽기 실패'; sub.style.color='var(--red)'; };
-    rd.onload=()=>{
-      bar.style.width='85%';
-      ROOT.child('fileblobs/'+key).set(rd.result)
-        .then(()=>ROOT.child('files/'+key).set({name:file.name,size:file.size,type:file.type||'',by:ME||'',at:Date.now()}))
-        .then(()=>{ stamp(); box.remove(); })
-        .catch(err=>{ sub.textContent='저장 실패: '+((err&&err.message)||err); sub.style.color='var(--red)'; });
+    rd.onload=async ()=>{
+      try{
+        const data=rd.result;
+        const parts=[]; for(let i=0;i<data.length;i+=F_CHUNK) parts.push(data.slice(i,i+F_CHUNK));
+        for(let i=0;i<parts.length;i++){ await ROOT.child('fileblobs/'+key+'/c'+i).set(parts[i]); bar.style.width=(35+(i+1)/parts.length*60)+'%'; }
+        await ROOT.child('files/'+key).set({name:file.name,size:file.size,type:file.type||'',by:ME||'',at:Date.now(),chunks:parts.length});
+        stamp(); box.remove();
+      }catch(err){ sub.textContent='저장 실패: '+((err&&err.message)||err); sub.style.color='var(--red)'; }
     };
     rd.readAsDataURL(file);
   });
