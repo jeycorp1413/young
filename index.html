@@ -271,7 +271,7 @@ const MOODS = { good:{l:"기분좋음",e:"😊",c:"#ec6f9e"}, hangover:{l:"숙�
 const STAMPS = { star:{l:"오늘의 일잘러",e:"🏅"}, clap:{l:"수고했어",e:"👏"}, thanks:{l:"고마워",e:"🙏"}, love:{l:"최고야",e:"😍"} };
 const REACTIONS = { kk:"ㅋㅋ", up:"👍", heart:"❤️" };
 // 출퇴근 시간 [시작, 종료] (시 단위, .5=30분)
-const WORKHOURS = { "하이슬":[8,17], "신지영":[8,17], "정서연":[8,17], "지희애":[8.5,17.5] };
+const WORKHOURS = { "하이슬":[8,17], "신지영":[8,17], "정서연":[8,17] };
 // 2026 공휴일(대체공휴일 포함) — 매년 갱신 필요
 /* 국경일·기념일(쉬는 날 아님, 근무일). MM-DD 키, 매년 반복 */
 const NATIONAL = {};
@@ -280,7 +280,6 @@ const SEED = {
   u1:{name:"하이슬", status:"working", sub:"busy",   msg:"오늘 너무 바빠.....", order:1},
   u2:{name:"신지영", status:"meeting", sub:null,     msg:"월루중", order:2},
   u3:{name:"정서연", status:"resting", sub:"coffee", msg:"사장님 나빠요", order:3},
-  u4:{name:"지희애", status:"working", sub:"free",   msg:"안녕하세요!", order:4},
 };
 let DATA=[], PROJECTS=[], filter="all", editId=null, editStatus=null, editSub=null, editMood=null, stampTarget=null;
 let EVENTS=[], WEATHER=null, COFFEE=null; const DAYMS=86400000;
@@ -607,6 +606,7 @@ function start(){
   clock(); setInterval(()=>{ clock(); ticker(); tickOffwork(); }, 1000); setInterval(render, 30000);
   if(configured){
     firebase.initializeApp(firebaseConfig); db=firebase.database();
+    db.ref("members/u4").remove(); // 퇴사 멤버(지희애) DB 정리
     db.ref("members").on("value", snap=>{ const v=snap.val(); if(!v){ db.ref("members").set(SEED); return; }
       DATA=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.order||0)-(b.order||0)); render(); });
     db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
