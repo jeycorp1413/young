@@ -305,7 +305,7 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
       <div class="filedrop" id="fileDrop">
         <input type="file" id="fileInput" multiple hidden>
         <div>📎 파일을 여기로 끌어다 놓거나 <button class="btn ghost sm" id="filePick">파일 선택</button></div>
-        <div class="muted" style="font-size:12.5px;margin-top:7px">최대 50MB · 첨부자는 상단에서 선택한 작성자 이름으로 기록됩니다 · 이 사업 탭에만 표시</div>
+        <div class="muted" style="font-size:12.5px;margin-top:7px">최대 5MB (한글·워드 문서 권장) · 첨부자는 상단에서 선택한 작성자 이름으로 기록됩니다 · 이 사업 탭에만 표시</div>
       </div>
       <div id="fileUploading"></div>
       <div id="fileList"><div class="loading">불러오는 중…</div></div></div>
@@ -341,7 +341,6 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyDerROVp0gBbuClRdhNAn42uv1FjnoaOKQ",
@@ -354,7 +353,6 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const storage = firebase.storage();
 
 /* ---------- 공용 유틸 ---------- */
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
@@ -968,33 +966,47 @@ function renderFiles(){
         <div class="fname">${esc(f.name)}</div>
         <div class="fsub">${fmtSize(f.size)} · ✍ ${esc(f.by||'미기록')}${f.at?' · '+new Date(f.at).toLocaleDateString('ko-KR'):''}</div>
       </div>
-      <a class="btn ghost sm fdl" href="${escA(f.url)}" target="_blank" rel="noopener" download="${escA(f.name)}">내려받기</a>
+      <button class="btn ghost sm fdl" data-dl="${id}">내려받기</button>
       <button class="btn del sm" data-del="${id}">×</button>
     </div>`).join('') : '<div class="muted">첨부된 파일이 없습니다. 위에서 파일을 올려보세요.</div>';
+  el.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>downloadFile(b.dataset.dl,b));
   el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
-    const id=b.dataset.del, f=FILES[id]; if(!confirm('이 파일을 삭제할까요?'))return;
-    const done=()=>{ ROOT.child('files/'+id).remove(); stamp(); };
-    if(f&&f.path){ storage.ref().child(f.path).delete().then(done).catch(done); } else done();
+    const id=b.dataset.del; if(!confirm('이 파일을 삭제할까요?'))return;
+    ROOT.child('files/'+id).remove(); ROOT.child('fileblobs/'+id).remove(); stamp();
+  });
+}
+function downloadFile(id,btn){
+  const f=FILES[id]; if(!f)return;
+  const old=btn.textContent; btn.textContent='준비중…'; btn.disabled=true;
+  ROOT.child('fileblobs/'+id).once('value',s=>{
+    btn.textContent=old; btn.disabled=false;
+    const data=s.val(); if(!data){ alert('파일 데이터를 찾을 수 없습니다.'); return; }
+    fetch(data).then(r=>r.blob()).then(blob=>{
+      const url=URL.createObjectURL(blob), a=document.createElement('a');
+      a.href=url; a.download=f.name||'file'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+    }).catch(()=>alert('다운로드에 실패했습니다.'));
   });
 }
 function uploadFiles(fileArr){
   const up=document.getElementById('fileUploading');
   [...fileArr].forEach(file=>{
-    if(file.size>52428800){ alert(`"${file.name}"은(는) 50MB를 넘어 올릴 수 없습니다.`); return; }
+    if(file.size>5242880){ alert(`"${file.name}"은(는) 5MB를 넘어 올릴 수 없습니다.\n(현재 저장 방식은 5MB 이하 문서용입니다)`); return; }
     const key=ROOT.child('files').push().key;
-    const safe=(file.name||'file').replace(/[^\w.\-가-힣() ]/g,'_');
-    const path='mfg_ai/'+PID+'/'+key+'_'+safe;
     const box=document.createElement('div'); box.className='frow';
     box.innerHTML=`<div class="fic">${fileIcon(file.name)}</div><div class="fmeta"><div class="fname">${esc(file.name)}</div><div class="fprog"><i></i></div><div class="fsub">올리는 중…</div></div>`;
     up.appendChild(box); const bar=box.querySelector('.fprog>i'), sub=box.querySelector('.fsub');
-    const task=storage.ref().child(path).put(file);
-    task.on('state_changed',
-      snap=>{ bar.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%'; },
-      err=>{ sub.textContent='업로드 실패: '+(err.code||err.message)+' — Storage 권한 확인 필요'; sub.style.color='var(--red)'; },
-      ()=>{ task.snapshot.ref.getDownloadURL().then(url=>{
-        ROOT.child('files/'+key).set({name:file.name,size:file.size,type:file.type||'',url,path,by:ME||'',at:Date.now()});
-        stamp(); box.remove();
-      }); });
+    const rd=new FileReader();
+    rd.onprogress=e=>{ if(e.lengthComputable) bar.style.width=(e.loaded/e.total*70)+'%'; };
+    rd.onerror=()=>{ sub.textContent='읽기 실패'; sub.style.color='var(--red)'; };
+    rd.onload=()=>{
+      bar.style.width='85%';
+      ROOT.child('fileblobs/'+key).set(rd.result)
+        .then(()=>ROOT.child('files/'+key).set({name:file.name,size:file.size,type:file.type||'',by:ME||'',at:Date.now()}))
+        .then(()=>{ stamp(); box.remove(); })
+        .catch(err=>{ sub.textContent='저장 실패: '+((err&&err.message)||err); sub.style.color='var(--red)'; });
+    };
+    rd.readAsDataURL(file);
   });
 }
 /* 파일 선택·드래그 (1회 배선) */
