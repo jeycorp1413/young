@@ -606,6 +606,7 @@ function start(){
   clock(); setInterval(()=>{ clock(); ticker(); tickOffwork(); }, 1000); setInterval(render, 30000);
   if(configured){
     firebase.initializeApp(firebaseConfig); db=firebase.database();
+    db.ref("members/u4").remove(); // 퇴사 멤버(지희애) DB 정리
     db.ref("members").on("value", snap=>{ const v=snap.val(); if(!v){ db.ref("members").set(SEED); return; }
       DATA=Object.keys(v).map(k=>Object.assign({id:k}, v[k])).sort((a,b)=>(a.order||0)-(b.order||0)); render(); });
     db.ref("events").on("value", snap=>{ const v=snap.val()||{}; EVENTS=Object.keys(v).map(k=>Object.assign({id:k}, v[k])); render(); });
