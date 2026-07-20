@@ -25,15 +25,18 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .pbtn.on{border-color:var(--blue);box-shadow:0 3px 14px rgba(5,122,250,.14)}
 .pbtn.on.gntp{border-color:var(--amber);box-shadow:0 3px 14px rgba(224,144,10,.16)}
 .pbtn.on.robot{border-color:var(--green);box-shadow:0 3px 14px rgba(31,157,91,.16)}
+.pbtn.on.rag{border-color:var(--purple);box-shadow:0 3px 14px rgba(122,90,245,.16)}
 .pbtn .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;color:#fff;background:var(--blue)}
 .pbtn.gntp .ic{background:var(--amber)}
-.pbtn.robot .ic{background:var(--green)}
+.pbtn.robot .ic{background:var(--green);font-size:17px}
+.pbtn.rag .ic{background:var(--purple)}
 .pbtn>span{min-width:0}
 .pbtn .pt{display:block;font-size:16px;font-weight:700;letter-spacing:-.3px;line-height:1.3}
 .pbtn .ps{display:block;font-size:12.5px;color:var(--sub);margin-top:3px;line-height:1.35}
 .pbtn .role{margin-left:auto;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--lblue);color:var(--blue);white-space:nowrap}
 .pbtn.gntp .role{background:#fdf0d9;color:var(--amber)}
 .pbtn.robot .role{background:#e4f5ec;color:var(--green)}
+.pbtn.rag .role{background:#ece8fe;color:var(--purple)}
 
 header.top{background:var(--navy);color:#fff;border-radius:16px;padding:20px 24px;margin-bottom:16px;
   display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
@@ -69,6 +72,10 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
 .ed:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(5,122,250,.15)}
 .erow .btn.del{position:absolute;top:9px;right:9px;padding:3px 9px}
 .tag-chip{font-size:12px;font-weight:700;padding:2px 9px;border-radius:6px}
+.byline{flex-basis:100%;width:100%;font-size:12.5px;color:var(--sub);margin-top:3px;display:flex;align-items:center;gap:5px}
+.byline b{color:var(--blue);font-weight:700} .byline.noauth{color:var(--gray);font-style:italic}
+.byline.clk{cursor:pointer;border-radius:6px;padding:1px 5px;margin-left:-5px;width:fit-content;max-width:100%}
+.byline.clk:hover{background:var(--lblue);color:var(--blue)} .byline.noauth.clk:hover{background:#fff4d6}
 .add-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .add-bar input,.add-bar select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:15px}
 .action{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)} .action:first-child{border-top:0}
@@ -108,6 +115,16 @@ textarea.ed{flex-basis:100%;width:100%;min-height:48px;resize:vertical;line-heig
 .fld input,.fld select,.fld textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 11px;font-family:inherit;font-size:15.5px}
 .fld textarea{resize:vertical;min-height:54px}
 .modal-act{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.filedrop{border:2px dashed var(--line);border-radius:12px;padding:22px 16px;text-align:center;transition:.15s;margin-bottom:14px}
+.filedrop.drag{border-color:var(--blue);background:#f3f8ff}
+.frow{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;margin-bottom:9px}
+.frow .fic{width:38px;height:38px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;font-size:19px;background:var(--lblue)}
+.frow .fmeta{min-width:0;flex:1}
+.frow .fname{font-weight:600;font-size:15px;word-break:break-all}
+.frow .fsub{font-size:12.5px;color:var(--sub);margin-top:2px}
+.frow a.fdl{white-space:nowrap;text-decoration:none}
+.fprog{height:8px;background:#eef1f7;border-radius:5px;overflow:hidden;margin:6px 0}
+.fprog>i{display:block;height:100%;background:var(--blue);width:0;transition:width .2s}
 .foot{text-align:center;color:var(--gray);font-size:13px;margin-top:20px}
 .loading{text-align:center;color:var(--sub);padding:30px;font-size:15px}
 .tl-month{font-weight:700;font-size:15.5px;color:var(--navy);margin:16px 0 6px;padding-bottom:5px;border-bottom:2px solid var(--lblue)}
@@ -165,6 +182,11 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
       <span><span class="pt">양팔로봇 · 자율주행 양팔 로봇시스템</span><span class="ps">비전기반 프레임리스 유연생산 · 온디바이스 AI 비전</span></span>
       <span class="role">공동</span>
     </button>
+    <button class="pbtn rag" data-pid="rag">
+      <span class="ic">🪖</span>
+      <span><span class="pt">軍 인사업무체계 RAG Agent 실증</span><span class="ps">3대 에이전트·환각제로 RAG·온프레미스 국방 LLM · 육군 인사사령부</span></span>
+      <span class="role">공동</span>
+    </button>
   </div>
 
   <header class="top">
@@ -174,6 +196,7 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
       <div id="badgeBox"></div>
     </div>
     <div style="text-align:right">
+      <select class="who-pick" id="whoPick" title="작성자(나)를 선택하세요 — 이슈·댓글에 이름이 기록됩니다"></select>
       <div class="sync" id="syncInfo">연결 중…</div>
     </div>
   </header>
@@ -193,6 +216,7 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
     <div class="tab" data-p="wbs">📊 WBS</div>
     <div class="tab" data-p="issues">이슈</div>
     <div class="tab" data-p="actions">✅ 체크리스트</div>
+    <div class="tab" data-p="files">📎 첨부파일</div>
     <div class="tab" data-p="people">연락처</div>
   </div>
 
@@ -276,6 +300,17 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
         <div id="mmResult" style="margin-top:8px"></div></details></div>
   </section>
 
+  <section class="panel" data-p="files">
+    <div class="card"><h3>첨부파일 <span class="editable-hint">한글·워드·PDF·엑셀 등</span></h3>
+      <div class="filedrop" id="fileDrop">
+        <input type="file" id="fileInput" multiple hidden>
+        <div>📎 파일을 여기로 끌어다 놓거나 <button class="btn ghost sm" id="filePick">파일 선택</button></div>
+        <div class="muted" style="font-size:12.5px;margin-top:7px">최대 50MB · 첨부자는 상단에서 선택한 작성자 이름으로 기록됩니다 · 이 사업 탭에만 표시</div>
+      </div>
+      <div id="fileUploading"></div>
+      <div id="fileList"><div class="loading">불러오는 중…</div></div></div>
+  </section>
+
   <section class="panel" data-p="people">
     <div class="card"><h3>수행기관·담당자 <span class="editable-hint">기관명·담당자 수정</span></h3>
       <div id="orgList"><div class="loading">불러오는 중…</div></div>
@@ -306,6 +341,7 @@ table.gt{border-collapse:separate;border-spacing:0;font-size:13px;width:max-cont
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyDerROVp0gBbuClRdhNAn42uv1FjnoaOKQ",
@@ -318,6 +354,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const storage = firebase.storage();
 
 /* ---------- 공용 유틸 ---------- */
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
@@ -330,6 +367,32 @@ const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"
 const escA=s=>(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const sortV=o=>Object.values(o||{}).sort((a,b)=>(a.ord||0)-(b.ord||0));
 document.getElementById('today').textContent=`${fmtMD(TODAY)} (${W[TODAY.getDay()]})`;
+
+/* ---------- 작성자(나) 식별 ---------- */
+const WHOAMI=['하이슬','강지훈','윤창식','신지영','김대원'];
+let ME=localStorage.getItem('mfg_user')||'';
+const whoPick=document.getElementById('whoPick');
+whoPick.innerHTML='<option value="">✍ 작성자 선택…</option>'+WHOAMI.map(n=>`<option ${n===ME?'selected':''}>${n}</option>`).join('');
+whoPick.value=ME;
+whoPick.onchange=()=>{ ME=whoPick.value; localStorage.setItem('mfg_user',ME); };
+/* 항목의 작성자 표시 HTML (refKey·id 주면 클릭해 작성자 입력 가능) */
+function byHTML(it,refKey,id){
+  const editable=refKey&&id, attr=editable?` data-byrk="${refKey}" data-byid="${id}" title="클릭해 작성자 입력/수정"`:'';
+  if(it&&it.by){ const d=it.at?new Date(it.at):null; const dt=d?` · ${d.getMonth()+1}/${d.getDate()}`:''; return `<div class="byline${editable?' clk':''}"${attr}>✍ 작성 <b>${esc(it.by)}</b>${dt}</div>`; }
+  return `<div class="byline noauth${editable?' clk':''}"${attr}>✍ 작성자 미기록${editable?' (클릭해 입력)':''}</div>`;
+}
+/* 작성자 클릭 편집 배선 */
+function wireByline(scope){
+  scope.querySelectorAll('.byline.clk[data-byrk]').forEach(el=>el.onclick=()=>{
+    const rk=el.dataset.byrk, id=el.dataset.byid;
+    const b=el.querySelector('b'), cur=b?b.textContent:'';
+    const v=prompt('작성자 이름을 입력하세요\n(하이슬 / 강지훈 / 윤창식 / 신지영 / 김대원)', cur||ME||'');
+    if(v===null) return;
+    ROOT.child(rk+'/'+id).update({by:v.trim(),at:Date.now()}); stamp();
+  });
+}
+/* 새 항목에 작성자·시각 스탬프 */
+function stampBy(obj){ obj.by=ME||''; obj.at=Date.now(); return obj; }
 
 /* ==========================================================
    사업별 설정 + 시드 데이터 (폴더 문서 실데이터)
@@ -390,7 +453,7 @@ const PCONF={
      p4:{org:'대구디지털혁신진흥원 (DIP·발주)',people:'—',ord:4},
      p5:{org:'ETRI (컨설팅 자문)',people:'윤민성 책임연구원',ord:5}
    },
-   wbs:{w00:{lvl:1,code:"1",title:"1차년도(2025) 개발·실증·운영",org:"1차년도",start:"2025-05-01",end:"2025-12-31",pct:100,ord:1},w01:{lvl:3,code:"1.1",title:"데이터 수집 환경 구축 (소리 특징분석·소음필터·데이터셋)",org:"1차년도",start:"2025-05-01",end:"2025-06-30",pct:100,ord:2},w02:{lvl:3,code:"1.2",title:"실시간 데이터 처리·전처리 (spectrogram·잡음제거)",org:"1차년도",start:"2025-06-01",end:"2025-07-31",pct:100,ord:3},w03:{lvl:3,code:"1.3",title:"AI 모델 개발 (특징 추출·주파수 변환)",org:"1차년도",start:"2025-07-01",end:"2025-09-30",pct:100,ord:4},w04:{lvl:3,code:"1.4",title:"AI 모델 학습·성능 검증 (GPU·자동튜닝, TTA 신뢰성)",org:"1차년도",start:"2025-08-01",end:"2025-10-31",pct:100,ord:5},w05:{lvl:3,code:"1.5",title:"실시간 불량 탐지 시스템 개발 (프로토타입)",org:"1차년도",start:"2025-09-01",end:"2025-11-30",pct:100,ord:6},w06:{lvl:3,code:"1.6",title:"AI 모델 PoC·실증 (웹 연동·검증)",org:"1차년도",start:"2025-10-01",end:"2025-11-30",pct:100,ord:7},w07:{lvl:3,code:"1.7",title:"실시간 불량 탐지 시스템 테스트",org:"1차년도",start:"2025-11-01",end:"2025-12-31",pct:100,ord:8},w08:{lvl:3,code:"1.8",title:"품질지능시스템 운영 (생산성 향상률 TTA)",org:"1차년도",start:"2025-12-01",end:"2025-12-31",pct:100,ord:9},w09:{lvl:1,code:"2",title:"2차년도(2026) 개발·실증·운영",org:"2차년도",start:"2026-01-01",end:"2026-12-31",pct:0,ord:10},w10:{lvl:3,code:"2.1",title:"고품질 데이터 추가 수집 (기존 환경 특징 분석)",org:"2차년도",start:"2026-01-01",end:"2026-03-31",pct:0,ord:11},w11:{lvl:3,code:"2.2",title:"생산 이상 AI 모델 고도화 (헤딩공정 포함, TTA)",org:"2차년도",start:"2026-02-01",end:"2026-05-31",pct:0,ord:12},w12:{lvl:3,code:"2.3",title:"기계 이상 AI 모델 개발·고도화",org:"2차년도",start:"2026-03-01",end:"2026-06-30",pct:0,ord:13},w13:{lvl:3,code:"2.4",title:"실시간 이상 탐지·대응 개선",org:"2차년도",start:"2026-05-01",end:"2026-07-31",pct:0,ord:14},w14:{lvl:3,code:"2.5",title:"실시간 불량 탐지 시스템 운영 테스트 (클라우드 연계)",org:"2차년도",start:"2026-06-01",end:"2026-08-31",pct:0,ord:15},w15:{lvl:3,code:"2.6",title:"생산 공정 내 AI 모델 안정화 (재학습)",org:"2차년도",start:"2026-07-01",end:"2026-09-30",pct:0,ord:16},w16:{lvl:3,code:"2.7",title:"제조 공정 AI 모델 도입 확대 (클라우드 연동·리포트)",org:"2차년도",start:"2026-09-01",end:"2026-11-30",pct:0,ord:17},w17:{lvl:3,code:"2.8",title:"지속 유지보수·개선 (스토리지 최적화·암호화)",org:"2차년도",start:"2026-11-01",end:"2026-12-31",pct:0,ord:18}}
+   wbs:{w00:{lvl:1,code:"1",title:"1차년도(2025) 개발·실증·운영",org:"1차년도",start:"2025-05-01",end:"2025-12-31",pct:100,ord:1},w01:{lvl:3,code:"1.1",title:"데이터 수집 환경 구축 (소리 특징분석·소음필터·데이터셋)",org:"1차년도",start:"2025-05-01",end:"2025-06-30",pct:100,ord:2},w02:{lvl:3,code:"1.2",title:"실시간 데이터 처리·전처리 (spectrogram·잡음제거)",org:"1차년도",start:"2025-06-01",end:"2025-07-31",pct:100,ord:3},w03:{lvl:3,code:"1.3",title:"AI 모델 개발 (특징 추출·주파수 변환)",org:"1차년도",start:"2025-07-01",end:"2025-09-30",pct:100,ord:4},w04:{lvl:3,code:"1.4",title:"AI 모델 학습·성능 검증 (GPU·자동튜닝, TTA 신뢰성)",org:"1차년도",start:"2025-08-01",end:"2025-10-31",pct:100,ord:5},w05:{lvl:3,code:"1.5",title:"실시간 불량 탐지 시스템 개발 (프로토타입)",org:"1차년도",start:"2025-09-01",end:"2025-11-30",pct:100,ord:6},w06:{lvl:3,code:"1.6",title:"AI 모델 PoC·실증 (웹 연동·검증)",org:"1차년도",start:"2025-10-01",end:"2025-11-30",pct:100,ord:7},w07:{lvl:3,code:"1.7",title:"실시간 불량 탐지 시스템 테스트",org:"1차년도",start:"2025-11-01",end:"2025-12-31",pct:100,ord:8},w08:{lvl:3,code:"1.8",title:"품질지능시스템 운영 (생산성 향상률 TTA)",org:"1차년도",start:"2025-12-01",end:"2025-12-31",pct:100,ord:9},w09:{lvl:1,code:"2",title:"2차년도(2026) 개발·실증·운영",org:"2차년도",start:"2026-01-01",end:"2026-12-31",pct:0,ord:10},w10:{lvl:3,code:"2.1",title:"고품질 데이터 추가 수집 (기존 환경 특징 분석)",org:"투스카이",start:"2026-07-01",end:"2026-08-31",pct:10,ord:11},w11:{lvl:3,code:"2.2",title:"생산 이상 AI 모델 고도화 (헤딩공정 포함, TTA)",org:"투스카이",start:"2026-05-01",end:"2026-09-30",pct:45,ord:12},w12:{lvl:3,code:"2.3",title:"기계 이상 AI 모델 개발·고도화",org:"2차년도",start:"2026-03-01",end:"2026-06-30",pct:0,ord:13},w13:{lvl:3,code:"2.4",title:"실시간 이상 탐지·대응 개선",org:"투스카이",start:"2026-08-01",end:"2026-09-30",pct:0,ord:14},w14:{lvl:3,code:"2.5",title:"실시간 불량 탐지 시스템 운영 테스트 (클라우드 연계)",org:"투스카이",start:"2026-08-01",end:"2026-11-30",pct:0,ord:15},w15:{lvl:3,code:"2.6",title:"생산 공정 내 AI 모델 안정화 (재학습)",org:"투스카이",start:"2026-08-01",end:"2026-11-30",pct:0,ord:16},w16:{lvl:3,code:"2.7",title:"제조 공정 AI 모델 도입 확대 (클라우드 연동·리포트)",org:"투스카이",start:"2026-09-01",end:"2026-11-30",pct:0,ord:17},w17:{lvl:3,code:"2.8",title:"지속 유지보수·개선 (스토리지 최적화·암호화)",org:"투스카이",start:"2026-11-01",end:"2026-12-31",pct:0,ord:18}}
   }
  },
  gntp:{
@@ -501,10 +564,99 @@ const PCONF={
      p5:{org:'고광메탈 (수요기업)',people:'성석천 이사 (kkmetal@kokwang.co.kr)',ord:5}
    },
    wbs:{
-     w01:{name:'하이브리드 인지 알고리즘 (경량 VLM 상황추론 + 고속 비전 실시간 추적 결합)',pct:0,ord:1},
-     w02:{name:'초저지연 객체 탐지 (동적 장애물 200ms 이내) 온디바이스 최적화',pct:0,ord:2},
-     w03:{name:'고정밀 3D 공간 인지 (작업대상 깊이 오차 ±20mm 좌표 산출)',pct:0,ord:3},
-     w04:{name:'성능 목표 검증 (회피율 80%·경로재설계 400ms·캘리브레이션 3mm)',pct:0,ord:4}
+     w00:{lvl:1,code:"1",title:"공통 · 협약 · 관리",org:"공통",start:"2026-04-01",end:"2026-12-31",pct:15,ord:1},
+     w01:{lvl:3,code:"1.1",title:"과제 착수 및 기관 간 역할·인터페이스 협의",org:"공통",start:"2026-04-01",end:"2026-06-30",pct:60,ord:2},
+     w02:{lvl:3,code:"1.2",title:"월간 보고·중간 점검·1년차 평가 대응",org:"공통",start:"2026-06-01",end:"2026-12-31",pct:0,ord:3},
+     w03:{lvl:1,code:"2",title:"더아이엠씨 — 온디바이스 하이브리드 AI 비전",org:"더아이엠씨",start:"2026-05-01",end:"2026-12-31",pct:0,ord:4},
+     w04:{lvl:2,code:"2.1",title:"하이브리드 인지 알고리즘 개발",org:"더아이엠씨",start:"2026-05-01",end:"2026-10-31",pct:0,ord:5},
+     w05:{lvl:3,code:"2.1.1",title:"경량 VLM 고차원 상황추론 모델 설계",org:"더아이엠씨",start:"2026-05-01",end:"2026-08-31",pct:0,ord:6},
+     w06:{lvl:3,code:"2.1.2",title:"고속 비전 실시간 추적 결합 구조 개발",org:"더아이엠씨",start:"2026-07-01",end:"2026-10-31",pct:0,ord:7},
+     w07:{lvl:2,code:"2.2",title:"초저지연 객체 탐지 (동적 장애물 200ms) 온디바이스 최적화",org:"더아이엠씨",start:"2026-07-01",end:"2026-11-30",pct:0,ord:8},
+     w08:{lvl:3,code:"2.2.1",title:"객체탐지 모델 경량화·양자화 (온디바이스)",org:"더아이엠씨",start:"2026-07-01",end:"2026-09-30",pct:0,ord:9},
+     w09:{lvl:3,code:"2.2.2",title:"실시간 추론 파이프라인 지연 200ms 이내 튜닝",org:"더아이엠씨",start:"2026-09-01",end:"2026-11-30",pct:0,ord:10},
+     w10:{lvl:2,code:"2.3",title:"고정밀 3D 공간 인지 (깊이 오차 ±20mm 좌표 산출)",org:"더아이엠씨",start:"2026-08-01",end:"2026-12-15",pct:0,ord:11},
+     w11:{lvl:3,code:"2.3.1",title:"스테레오·깊이 센서 기반 3D 좌표 추정 개발",org:"더아이엠씨",start:"2026-08-01",end:"2026-10-31",pct:0,ord:12},
+     w12:{lvl:3,code:"2.3.2",title:"카메라-로봇 캘리브레이션 (오차 3mm) 구현",org:"더아이엠씨",start:"2026-10-01",end:"2026-12-15",pct:0,ord:13},
+     w13:{lvl:2,code:"2.4",title:"성능 목표 검증 (회피율 80%·경로재설계 400ms)",org:"더아이엠씨",start:"2026-10-01",end:"2026-12-31",pct:0,ord:14},
+     w14:{lvl:3,code:"2.4.1",title:"통합 실증 데이터셋 구성·성능 측정",org:"더아이엠씨",start:"2026-10-01",end:"2026-11-30",pct:0,ord:15},
+     w15:{lvl:3,code:"2.4.2",title:"목표 지표 검증·리포트 (회피율/경로/캘리브)",org:"더아이엠씨",start:"2026-11-01",end:"2026-12-31",pct:0,ord:16}
+   }
+  }
+ },
+ rag:{
+  text:{
+    htitle:'軍 인사업무체계 RAG Agent 기술 적용 실증',
+    hsub:'3대 에이전트·환각제로 RAG·온프레미스 국방 LLM · 육군 인사사령부 국방 실험사업(IITP) · 제안 준비',
+    stage:'제안서 작성 단계',
+    role:'공동수급(데이터·RAG 담당) — 환각제로 RAG 파이프라인·벡터DB 품질·비정형 데이터 처리(텍스톰 13년 NLP)로 3대 에이전트(①질의응답 ②보고서초안 ③현황종합) 구현. "모델을 파는 사업이 아니라 데이터를 다루는 사업" 차별화·모델중립 LLMOps. 주관 만사시스템(국방 SI).'
+  },
+  badges:['주관: 만사시스템','공동: 더아이엠씨','발주: 육군 인사사령부','국방 실험사업(IITP 관리)'],
+  info:[
+    ['사업명','軍 인사업무체계 RAG Agent 기술 적용 실증'],
+    ['발주기관','육군 인사사령부(AI 인재관리시스템 구축TF) · 납품 충남 계룡'],
+    ['수행체계','만사시스템(주관·국방SI) · ㈜더아이엠씨(공동·데이터/RAG)'],
+    ['사업기간','계약체결일 ~ 12개월'],
+    ['사업예산','1,346백만원(VAT포함) · 장기계속 (26년 700 / 27년 646)'],
+    ['계약방법','일반경쟁(협상에 의한 계약) · 차등점수 3점 · 협상적격 원점수 85%↑'],
+    ['평가배점','정량15(경영5·실적5·상생5) + 정성85 + 가격 / 목차=RFP 별지#1 준수'],
+    ['더아이엠씨 담당','환각제로 RAG·벡터DB 품질·비정형 데이터 처리·3대 에이전트 구현']
+  ],
+  seeds:{
+   events:{
+     e1:{date:'2026-07-13',title:'1차 컨소시엄 회의 (제안전략 검토)',type:'회의',owner:'만사시스템·더아이엠씨',memo:'환각제로·데이터 사업 프레임 검토'},
+     e2:{date:'2026-07-15',title:'제안 브리프 최종본 공유',type:'보고',owner:'더아이엠씨',memo:'RFP 팩트·배점·차별화 정리'},
+     e3:{date:'2026-07-20',title:'제안서 작성 착수 (1차 목차·전략 확정)',type:'기타',owner:'더아이엠씨',memo:'별지#1 목차 + 배점 매핑'},
+     e4:{date:'2026-07-31',title:'제안서 초안 내부 검토 (목표)',type:'마감',owner:'컨소시엄',memo:'※ 실제 제출 마감일 확인 필요'}
+   },
+   actions:{
+     a1:{title:'목차 확정 — RFP 별지#1 준수 + 배점 매핑 검증(조견표 별지#25 대조)',who:'더아이엠씨',due:'',done:false,ord:1},
+     a2:{title:'컨소시엄 지분율 결정(중기 50%↑ 상생 5점) + 업무분장',who:'만사·더아이엠씨',due:'',done:false,ord:2},
+     a3:{title:'LLM 제조사 선정·기술지원 확약서 3종 확보 경로',who:'컨소시엄',due:'',done:false,ord:3},
+     a4:{title:'성과지표 4종 달성방법+측정방법 SLA 표 초안',who:'더아이엠씨',due:'',done:false,ord:4},
+     a5:{title:'3대 에이전트 구현 아키텍처 도식(기능요구 7점 승부처)',who:'더아이엠씨',due:'',done:false,ord:5},
+     a6:{title:'요구사항 89항목 수용여부 참조표(별지#24) 작성',who:'더아이엠씨',due:'',done:false,ord:6}
+   },
+   recent:{
+     r1:{tag:'완료',title:'1차 컨소시엄 회의 (제안전략 검토)',desc:'만사시스템(주관·국방)+더아이엠씨(데이터·RAG) 역할·차별화 방향 합의',ord:1},
+     r2:{tag:'완료',title:'제안 브리프 최종본 공유 (07-15)',desc:'RFP 팩트시트·평가배점·경쟁사(코난/마음AI/솔트룩스) 대응 정리',ord:2},
+     r3:{tag:'완료',title:'1차 목차 전략·차별화 매핑 수립 (07-20)',desc:'별지#1 목차 준수 + 배점별 화력배분 + 8대 차별화 메시지 삽입점',ord:3},
+     r4:{tag:'완료',title:'제안 도식 3종 초안',desc:'목표시스템 구성도·3대 에이전트·RAG 파이프라인',ord:4}
+   },
+   upcoming:{
+     u1:{tag:'예정',title:'제안서 본문 집필 (정성 85점 항목 1:1 매핑)',desc:'기술및기능25·전략방법론20 우선 화력 집중',ord:1},
+     u2:{tag:'예정',title:'요구사항 89항목 참조표(별지#24) 완성',desc:'SFR10·ECR8·PER6·SIR6·DAR5·TER10·SER10·QUR9·PMR16·PSR5·COR4',ord:2},
+     u3:{tag:'예정',title:'정량 증빙 확보(확약서 3종·지분율·실적)',desc:'제조사 기술지원 확약·중기 지분 50%↑·공공 SW 실적',ord:3}
+   },
+   cadence:{
+     c1:{tag:'기타',title:'컨소 정례 협의',desc:'만사시스템·더아이엠씨 제안 진행 점검',ord:1},
+     c2:{tag:'상시',title:'RFP 요구사항 대조',desc:'별지#1 목차·별지#24 요구사항·별지#25 조견표 상시 검증',ord:2}
+   },
+   issuelist:{
+     i1:{title:'제안서 제출 마감일 확정',desc:'실제 접수 마감 일시 확인 후 일정 역산 필요(현재 초안일정은 목표치)',note:'',ord:1},
+     i2:{title:'컨소시엄 지분율·업무분장 확정',desc:'중기 지분 50%↑ 시 상생협력 5점 만점 — 지분 설계에 반영 필요',note:'',ord:2},
+     i3:{title:'LLM 제조사 기술지원 확약서 3종',desc:'정품·공급·체계규격 확약 확보 경로 및 대상 모델 선정',note:'',ord:3}
+   },
+   contacts:{
+     p1:{org:'만사시스템 (주관 — 국방 SI)',people:'국방 인사업무체계 연동·SI 총괄',ord:1},
+     p2:{org:'㈜더아이엠씨 (공동 — 데이터/RAG)',people:'전채남 대표 / 데이터·RAG 파이프라인·벡터DB·3대 에이전트',ord:2},
+     p3:{org:'육군 인사사령부 (발주)',people:'AI 인재관리시스템 구축TF · 납품 충남 계룡',ord:3},
+     p4:{org:'IITP (관리기관)',people:'국방 실험사업 관리',ord:4}
+   },
+   wbs:{
+     w00:{lvl:1,code:"1",title:"제안 기획 · 전략",org:"제안준비",start:"2026-07-13",end:"2026-07-25",pct:90,ord:1},
+     w01:{lvl:3,code:"1.1",title:"1차 컨소 회의·제안전략 검토",org:"제안준비",start:"2026-07-13",end:"2026-07-15",pct:100,ord:2},
+     w02:{lvl:3,code:"1.2",title:"제안 목차 확정 (별지#1 준수 + 배점 매핑)",org:"제안준비",start:"2026-07-18",end:"2026-07-22",pct:100,ord:3},
+     w03:{lvl:3,code:"1.3",title:'차별화 전략 매핑 ("데이터 사업"·환각제로·모델중립)',org:"제안준비",start:"2026-07-18",end:"2026-07-25",pct:100,ord:4},
+     w04:{lvl:1,code:"2",title:"기술·기능 본문 (정성 85점 승부처)",org:"더아이엠씨",start:"2026-07-20",end:"2026-08-08",pct:20,ord:5},
+     w05:{lvl:2,code:"2.1",title:"3대 에이전트 구현 아키텍처 (기능요구 7점)",org:"더아이엠씨",start:"2026-07-20",end:"2026-08-01",pct:40,ord:6},
+     w06:{lvl:3,code:"2.1.1",title:"제안 도식 3종 (목표시스템·에이전트·RAG 파이프라인)",org:"더아이엠씨",start:"2026-07-20",end:"2026-07-28",pct:80,ord:7},
+     w07:{lvl:3,code:"2.1.2",title:"환각제로 RAG 파이프라인 상세 설계",org:"더아이엠씨",start:"2026-07-25",end:"2026-08-01",pct:20,ord:8},
+     w08:{lvl:2,code:"2.2",title:"성과지표(SLA) 달성·측정방법 표 (만족도4.0·+10%·3초·95%)",org:"더아이엠씨",start:"2026-07-25",end:"2026-08-04",pct:20,ord:9},
+     w09:{lvl:2,code:"2.3",title:"요구사항 89항목 수용 참조표 (별지#24, 11개 분야)",org:"더아이엠씨",start:"2026-07-28",end:"2026-08-08",pct:10,ord:10},
+     w10:{lvl:1,code:"3",title:"정량·행정·제출",org:"제안준비",start:"2026-07-22",end:"2026-08-15",pct:0,ord:11},
+     w11:{lvl:3,code:"3.1",title:"컨소 지분율·업무분장 확정 (상생 5점)",org:"제안준비",start:"2026-07-22",end:"2026-07-31",pct:0,ord:12},
+     w12:{lvl:3,code:"3.2",title:"제조사 기술지원 확약서 3종·수행실적 증빙",org:"제안준비",start:"2026-07-25",end:"2026-08-08",pct:0,ord:13},
+     w13:{lvl:3,code:"3.3",title:"제안서 통합·검토·제출 (마감일 확인 필요)",org:"제안준비",start:"2026-08-08",end:"2026-08-15",pct:0,ord:14}
    }
   }
  }
@@ -528,7 +680,7 @@ firebase.database().ref('.info/connected').on('value',s=>{
 /* ---------- 사업 전환 ---------- */
 function setActiveSwitch(){
   document.querySelectorAll('.pbtn').forEach(b=>b.classList.toggle('on',b.dataset.pid===PID));
-  document.documentElement.style.setProperty('--accent', PID==='gntp'?'var(--amber)':PID==='robot'?'var(--green)':'var(--blue)');
+  document.documentElement.style.setProperty('--accent', PID==='gntp'?'var(--amber)':PID==='robot'?'var(--green)':PID==='rag'?'var(--purple)':'var(--blue)');
 }
 document.querySelectorAll('.pbtn').forEach(b=>b.onclick=()=>{
   if(b.dataset.pid===PID)return;
@@ -569,20 +721,20 @@ function wireFields(scope,refKey){
     else { let tmr; el.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child(refKey+'/'+el.dataset.id+'/'+el.dataset.f).set(el.value); stamp(); },400); }; }
   });
 }
-function makeColl(refKey,mountId,fieldsDef,onData){
+function makeColl(refKey,mountId,fieldsDef,onData,byAuthor){
   let DATA={}; const mount=document.getElementById(mountId);
   bind(ROOT.child(refKey),'value',s=>{ DATA=s.val()||{}; if(!mount.contains(document.activeElement)) render(); if(onData) onData(DATA); });
   mount.onfocusout=()=>setTimeout(()=>{ if(!mount.contains(document.activeElement)) render(); },70);
   function render(){
     const arr=Object.entries(DATA).sort((a,b)=>(a[1].ord||0)-(b[1].ord||0));
-    mount.innerHTML=arr.length? arr.map(([id,it])=>`<div class="erow">${fieldsDef.map(fd=>field(id,fd.f,it[fd.f],fd)).join('')}<button class="btn del sm" data-del="${id}">×</button></div>`).join('')
+    mount.innerHTML=arr.length? arr.map(([id,it])=>`<div class="erow">${fieldsDef.map(fd=>field(id,fd.f,it[fd.f],fd)).join('')}<button class="btn del sm" data-del="${id}">×</button>${byAuthor?byHTML(it,refKey,id):''}</div>`).join('')
       : '<div class="muted">항목이 없습니다. 아래 +로 추가하세요.</div>';
-    wireFields(mount,refKey);
+    wireFields(mount,refKey); if(byAuthor) wireByline(mount);
     mount.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child(refKey+'/'+b.dataset.del).remove(); stamp(); } });
   }
   document.querySelectorAll(`[data-add="${refKey}"]`).forEach(b=>b.onclick=()=>{
     const ord=Object.values(DATA).reduce((m,w)=>Math.max(m,w.ord||0),0)+1; const obj={ord};
-    fieldsDef.forEach(fd=>obj[fd.f]=fd.type==='select'?fd.options[0]:''); ROOT.child(refKey).push(obj); stamp();
+    fieldsDef.forEach(fd=>obj[fd.f]=fd.type==='select'?fd.options[0]:''); if(byAuthor)stampBy(obj); ROOT.child(refKey).push(obj); stamp();
   });
 }
 const STAGTAGS=['완료','진행','협의','예정','정보'];
@@ -631,7 +783,7 @@ function renderTimeline(){
     const klass=n<0?'past':(n===0?'today':'');
     html+=`<div class="tl-item ${klass}"><div class="tl-dot ${e.type}"></div>
       <div><div class="tl-date">${fmtMD(d)} (${W[d.getDay()]}) · ${lab} · ${esc(e.type)}</div>
-      <div class="tl-title">${esc(e.title)}</div>${e.owner?`<div class="muted">${esc(e.owner)}</div>`:''}</div></div>`;
+      <div class="tl-title">${esc(e.title)}</div>${e.owner?`<div class="muted">${esc(e.owner)}</div>`:''}${e.by?`<div class="byline">✍ 작성 <b>${esc(e.by)}</b></div>`:''}</div></div>`;
   });
   el.innerHTML=html;
 }
@@ -655,7 +807,8 @@ document.getElementById('evSave').onclick=()=>{
   const obj={ title:document.getElementById('evTitle').value.trim(), date:document.getElementById('evDate').value,
     type:document.getElementById('evType').value, owner:document.getElementById('evOwner').value.trim(), memo:document.getElementById('evMemo').value.trim() };
   if(!obj.title||!obj.date){ alert('제목과 날짜를 입력하세요.'); return; }
-  if(editId) ROOT.child('events/'+editId).set(obj); else ROOT.child('events').push(obj);
+  if(editId){ const prev=EVENTS[editId]||{}; if(prev.by)obj.by=prev.by; if(prev.at)obj.at=prev.at; ROOT.child('events/'+editId).set(obj); }
+  else ROOT.child('events').push(stampBy(obj));
   stamp(); M.classList.remove('on');
 };
 document.getElementById('evDelete').onclick=()=>{ if(editId && confirm('이 일정을 삭제할까요?')){ ROOT.child('events/'+editId).remove(); stamp(); M.classList.remove('on'); } };
@@ -679,6 +832,7 @@ function renderActions(){
       <div style="flex:1">
         <input class="txt ed" data-id="${id}" data-f="title" value="${escA(a.title)}">
         <input class="who ed" data-id="${id}" data-f="who" value="${escA(a.who)}" placeholder="담당/대상">
+        ${byHTML(a,'actions',id)}
       </div>
       <input type="date" data-id="${id}" data-f="due" value="${a.due||''}">
       <span class="due ${cls}">${a.done?'완료':(n===null?'':(n<0?'지남':'D-'+n))}</span>
@@ -691,11 +845,12 @@ function renderActions(){
   el.querySelectorAll('input[type=date]').forEach(c=>c.onchange=()=>{ ROOT.child('actions/'+c.dataset.id+'/due').set(c.value); stamp(); });
   el.querySelectorAll('input.ed[data-f]').forEach(c=>{ let tmr; c.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child('actions/'+c.dataset.id+'/'+c.dataset.f).set(c.value); stamp(); },400); }; });
   el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child('actions/'+b.dataset.del).remove(); stamp(); } });
+  wireByline(el);
 }
 document.getElementById('actAdd').onclick=()=>{
   const t=document.getElementById('actTitle').value.trim(); if(!t)return;
   const ord=Object.values(ACTIONS).reduce((m,w)=>Math.max(m,w.ord||0),0)+1;
-  ROOT.child('actions').push({title:t,who:document.getElementById('actWho').value.trim(),due:document.getElementById('actDue').value,done:false,ord});
+  ROOT.child('actions').push(stampBy({title:t,who:document.getElementById('actWho').value.trim(),due:document.getElementById('actDue').value,done:false,ord}));
   stamp(); document.getElementById('actTitle').value='';document.getElementById('actWho').value='';document.getElementById('actDue').value='';
 };
 
@@ -703,7 +858,7 @@ document.getElementById('actAdd').onclick=()=>{
    WBS — 날짜(start/end) 있으면 간트, 없으면 진척률 바
    ========================================================== */
 let WBS={}, wbsFilter='all';
-const ORGC={'공통':'#8a94ab','플렛디스':'#057afa','더아이엠씨':'#7a5af5','1차년도':'#1f9d5b','2차년도':'#7a5af5','유엔디':'#057afa','한양대 ERICA':'#d8453a','한국섬유기계연':'#e0900a'};
+const ORGC={'공통':'#8a94ab','플렛디스':'#057afa','더아이엠씨':'#7a5af5','1차년도':'#1f9d5b','2차년도':'#7a5af5','투스카이':'#e0900a','유엔디':'#057afa','한양대 ERICA':'#d8453a','한국섬유기계연':'#e0900a','만사시스템':'#057afa','제안준비':'#057afa'};
 function bindWbs(){
   const list=document.getElementById('wbsList');
   bind(ROOT.child('wbs'),'value',s=>{ WBS=s.val()||{}; if(!list.contains(document.activeElement)) renderWbs(); });
@@ -788,10 +943,69 @@ document.getElementById('mmExtract').onclick=()=>{
   document.getElementById('mmAdd').onclick=()=>{
     const picks=[...box.querySelectorAll('.mmc:checked')].map(c=>c.dataset.t);
     let ord=Object.values(ACTIONS).reduce((m,w)=>Math.max(m,w.ord||0),0);
-    picks.forEach(t=>{ ord++; ROOT.child('actions').push({title:t,who:'',due:'',done:false,ord}); });
+    picks.forEach(t=>{ ord++; ROOT.child('actions').push(stampBy({title:t,who:'',due:'',done:false,ord})); });
     stamp(); box.innerHTML=`<div class="muted">${picks.length}건을 추가했어요. (체크리스트 탭 확인)</div>`; document.getElementById('mmText').value='';
   };
 };
+/* ==========================================================
+   첨부파일 (Firebase Storage + RTDB 메타)
+   ========================================================== */
+let FILES={};
+const fmtSize=b=>b>=1048576?(b/1048576).toFixed(1)+'MB':b>=1024?(b/1024).toFixed(0)+'KB':(b||0)+'B';
+function fileIcon(name){ const e=((name||'').split('.').pop()||'').toLowerCase();
+  if(['hwp','hwpx'].includes(e))return '📗'; if(['doc','docx'].includes(e))return '📘';
+  if(['xls','xlsx','csv'].includes(e))return '📊'; if(e==='pdf')return '📕';
+  if(['ppt','pptx'].includes(e))return '📙'; if(['png','jpg','jpeg','gif','webp','bmp','svg'].includes(e))return '🖼️';
+  if(['zip','7z','rar','tar','gz'].includes(e))return '🗜️'; if(['txt','md'].includes(e))return '📝'; return '📄'; }
+function bindFiles(){ bind(ROOT.child('files'),'value',s=>{ FILES=s.val()||{}; renderFiles(); }); }
+function renderFiles(){
+  const el=document.getElementById('fileList');
+  const arr=Object.entries(FILES).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
+  el.innerHTML=arr.length? arr.map(([id,f])=>`
+    <div class="frow">
+      <div class="fic">${fileIcon(f.name)}</div>
+      <div class="fmeta">
+        <div class="fname">${esc(f.name)}</div>
+        <div class="fsub">${fmtSize(f.size)} · ✍ ${esc(f.by||'미기록')}${f.at?' · '+new Date(f.at).toLocaleDateString('ko-KR'):''}</div>
+      </div>
+      <a class="btn ghost sm fdl" href="${escA(f.url)}" target="_blank" rel="noopener" download="${escA(f.name)}">내려받기</a>
+      <button class="btn del sm" data-del="${id}">×</button>
+    </div>`).join('') : '<div class="muted">첨부된 파일이 없습니다. 위에서 파일을 올려보세요.</div>';
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.del, f=FILES[id]; if(!confirm('이 파일을 삭제할까요?'))return;
+    const done=()=>{ ROOT.child('files/'+id).remove(); stamp(); };
+    if(f&&f.path){ storage.ref().child(f.path).delete().then(done).catch(done); } else done();
+  });
+}
+function uploadFiles(fileArr){
+  const up=document.getElementById('fileUploading');
+  [...fileArr].forEach(file=>{
+    if(file.size>52428800){ alert(`"${file.name}"은(는) 50MB를 넘어 올릴 수 없습니다.`); return; }
+    const key=ROOT.child('files').push().key;
+    const safe=(file.name||'file').replace(/[^\w.\-가-힣() ]/g,'_');
+    const path='mfg_ai/'+PID+'/'+key+'_'+safe;
+    const box=document.createElement('div'); box.className='frow';
+    box.innerHTML=`<div class="fic">${fileIcon(file.name)}</div><div class="fmeta"><div class="fname">${esc(file.name)}</div><div class="fprog"><i></i></div><div class="fsub">올리는 중…</div></div>`;
+    up.appendChild(box); const bar=box.querySelector('.fprog>i'), sub=box.querySelector('.fsub');
+    const task=storage.ref().child(path).put(file);
+    task.on('state_changed',
+      snap=>{ bar.style.width=(snap.bytesTransferred/snap.totalBytes*100)+'%'; },
+      err=>{ sub.textContent='업로드 실패: '+(err.code||err.message)+' — Storage 권한 확인 필요'; sub.style.color='var(--red)'; },
+      ()=>{ task.snapshot.ref.getDownloadURL().then(url=>{
+        ROOT.child('files/'+key).set({name:file.name,size:file.size,type:file.type||'',url,path,by:ME||'',at:Date.now()});
+        stamp(); box.remove();
+      }); });
+  });
+}
+/* 파일 선택·드래그 (1회 배선) */
+document.getElementById('filePick').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=e=>{ if(e.target.files.length) uploadFiles(e.target.files); e.target.value=''; };
+(function(){ const fd=document.getElementById('fileDrop');
+  ['dragenter','dragover'].forEach(ev=>fd.addEventListener(ev,e=>{ e.preventDefault(); fd.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev=>fd.addEventListener(ev,e=>{ e.preventDefault(); fd.classList.remove('drag'); }));
+  fd.addEventListener('drop',e=>{ if(e.dataTransfer.files.length) uploadFiles(e.dataTransfer.files); });
+})();
+
 /* ==========================================================
    탭
    ========================================================== */
@@ -818,18 +1032,27 @@ function boot(){
   seedIf('upcoming',s.upcoming); seedIf('cadence',s.cadence); seedIf('issuelist',s.issuelist);
   seedIf('contacts',s.contacts); seedIf('wbs',s.wbs);
 
+  // WBS 포맷 마이그레이션: 기존 진척바(구버전) → 간트(신버전) 1회 자동 교체
+  ROOT.child('wbs').once('value',ws=>{
+    const cur=ws.val(), seed=s.wbs;
+    const seedDated=seed && Object.values(seed).some(w=>w&&w.start);
+    const curDated=cur && Object.values(cur).some(w=>w&&w.start);
+    if(seed && seedDated && cur && !curDated){ ROOT.child('wbs').set(seed); stamp(); }
+  });
+
   // collections
-  makeColl('recent','recentList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
-  makeColl('upcoming','upcomingList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
-  makeColl('cadence','cadenceList',[{f:'tag',type:'select',options:['월간','격주','주간','상시','기타']},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}]);
+  makeColl('recent','recentList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}],null,true);
+  makeColl('upcoming','upcomingList',[{f:'tag',type:'select',options:STAGTAGS},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}],null,true);
+  makeColl('cadence','cadenceList',[{f:'tag',type:'select',options:['월간','격주','주간','상시','기타']},{f:'title',ph:'제목'},{f:'desc',type:'area',ph:'세부 내용'}],null,true);
   makeColl('issuelist','issueList',[{f:'title',ph:'이슈 제목'},{f:'desc',type:'area',ph:'이슈 내용'},{f:'note',type:'area',ph:'진행 메모'}],
-    d=>document.getElementById('nIssue').textContent=Object.keys(d).length);
+    d=>document.getElementById('nIssue').textContent=Object.keys(d).length,true);
   makeColl('contacts','orgList',[{f:'org',ph:'기관명'},{f:'people',type:'area',ph:'담당자'}]);
 
   // calendar / actions / wbs
   bind(ROOT.child('events'),'value',s2=>{ EVENTS=s2.val()||{}; renderCal(); renderTimeline(); updateNextKPI(); });
   bindActions();
   bindWbs();
+  bindFiles();
 }
 
 boot();
