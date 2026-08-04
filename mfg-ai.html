@@ -49,6 +49,16 @@ header.top .badge{display:inline-block;background:rgba(255,255,255,.13);border-r
 [contenteditable]{outline:none}
 [contenteditable]:focus{background:#fffbe9;border-radius:6px;box-shadow:0 0 0 2px #ffe08a;color:#1c2434}
 .editable-hint{display:inline-block;font-size:12px;font-weight:400;background:var(--lblue);color:var(--blue);border-radius:6px;padding:2px 8px;margin-left:8px}
+/* 인페이지 확인/선택 모달 (네이티브 confirm/prompt 대체) */
+.mini-ov{position:fixed;inset:0;background:rgba(20,28,45,.5);display:flex;align-items:center;justify-content:center;z-index:1000;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.mini-box{background:var(--card);border-radius:16px;padding:22px;max-width:340px;width:90%;box-shadow:0 14px 44px rgba(0,0,0,.28)}
+.mini-msg{font-size:16.5px;font-weight:600;margin-bottom:16px;text-align:center}
+.mini-picks{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.pick-name{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:11px;font-size:15.5px;font-family:inherit;font-weight:600;color:var(--ink);cursor:pointer;transition:.12s}
+.pick-name:hover{border-color:var(--blue);background:var(--lblue)}
+.pick-name.on{border-color:var(--blue);background:var(--lblue);color:var(--blue)}
+.mini-btns{display:flex;gap:8px;justify-content:center}
+.mini-btns .btn{min-width:84px;justify-content:center;text-align:center}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
 .kpi .lab{font-size:13px;color:var(--sub)} .kpi .num{font-size:21px;font-weight:700;margin-top:3px}
@@ -367,7 +377,8 @@ const sortV=o=>Object.values(o||{}).sort((a,b)=>(a.ord||0)-(b.ord||0));
 document.getElementById('today').textContent=`${fmtMD(TODAY)} (${W[TODAY.getDay()]})`;
 
 /* ---------- 작성자(나) 식별 ---------- */
-const WHOAMI=['하이슬','강지훈','윤창식','신지영','김대원'];
+const TEAM=['신지영','강지훈','강찬석','김대원','김범준'];
+const WHOAMI=TEAM;
 let ME=localStorage.getItem('mfg_user')||'';
 const whoPick=document.getElementById('whoPick');
 whoPick.innerHTML='<option value="">✍ 작성자 선택…</option>'+WHOAMI.map(n=>`<option ${n===ME?'selected':''}>${n}</option>`).join('');
@@ -379,18 +390,62 @@ function byHTML(it,refKey,id){
   if(it&&it.by){ const d=it.at?new Date(it.at):null; const dt=d?` · ${d.getMonth()+1}/${d.getDate()}`:''; return `<div class="byline${editable?' clk':''}"${attr}>✍ 작성 <b>${esc(it.by)}</b>${dt}</div>`; }
   return `<div class="byline noauth${editable?' clk':''}"${attr}>✍ 작성자 미기록${editable?' (클릭해 입력)':''}</div>`;
 }
-/* 작성자 클릭 편집 배선 */
+/* 작성자 클릭 편집 배선 — 드롭다운 선택 */
 function wireByline(scope){
-  scope.querySelectorAll('.byline.clk[data-byrk]').forEach(el=>el.onclick=()=>{
+  scope.querySelectorAll('.byline.clk[data-byrk]').forEach(el=>el.onclick=async()=>{
     const rk=el.dataset.byrk, id=el.dataset.byid;
     const b=el.querySelector('b'), cur=b?b.textContent:'';
-    const v=prompt('작성자 이름을 입력하세요\n(하이슬 / 강지훈 / 윤창식 / 신지영 / 김대원)', cur||ME||'');
+    const v=await askAuthor(cur||ME||'');
     if(v===null) return;
-    ROOT.child(rk+'/'+id).update({by:v.trim(),at:Date.now()}); stamp();
+    ROOT.child(rk+'/'+id).update({by:v,at:Date.now()}); stamp();
   });
 }
 /* 새 항목에 작성자·시각 스탬프 */
 function stampBy(obj){ obj.by=ME||''; obj.at=Date.now(); return obj; }
+
+/* ---------- 인페이지 확인/선택 모달 (네이티브 confirm/prompt 대체) ---------- */
+function askConfirm(msg){
+  return new Promise(res=>{
+    const ov=document.createElement('div'); ov.className='mini-ov';
+    ov.innerHTML=`<div class="mini-box"><div class="mini-msg">${esc(msg)}</div>
+      <div class="mini-btns"><button class="btn ghost sm" data-no>취소</button>
+      <button class="btn del sm" data-yes>삭제</button></div></div>`;
+    document.body.appendChild(ov);
+    const close=v=>{ ov.remove(); res(v); };
+    ov.querySelector('[data-yes]').onclick=()=>close(true);
+    ov.querySelector('[data-no]').onclick=()=>close(false);
+    ov.onclick=e=>{ if(e.target===ov) close(false); };
+  });
+}
+function askAuthor(cur){
+  return new Promise(res=>{
+    const ov=document.createElement('div'); ov.className='mini-ov';
+    ov.innerHTML=`<div class="mini-box"><div class="mini-msg">작성자 선택</div>
+      <div class="mini-picks">${TEAM.map(n=>`<button class="pick-name${n===cur?' on':''}" data-n="${escA(n)}">${esc(n)}</button>`).join('')}</div>
+      <div class="mini-btns"><button class="btn ghost sm" data-no>취소</button></div></div>`;
+    document.body.appendChild(ov);
+    const close=v=>{ ov.remove(); res(v); };
+    ov.querySelectorAll('.pick-name').forEach(b=>b.onclick=()=>close(b.dataset.n));
+    ov.querySelector('[data-no]').onclick=()=>close(null);
+    ov.onclick=e=>{ if(e.target===ov) close(null); };
+  });
+}
+function askInput(msg,cur,type){
+  return new Promise(res=>{
+    const ov=document.createElement('div'); ov.className='mini-ov';
+    ov.innerHTML=`<div class="mini-box"><div class="mini-msg">${esc(msg)}</div>
+      <input class="ed" id="miniInput" type="${type||'text'}" value="${escA(String(cur??''))}" style="width:100%;margin-bottom:14px">
+      <div class="mini-btns"><button class="btn ghost sm" data-no>취소</button>
+      <button class="btn sm" data-yes style="background:var(--blue);color:#fff">확인</button></div></div>`;
+    document.body.appendChild(ov);
+    const inp=ov.querySelector('#miniInput'); inp.focus(); inp.select();
+    const close=v=>{ ov.remove(); res(v); };
+    ov.querySelector('[data-yes]').onclick=()=>close(inp.value);
+    ov.querySelector('[data-no]').onclick=()=>close(null);
+    inp.onkeydown=e=>{ if(e.key==='Enter')close(inp.value); if(e.key==='Escape')close(null); };
+    ov.onclick=e=>{ if(e.target===ov) close(null); };
+  });
+}
 
 /* ==========================================================
    사업별 설정 + 시드 데이터 (폴더 문서 실데이터)
@@ -748,7 +803,7 @@ function makeColl(refKey,mountId,fieldsDef,onData,byAuthor){
     mount.innerHTML=arr.length? arr.map(([id,it])=>`<div class="erow">${fieldsDef.map(fd=>field(id,fd.f,it[fd.f],fd)).join('')}<button class="btn del sm" data-del="${id}">×</button>${byAuthor?byHTML(it,refKey,id):''}</div>`).join('')
       : '<div class="muted">항목이 없습니다. 아래 +로 추가하세요.</div>';
     wireFields(mount,refKey); if(byAuthor) wireByline(mount);
-    mount.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child(refKey+'/'+b.dataset.del).remove(); stamp(); } });
+    mount.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(await askConfirm('삭제할까요?')){ ROOT.child(refKey+'/'+b.dataset.del).remove(); stamp(); } });
   }
   document.querySelectorAll(`[data-add="${refKey}"]`).forEach(b=>b.onclick=()=>{
     const ord=Object.values(DATA).reduce((m,w)=>Math.max(m,w.ord||0),0)+1; const obj={ord};
@@ -829,7 +884,7 @@ document.getElementById('evSave').onclick=()=>{
   else ROOT.child('events').push(stampBy(obj));
   stamp(); M.classList.remove('on');
 };
-document.getElementById('evDelete').onclick=()=>{ if(editId && confirm('이 일정을 삭제할까요?')){ ROOT.child('events/'+editId).remove(); stamp(); M.classList.remove('on'); } };
+document.getElementById('evDelete').onclick=async()=>{ if(editId && await askConfirm('이 일정을 삭제할까요?')){ ROOT.child('events/'+editId).remove(); stamp(); M.classList.remove('on'); } };
 
 /* ==========================================================
    체크리스트(액션)
@@ -862,7 +917,7 @@ function renderActions(){
   el.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=()=>{ ROOT.child('actions/'+c.dataset.id+'/done').set(c.checked); stamp(); });
   el.querySelectorAll('input[type=date]').forEach(c=>c.onchange=()=>{ ROOT.child('actions/'+c.dataset.id+'/due').set(c.value); stamp(); });
   el.querySelectorAll('input.ed[data-f]').forEach(c=>{ let tmr; c.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child('actions/'+c.dataset.id+'/'+c.dataset.f).set(c.value); stamp(); },400); }; });
-  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child('actions/'+b.dataset.del).remove(); stamp(); } });
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(await askConfirm('삭제할까요?')){ ROOT.child('actions/'+b.dataset.del).remove(); stamp(); } });
   wireByline(el);
 }
 document.getElementById('actAdd').onclick=()=>{
@@ -911,7 +966,7 @@ function renderBars(arr){
       <div class="bar"><i style="width:${w.pct||0}%"></i></div></div>`).join('') : '<div class="muted">항목이 없습니다.</div>';
   el.querySelectorAll('input[type=number]').forEach(inp=>inp.onchange=()=>{ let v=Math.max(0,Math.min(100,Number(inp.value)||0)); ROOT.child('wbs/'+inp.dataset.id+'/pct').set(v); stamp(); });
   el.querySelectorAll('input.nm').forEach(inp=>{ let tmr; inp.oninput=()=>{ clearTimeout(tmr); tmr=setTimeout(()=>{ ROOT.child('wbs/'+inp.dataset.id+'/name').set(inp.value); stamp(); },400); }; });
-  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ if(confirm('삭제할까요?')){ ROOT.child('wbs/'+b.dataset.del).remove(); stamp(); } });
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(await askConfirm('삭제할까요?')){ ROOT.child('wbs/'+b.dataset.del).remove(); stamp(); } });
 }
 function renderGantt(arr){
   const el=document.getElementById('wbsList');
@@ -935,7 +990,7 @@ function renderGantt(arr){
     rows+=`<tr class="gt-l${g.lvl}" style="--oc:${oc}"><td class="gt-name" title="${escA(g.code+' '+g.title)}"><span class="gt-code">${esc(g.code)}</span>${esc(g.title)}</td><td class="gt-pct ${g.lvl===3?'gpedit':''}" ${g.lvl===3?`data-id="${g.id}"`:''}>${g.pct||0}%</td>${cells}</tr>`;
   });
   el.innerHTML=`<div class="g-wrap"><table class="gt"><thead><tr class="gt-mrow">${thM}</tr><tr class="gt-wrow">${thW}</tr></thead><tbody>${rows}</tbody></table></div>`;
-  el.querySelectorAll('.gpedit[data-id]').forEach(td=>td.onclick=()=>{ const id=td.dataset.id; const cur=(WBS[id]&&WBS[id].pct)||0; const v=prompt('진척률 %를 입력하세요 (0~100)',cur); if(v===null)return; const n=Math.max(0,Math.min(100,Number(v)||0)); ROOT.child('wbs/'+id+'/pct').set(n); stamp(); });
+  el.querySelectorAll('.gpedit[data-id]').forEach(td=>td.onclick=async()=>{ const id=td.dataset.id; const cur=(WBS[id]&&WBS[id].pct)||0; const v=await askInput('진척률 %를 입력하세요 (0~100)',cur,'number'); if(v===null)return; const n=Math.max(0,Math.min(100,Number(v)||0)); ROOT.child('wbs/'+id+'/pct').set(n); stamp(); });
 }
 document.getElementById('wbsAdd').onclick=()=>{
   const n=document.getElementById('wbsName').value.trim(); if(!n)return;
@@ -990,8 +1045,8 @@ function renderFiles(){
       <button class="btn del sm" data-del="${id}">×</button>
     </div>`).join('') : '<div class="muted">첨부된 파일이 없습니다. 위에서 파일을 올려보세요.</div>';
   el.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>downloadFile(b.dataset.dl,b));
-  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
-    const id=b.dataset.del; if(!confirm('이 파일을 삭제할까요?'))return;
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    const id=b.dataset.del; if(!await askConfirm('이 파일을 삭제할까요?'))return;
     ROOT.child('files/'+id).remove(); ROOT.child('fileblobs/'+id).remove(); stamp();
   });
 }
