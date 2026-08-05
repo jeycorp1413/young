@@ -33,7 +33,10 @@ export default async (request, context) => {
       headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
     });
   }
-  return context.next();
+  // 검증용: 엣지 함수가 살아있는지 + 감지된 국가를 헤더로 노출 (확인 후 제거 예정)
+  const res = await context.next();
+  try { res.headers.set("x-geo-guard", code || "unknown"); } catch (e) {}
+  return res;
 };
 
 export const config = { path: "/*" };
