@@ -38,5 +38,3 @@ export default async (request, context) => {
   try { res.headers.set("x-geo-guard", code || "unknown"); } catch (e) {}
   return res;
 };
-
-export const config = { path: "/*" };
