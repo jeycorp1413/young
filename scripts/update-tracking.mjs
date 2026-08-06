@@ -120,7 +120,23 @@ if (G2B_KEY) {
     { t: "모빌리티",  type: "cash",   kw: ["모빌리티","시내버스","노선버스","교통안전","교통 데이터","ITS","C-ITS","교통관제","자율주행","탄소저감","교통정보","교통약자"] },
   ];
   // 우리 사업과 무관한 공고 제외 (임차·렌탈·보험·청소·건설 등)
-  const EXCLUDE = ["임차","렌탈","리스","보험","공제","청소","급식","경비용역","시설관리","조경","방역","인쇄","행사","홍보물","물품구매","유류","승강기","냉난방","건설","감리","전기공사","통신공사","제초","소독","경관","도색","보수공사"];
+  const EXCLUDE = ["임차","렌탈","리스","보험","공제","청소","급식","경비용역","시설관리","조경","방역","인쇄","행사","홍보물","물품구매","유류","승강기","냉난방","건설","감리","전기공사","통신공사","제초","소독","경관","도색","보수공사","측량","지하시설물"];
+  // 미보유 면허를 요구하는 공고 제외 — 참가자격 면허제한에 아래 키워드가 있으면 입찰 불가로 판단
+  // (더아이엠씨 보유 업종: 소프트웨어·정보처리·데이터 계열. 측량업 등은 미등록)
+  const LICENSE_EXCLUDE = ["측량","건설업","전기공사업","정보통신공사업","소방시설","엔지니어링사업자(건설","문화재수리"];
+  const G2B_LIC = G2B_BASE.replace("getBidPblancListInfoServc", "getBidPblancListInfoLicenseLimit");
+  async function requiresExcludedLicense(bidNo) {
+    if (!bidNo) return false;
+    try {
+      const u = `${G2B_LIC}?serviceKey=${encodeURIComponent(G2B_KEY)}&pageNo=1&numOfRows=50&inqryDiv=2&type=json&bidNtceNo=${encodeURIComponent(bidNo)}`;
+      const r = await fetch(u); if (!r.ok) { console.log("lic http", r.status, bidNo); return false; }
+      const j = await r.json();
+      let it = j?.response?.body?.items; if (it?.item) it = it.item;
+      it = Array.isArray(it) ? it : (it ? [it] : []);
+      const names = it.map(x => x.lcnsLmtNm || x.permsnIndstrytyNm || "").filter(Boolean);
+      return names.some(n => LICENSE_EXCLUDE.some(k => norm(n).includes(norm(k))));
+    } catch (e) { console.log("lic error", bidNo, e.message); return false; } // 조회 실패 시 유지(fail-open)
+  }
   const norm = s => (s || "").replace(/\s/g, "");
   const won = n => { n = Number(n) || 0; if (n >= 1e8) return (n/1e8).toFixed(1).replace(/\.0$/,"")+"억"; if (n >= 1e4) return Math.round(n/1e4)+"만"; return n ? String(n) : ""; };
   const fmt = d => d.toISOString().slice(0,10).replace(/-/g,"")+"0000";
@@ -159,10 +175,17 @@ if (G2B_KEY) {
       score = Math.min(score + Math.min(hits*3, 9), 100);
       const key = ((it.bidNtceNo || "") + "-" + (it.bidNtceOrd || "0")).replace(/[.#$\[\]\/]/g, "_") || ("k" + Object.keys(out).length);
       out[key] = { name: nm.slice(0,80), org: (it.ntceInsttNm||"").slice(0,20), amount: won(amt) || "미공개",
-        deadline: dl, url: it.bidNtceDtlUrl || it.bidNtceUrl || "", axis, axisType: type,
+        deadline: dl, url: it.bidNtceDtlUrl || it.bidNtceUrl || "", axis, axisType: type, no: it.bidNtceNo || "",
         score, band: score >= 70 ? "전력" : score >= 40 ? "조건부" : "검토" };
     }
-    const top = Object.entries(out).sort((a,b) => b[1].score - a[1].score).slice(0, 30);
+    // 점수순 상위 후보에 대해 면허제한 검사 → 미보유 면허 요구 공고 제외 후 30건 확정
+    const ranked = Object.entries(out).sort((a,b) => b[1].score - a[1].score).slice(0, 45);
+    const top = [];
+    for (const [k, v] of ranked) {
+      if (top.length >= 30) break;
+      if (await requiresExcludedLicense(v.no)) { console.log(`면허제한 제외: ${v.name}`); continue; }
+      top.push([k, v]);
+    }
     const cand = {}; for (const [k,v] of top) cand[k] = v;
     naraCount = top.length;
     await fetch(`${DB}/narajangteo.json`, { method:"PUT", headers:{"Content-Type":"application/json"},
