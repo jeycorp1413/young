@@ -397,16 +397,19 @@ function renderNara(data){
   var el=document.getElementById("naraList"); if(!el) return;
   var upd=document.getElementById("naraUpd");
   var cand=(data&&data.candidates)||{};
-  var arr=Object.keys(cand).map(function(k){return cand[k];}).sort(function(a,b){return (b.score||0)-(a.score||0);});
+  var today=new Date(); today.setHours(0,0,0,0);
+  function daysLeft(c){ if(!c.deadline) return null; var p=String(c.deadline).split("-"); if(p.length!==3) return null; return Math.round((new Date(+p[0],+p[1]-1,+p[2])-today)/864e5); }
+  var arr=Object.keys(cand).map(function(k){return cand[k];})
+    .filter(function(c){ var d=daysLeft(c); return d===null || d>=14; }) // 마감 촉박(D-14 미만) 공고 제외
+    .sort(function(a,b){return (b.score||0)-(a.score||0);});
   if(upd) upd.textContent=(data&&data.meta&&data.meta.updatedAt)?("🔄 자동갱신 "+data.meta.updatedAt):"";
   if(!arr.length){ el.innerHTML='<div class="nara-empty">오늘 매칭된 공고가 없어요 · 매일 아침 자동 수집됩니다 ☀️</div>'; return; }
-  var today=new Date(); today.setHours(0,0,0,0);
   el.innerHTML="";
   arr.slice(0,20).forEach(function(c){
     var band=c.score>=70?"#2fb36b":c.score>=40?"#f2a53a":"#b0b0b0";
     var axisCls=c.axisType==="growth"?"axis-g":c.axisType==="cash"?"axis-c":"axis-o";
     var ddHtml="";
-    if(c.deadline){ var p=String(c.deadline).split("-"); if(p.length===3){ var d=Math.round((new Date(+p[0],+p[1]-1,+p[2])-today)/864e5); var urgent=d<14; ddHtml='<span class="nara-dday'+(urgent?" urgent":"")+'">마감 D-'+d+(urgent?" ⏰촉박":"")+'</span>'; } }
+    var d=daysLeft(c); if(d!==null){ ddHtml='<span class="nara-dday">마감 D-'+d+'</span>'; }
     var a=document.createElement("a");
     a.className="nara-item"; a.href=c.url||"#"; a.target="_blank"; a.rel="noopener";
     a.innerHTML='<div class="nara-score" style="background:'+band+'">'+(c.score||0)+'<small>'+(c.band||"")+'</small></div>'+
