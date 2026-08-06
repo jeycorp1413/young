@@ -152,6 +152,8 @@ if (G2B_KEY) {
       let dl = it.bidClseDt || "";
       dl = dl.includes("-") ? dl.slice(0,10) : (dl.length >= 8 ? `${dl.slice(0,4)}-${dl.slice(4,6)}-${dl.slice(6,8)}` : "");
       if (!dl || dl < todayISO) continue;                          // 마감일 없거나 이미 지난 공고 제외 (D-day 표기 위해)
+      const cutoff = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
+      if (dl < cutoff) continue;                                    // 마감 촉박(D-14 미만) 공고 제외
       let score = type === "growth" ? 60 : 40;                      // 모빌리티(현금)=40, 성장축=60
       if (amt >= 5e8) score += 25; else if (amt >= 1e8) score += 15; else if (amt > 0) score += 5;
       score = Math.min(score + Math.min(hits*3, 9), 100);
