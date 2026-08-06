@@ -129,13 +129,14 @@ if (G2B_KEY) {
     if (!bidNo) return false;
     try {
       const u = `${G2B_LIC}?serviceKey=${encodeURIComponent(G2B_KEY)}&pageNo=1&numOfRows=50&inqryDiv=2&type=json&bidNtceNo=${encodeURIComponent(bidNo)}`;
-      const r = await fetch(u); if (!r.ok) { console.log("lic http", r.status, bidNo); return false; }
+      const r = await fetch(u, { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) { console.log("lic http", r.status, bidNo); return false; }
       const j = await r.json();
       let it = j?.response?.body?.items; if (it?.item) it = it.item;
       it = Array.isArray(it) ? it : (it ? [it] : []);
       const names = it.map(x => x.lcnsLmtNm || x.permsnIndstrytyNm || "").filter(Boolean);
       return names.some(n => LICENSE_EXCLUDE.some(k => norm(n).includes(norm(k))));
-    } catch (e) { console.log("lic error", bidNo, e.message); return false; } // 조회 실패 시 유지(fail-open)
+    } catch (e) { console.log("lic error", bidNo, e.message); return false; } // 조회 실패·타임아웃 시 유지(fail-open)
   }
   const norm = s => (s || "").replace(/\s/g, "");
   const won = n => { n = Number(n) || 0; if (n >= 1e8) return (n/1e8).toFixed(1).replace(/\.0$/,"")+"억"; if (n >= 1e4) return Math.round(n/1e4)+"만"; return n ? String(n) : ""; };
@@ -179,13 +180,15 @@ if (G2B_KEY) {
         score, band: score >= 70 ? "전력" : score >= 40 ? "조건부" : "검토" };
     }
     // 점수순 상위 후보에 대해 면허제한 검사 → 미보유 면허 요구 공고 제외 후 30건 확정
+    // (9건씩 병렬 · 호출당 8초 제한 → 검사 전체가 오래 걸려 잡이 매달리는 것 방지)
     const ranked = Object.entries(out).sort((a,b) => b[1].score - a[1].score).slice(0, 45);
-    const top = [];
-    for (const [k, v] of ranked) {
-      if (top.length >= 30) break;
-      if (await requiresExcludedLicense(v.no)) { console.log(`면허제한 제외: ${v.name}`); continue; }
-      top.push([k, v]);
+    const excluded = new Set();
+    for (let i = 0; i < ranked.length; i += 9) {
+      const chunk = ranked.slice(i, i + 9);
+      const rs = await Promise.all(chunk.map(([k, v]) => requiresExcludedLicense(v.no).then(ex => [k, v, ex])));
+      for (const [k, v, ex] of rs) if (ex) { excluded.add(k); console.log(`면허제한 제외: ${v.name}`); }
     }
+    const top = ranked.filter(([k]) => !excluded.has(k)).slice(0, 30);
     const cand = {}; for (const [k,v] of top) cand[k] = v;
     naraCount = top.length;
     await fetch(`${DB}/narajangteo.json`, { method:"PUT", headers:{"Content-Type":"application/json"},
