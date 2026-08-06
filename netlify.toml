@@ -1,8 +1,0 @@
-# Netlify 설정
-[build]
-  publish = "."
-
-# 대한민국(KR) 외 IP 차단 엣지 함수 (사이트 전체)
-[[edge_functions]]
-  path = "/*"
-  function = "geoblock"
