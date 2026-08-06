@@ -1,0 +1,20 @@
+# Netlify 설정
+[build]
+  publish = "."
+
+# 대한민국(KR) 외 IP 차단 — 국가 조건 리다이렉트 방식
+# (엣지 함수는 이 사이트에서 배포가 실패하여 리다이렉트로 대체)
+# 규칙은 위에서부터 순서대로 평가됨: KR이면 정상 서빙, 그 외는 차단 페이지(403)
+
+[[redirects]]
+  from = "/*"
+  to = "/:splat"
+  status = 200
+  force = true
+  conditions = {Country = ["KR"]}
+
+[[redirects]]
+  from = "/*"
+  to = "/blocked.html"
+  status = 403
+  force = true
