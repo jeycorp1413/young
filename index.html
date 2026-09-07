@@ -151,6 +151,7 @@
   .nara-meta{font-size:.71875rem; color:var(--muted); display:flex; gap:9px; flex-wrap:wrap; align-items:center;}
   .axis{font-size:.65625rem; font-weight:800; padding:2px 9px; border-radius:20px;}
   .axis-g{background:#e6f7ec; color:#127a3e;} .axis-c{background:#fff3e0; color:#b25e00;} .axis-o{background:#eef1f6; color:#5b6472;}
+  .axis-d{background:#e8f0fb; color:#2f5f9e;}
   .nara-kind{font-size:.68rem; font-weight:800; letter-spacing:-.02em;}
   .nara-tag{font-size:.6rem; font-weight:800; color:#b25e00; background:#fff3e0; border-radius:6px; padding:1px 5px; white-space:nowrap;}
   .nara-dday{font-weight:800; color:#2f7d3e;}
@@ -235,7 +236,7 @@
   </div>
   <div class="nara-sec">
     <div class="nara-head" id="naraHead">
-      <div class="nara-title"><span id="naraCaret">▾</span>📋 오늘의 나라장터<span class="nara-subt">AI·데이터 키워드 · 1억 이상 · 본공고·사전규격·발주계획 · 매일 11:00 자동 갱신</span></div>
+      <div class="nara-title"><span id="naraCaret">▾</span>📋 오늘의 나라장터<span class="nara-subt">농업·국방·Agent/LLM·피지컬·데이터구축 AI만 · 1억 이상 · 컨설팅·교육·행사 제외 · 매일 11:00 자동 갱신</span></div>
       <div class="nara-upd" id="naraUpd"></div>
     </div>
     <div class="nara-list" id="naraList"></div>
@@ -489,7 +490,7 @@ function renderNara(data){
   if(!arr.length){ el.innerHTML='<div class="nara-empty">최근 등록된 AI·데이터 공고가 없어요 · 매일 11:00 자동 수집됩니다 ☀️</div>'; return; }
   el.innerHTML="";
   arr.slice(0,40).forEach(function(c){
-    var axisCls=c.axisType==="growth"?"axis-g":c.axisType==="cash"?"axis-c":"axis-o";
+    var axisCls=c.axisType==="growth"?"axis-g":c.axisType==="cash"?"axis-c":c.axisType==="data"?"axis-d":"axis-o";
     var d=daysLeft(c), ddHtml="";
     if(d!==null){ ddHtml='<span class="nara-dday'+(d<7?" urgent":"")+'">'+naraEsc(c.dlLabel||"마감")+' D-'+d+'</span>'; }
     else if(c.deadline){ ddHtml='<span class="nara-dday">'+naraEsc(c.dlLabel||"")+' '+naraEsc(c.deadline)+'</span>'; }
