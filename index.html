@@ -235,7 +235,7 @@
   </div>
   <div class="nara-sec">
     <div class="nara-head" id="naraHead">
-      <div class="nara-title"><span id="naraCaret">▾</span>📋 오늘의 나라장터<span class="nara-subt">AI·데이터 키워드 · 본공고·사전규격·발주계획 · 매일 11:00 자동 갱신</span></div>
+      <div class="nara-title"><span id="naraCaret">▾</span>📋 오늘의 나라장터<span class="nara-subt">AI·데이터 키워드 · 1억 이상 · 본공고·사전규격·발주계획 · 매일 11:00 자동 갱신</span></div>
       <div class="nara-upd" id="naraUpd"></div>
     </div>
     <div class="nara-list" id="naraList"></div>
@@ -480,7 +480,7 @@ function renderNara(data){
   var KCOL={"본공고":"#ec6f9e","사전규격":"#6fa8dc","발주계획":"#a98fda"};
   var KORD={"본공고":0,"사전규격":1,"발주계획":2};
   var arr=Object.keys(items).map(function(k){return items[k];})
-    .filter(function(c){ var d=daysLeft(c); return d===null || d>=0; }) // 마감 지난 공고만 제외
+    .filter(function(c){ var d=daysLeft(c); return (d===null || d>=0) && (c.budget||0)>=1e8; }) // 마감 지난 공고 · 1억 미만 제외
     .sort(function(a,b){ var s=(b.score||0)-(a.score||0); if(s) return s;
       var k=(KORD[a.kind]||9)-(KORD[b.kind]||9); if(k) return k;
       var da=daysLeft(a), db=daysLeft(b); if(da!==null&&db!==null&&da!==db) return da-db;
