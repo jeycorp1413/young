@@ -29,7 +29,7 @@ bidops_sync.py  (11:10 예약작업 권장 · 멱등)          ┌────�
                                      Netlify 정적 호스팅  young/bidops/  (ES 모듈, 빌드 없음)
 ```
 
-- **읽기 2회로 부트**: `/bidops`(사업·판정·로그)와 `/nara`(신규 공고 = 아직 검토 등록 안 한 후보). 경쟁사 원장 전체는 기존 `nara-tracking.html`에 링크.
+- **읽기 3회로 부트**: `/bidops`(사업·판정·로그) · `/nara`(신규 공고 = 아직 검토 등록 안 한 후보) · `/nara_tracking`(추적 현황·경쟁사 원장, 읽기 전용). 옛 `nara-tracking.html`은 `bidops/#/tracking`으로 리다이렉트.
 - **쓰기는 액션을 통해서만**: `store.actions.*` → `ref.update()` + `updatedAt/by`. 화면은 상태를 직접 만지지 않는다.
 - **자동 vs 사람 구분**: `stageBy:'auto'|'user'`. 동기화는 `auto`인 것만 재계산한다.
 
@@ -62,7 +62,9 @@ js/ui/today.js       KPI 4 · 이번 주 마감 · 다가오는 마감 · 변경
 js/ui/pipeline.js    칸반(후보→검토→참여·작성→제출→결과, 관찰/보류/불참은 토글)
 js/ui/calendar.js    월간 이정표 캘린더
 js/ui/axis.js        축별 파이프라인·평균 판정·경쟁사·보유 자산
-js/ui/detail.js      드로어: 기본정보·일정 편집·결정(단계/결과/담당)·판정·추적·로그
+js/ui/tracking.js    추적: 등록 건의 상태(공고 중·개찰·낙찰·계약)·달라진 것·눈여겨볼 점  ← /nara_tracking.rows
+js/ui/competitors.js 경쟁사: 분야별 자주 만나는 업체·업체별 표·개찰 결과            ← /nara_tracking.ledger
+js/ui/detail.js      드로어: 기본정보·일정 편집·결정(단계/결과/담당/축)·판정·추적(추적기 원본: 참가업체·규격의견·낙찰·계약·원공고)·로그
 css/tokens.css       색·타이포·간격·라운드·그림자·다크모드 토큰
 css/app.css          레이아웃·컴포넌트 (모바일 퍼스트, 768/1080 브레이크포인트)
 ```

@@ -119,3 +119,26 @@ export function calendarCells(y, m, opps) {
   return cells;
 }
 export function stageLabel(id) { return STAGE_BY[id]?.label || id || ""; }
+
+// ── 추적기(/nara_tracking) ──
+export function trackingRows(state) { return (state.tracking?.rows || []).map(r => Object.assign({ id: keyOf(r.bid_no || r.no) }, r)); }
+export function trackRow(state, id) { return trackingRows(state).find(r => r.id === id) || null; }
+export function trackCls(r) { const st = r.status || ""; if (/계약|낙찰:|개찰 완료/.test(st)) return "done"; if (/공고 중/.test(st)) return "open"; return "wait"; }
+export function trackFilter(rows, f) {
+  if (!f || f === "all") return rows;
+  if (f === "ours") return rows.filter(r => r.ours);
+  if (f === "changed") return rows.filter(r => (r.changes || []).length);
+  return rows.filter(r => trackCls(r) === f);
+}
+// 정렬: 달라진 것 → 당사 → 개찰이 가까운 순(지난 것은 뒤로)
+export function trackSort(rows) {
+  const key = r => { const d = dday(r.open); return d == null ? 9e4 : d < 0 ? 5e4 - d : d; };
+  return rows.sort((a, b) => ((b.changes || []).length ? 1 : 0) - ((a.changes || []).length ? 1 : 0) || (b.ours ? 1 : 0) - (a.ours ? 1 : 0) || key(a) - key(b));
+}
+export function ledgerCorps(state, tag, q) {
+  let c = state.tracking?.ledger?.corps || [];
+  if (tag) c = c.filter(x => (x.tags || []).includes(tag));
+  if (q) { q = q.toLowerCase(); c = c.filter(x => [x.corp, ...(x.orgs || []), ...(x.recent || [])].some(v => String(v || "").toLowerCase().includes(q))); }
+  return c;
+}
+export function ledgerBids(state) { return state.tracking?.ledger?.bids || []; }

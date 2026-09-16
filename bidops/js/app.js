@@ -6,11 +6,13 @@ import * as today from "./ui/today.js";
 import * as pipeline from "./ui/pipeline.js";
 import * as calendar from "./ui/calendar.js";
 import * as axis from "./ui/axis.js";
+import * as tracking from "./ui/tracking.js";
+import * as competitors from "./ui/competitors.js";
 import * as detail from "./ui/detail.js";
 import { openDrawer, closeDrawer, toast, esc } from "./ui/components.js";
 
-const ROUTES = { today, pipeline, calendar, axis };
-const ui = { calMonth: ymd().slice(0, 7), showExtra: false, axisFilter: "", q: "" };
+const ROUTES = { today, pipeline, calendar, axis, tracking, competitors };
+const ui = { calMonth: ymd().slice(0, 7), showExtra: false, axisFilter: "", q: "", trackFilter: "all", ledgerTag: "", ledgerQ: "" };
 const $ = s => document.querySelector(s);
 
 function route() {
@@ -34,6 +36,8 @@ function render() {
 function go(hash) { if (location.hash !== hash) location.hash = hash; else render(); }
 function open(id) { go(`#/opp/${encodeURIComponent(id)}`); }
 function close() { go(`#/${ui.lastView || "today"}`); }
+// 검색창은 다시 그려도 커서를 잃지 않게
+function rerenderKeep(sel) { const el = $(sel); const pos = el?.selectionStart; render(); const n = $(sel); if (n) { n.focus(); if (pos != null) n.setSelectionRange(pos, pos); } }
 
 document.addEventListener("click", e => {
   const el = e.target.closest("[data-open],[data-action]"); if (!el) return;
@@ -43,6 +47,8 @@ document.addEventListener("click", e => {
   else if (a === "cal") { if (v === "0") ui.calMonth = ymd().slice(0, 7); else { const [y, m] = ui.calMonth.split("-").map(Number); const d = new Date(y, m - 1 + Number(v), 1); ui.calMonth = ymd(d).slice(0, 7); } render(); }
   else if (a === "extra") { ui.showExtra = v === "1"; render(); }
   else if (a === "axis-go") { ui.axisFilter = v; go("#/pipeline"); }
+  else if (a === "track-filter") { ui.trackFilter = ui.trackFilter === v && v !== "all" ? "all" : v; render(); }
+  else if (a === "ledger-tag") { ui.ledgerTag = v; render(); }
   else if (a === "inbox-add") { const it = inboxItems(state).find(c => c.no === el.dataset.no); if (it) { const id = actions.addFromInbox(it); toast("검토 단계로 등록했습니다"); open(id); } }
   else if (a === "new") { const name = prompt("사업명을 입력하세요"); const id = actions.createManual(name); if (id) open(id); }
 });
@@ -59,7 +65,11 @@ document.addEventListener("change", e => {
   else if (a === "axis-filter") { ui.axisFilter = v; render(); }
   else if (a === "who") setUser(v);
 });
-document.addEventListener("input", e => { const el = e.target.closest("[data-action=search]"); if (el) { ui.q = el.value; const pos = el.selectionStart; render(); const n = $("[data-action=search]"); if (n) { n.focus(); n.setSelectionRange(pos, pos); } } });
+document.addEventListener("input", e => {
+  const el = e.target.closest("[data-action=search],[data-action=ledger-q]"); if (!el) return;
+  if (el.dataset.action === "search") { ui.q = el.value; rerenderKeep("[data-action=search]"); }
+  else { ui.ledgerQ = el.value; rerenderKeep("[data-action=ledger-q]"); }
+});
 document.addEventListener("submit", e => {
   const f = e.target.closest("form[data-action=note]"); if (!f) return; e.preventDefault();
   actions.addNote(f.dataset.id, f.text.value); f.text.value = ""; toast("기록했습니다");

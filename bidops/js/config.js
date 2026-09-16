@@ -4,9 +4,15 @@ export const FIREBASE = {
   databaseURL: "https://young-94e97-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "young-94e97",
 };
-export const NODE = "bidops";        // 이 앱의 진실의 원천
-export const FEED_NODE = "nara";     // 후보 피드(대시보드 갱신기, 11:00) — 읽기 전용
-export const LINKS = { board: "../index.html", tracker: "../nara-tracking.html" };
+export const NODE = "bidops";            // 이 앱의 진실의 원천
+export const FEED_NODE = "nara";         // 신규 공고 피드(대시보드 갱신기, 11:00) — 읽기 전용
+export const TRACK_NODE = "nara_tracking"; // 추적기(나라장터_추적.py check, 08:40) 결과 + 경쟁사 원장 — 읽기 전용
+export const LINKS = { board: "../index.html", competitors: "#/competitors", tracking: "#/tracking" };
+
+// 추적기 등록 구분 → 팀원 용어
+export const TRACK_KIND = { bid: "본공고", spec: "사전규격", kw: "이름 감시", manual: "국방 D2B" };
+// 경쟁사 원장의 분야 태그(경쟁사_원장.py domain_tags) — 표시 순서
+export const LEDGER_TAGS = ["LLM·RAG", "AI데이터", "국방", "농업·식품", "피지컬AI", "데이터플랫폼", "AI일반", "운영·유지", "감리"];
 
 // 승산 축 (2026-09-08 확정) — 순서가 표시 순서
 export const AXES = [

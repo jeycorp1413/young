@@ -1,8 +1,8 @@
 // 데이터 계층 — Firebase 구독 + 액션. 화면은 여기 actions 로만 쓴다.
-import { FIREBASE, NODE, FEED_NODE, STAGE_BY, verdictOf } from "./config.js";
+import { FIREBASE, NODE, FEED_NODE, TRACK_NODE, STAGE_BY, verdictOf } from "./config.js";
 import { keyOf, ymd } from "./derive.js";
 
-export const state = { opps: {}, analyses: {}, log: {}, meta: {}, nara: {}, user: "", ready: false, error: null };
+export const state = { opps: {}, analyses: {}, log: {}, meta: {}, nara: {}, tracking: {}, user: "", ready: false, error: null };
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 const emit = () => listeners.forEach(fn => { try { fn(state); } catch (e) { console.error(e); } });
@@ -13,9 +13,9 @@ const stamp = (o = {}) => Object.assign({ updatedAt: nowIso(), by: state.user ||
 
 export function init() {
   try { state.user = localStorage.getItem("bidops_user") || ""; } catch (_) {}
-  // 정적 주입(미리보기·테스트): window.__BIDOPS__ = {opps, analyses, log, meta}, window.__NARA__ = {items, meta}
+  // 정적 주입(미리보기·테스트): window.__BIDOPS__ = {opps, analyses, log, meta}, window.__NARA__ = {items, meta}, window.__TRACK__ = {rows, ledger, meta}
   if (window.__BIDOPS__) {
-    Object.assign(state, { opps: {}, analyses: {}, log: {}, meta: {} }, window.__BIDOPS__, { nara: window.__NARA__ || {}, ready: true, fixture: true });
+    Object.assign(state, { opps: {}, analyses: {}, log: {}, meta: {} }, window.__BIDOPS__, { nara: window.__NARA__ || {}, tracking: window.__TRACK__ || {}, ready: true, fixture: true });
     emit(); return;
   }
   if (!window.firebase) { state.error = "Firebase SDK 로드 실패"; emit(); return; }
@@ -27,6 +27,7 @@ export function init() {
     state.ready = true; state.error = null; emit();
   }, err => { state.error = err.message; state.ready = true; emit(); });
   db.ref(FEED_NODE).on("value", snap => { state.nara = snap.val() || {}; emit(); });
+  db.ref(TRACK_NODE).on("value", snap => { state.tracking = snap.val() || {}; emit(); });
 }
 export function setUser(name) { state.user = name; try { localStorage.setItem("bidops_user", name); } catch (_) {} emit(); }
 

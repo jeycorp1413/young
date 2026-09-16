@@ -159,10 +159,15 @@ table.tb{width:100%;border-collapse:collapse;font-size:var(--fs-xs)}
 /* ── 반응형 ── */
 @media (max-width:1080px){.grid.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.two{grid-template-columns:1fr}}
 @media (max-width:768px){
-  .topbar .in{gap:8px;padding:0 12px}
+  .topbar .in{gap:8px;padding:0 10px}
+  .brand b{font-size:15px}
   .brand span,.topbar .meta,.iconlink{display:none}
-  .tabs{overflow-x:auto;max-width:60vw}
-  .tabs a{padding:6px 10px}
+  .tabs{flex:1;min-width:0;max-width:none;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs a{padding:6px 9px;font-size:12.5px}
+  .who{padding:5px 6px;font-size:12px}
+  .card .hd{flex-wrap:wrap}
+  .card .hd h2{white-space:nowrap}
   main{padding:14px 12px 90px}
   .page-h h1{font-size:18px}
   .kanban{grid-auto-flow:row;grid-template-columns:minmax(0,1fr);grid-auto-columns:auto;overflow:visible}   /* 모바일: 열을 세로로 쌓는다 */
@@ -175,5 +180,34 @@ table.tb{width:100%;border-collapse:collapse;font-size:var(--fs-xs)}
   .drawer.on{transform:none}
   .ctrl{grid-template-columns:1fr 1fr}
   .kv{grid-template-columns:76px minmax(0,1fr)}
+}
+/* ── 추적·경쟁사 표: 데스크톱은 표, 모바일은 카드로 쌓임 ── */
+table.stack{width:100%;border-collapse:collapse;font-size:var(--fs-s)}
+.stack th{text-align:left;color:var(--sub);font-weight:600;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:var(--fs-xs)}
+.stack td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.stack tbody tr[data-open]{cursor:pointer}
+.stack tbody tr[data-open]:hover td{background:var(--card-2)}
+.stack tr.ours td{background:var(--amber-2)}
+.st{font-weight:600}.st.done{color:var(--green)}.st.open{color:var(--blue)}.st.wait{color:var(--sub)}
+.chg{color:var(--red);font-weight:700;font-size:var(--fs-xs);margin-top:2px}
+.sig{color:var(--amber);font-size:var(--fs-xs)}
+.axis{margin:6px 0;font-size:var(--fs-s)}
+.axis b{display:inline-block;min-width:96px;color:var(--ink-2)}
+.axis span{display:inline-block;margin:2px 6px 2px 0;font-size:var(--fs-xs);background:var(--line-2);border-radius:6px;padding:2px 7px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.kpi-tile.on{outline:2px solid var(--ink)}
+@media (max-width:1080px){.grid.kpi[style*="repeat(6"]{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media (max-width:768px){
+  .grid.kpi[style*="repeat(6"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  table.stack thead{display:none}
+  table.stack,table.stack tbody,table.stack tr,table.stack td{display:block;width:100%}
+  table.stack tr{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px 12px;margin-bottom:8px}
+  table.stack tr.ours{background:var(--amber-2)}
+  table.stack tr.ours td{background:transparent}
+  table.stack td{border:0;padding:2px 0;display:flex;gap:8px;align-items:baseline}
+  table.stack td:empty{display:none}
+  table.stack td::before{content:attr(data-l);color:var(--sub);min-width:64px;flex:none;font-size:var(--fs-xs)}
+  table.stack td.full{display:block}
+  table.stack td.full::before{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
