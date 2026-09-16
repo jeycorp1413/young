@@ -21,6 +21,14 @@ export function ddayBadge(n, label = "") {
   return `<span class="dday ${urgency(n)}" title="${esc(label)}">${t}</span>`;
 }
 export function scoreBadge(s) { return s == null ? "" : `<span class="score ${scoreCls(s)} num">${s}</span>`; }
+// 판정 출처 표기: "AI 추천 9/16" (일일 판정 자동) / "신지영 입력 9/16" (보드에서 수기)
+export function judgedBy(latest) {
+  if (!latest || latest.score == null) return "";
+  const d = latest.ymd ? `${+latest.ymd.slice(5, 7)}/${+latest.ymd.slice(8, 10)}` : "";
+  const who = latest.manual ? `${esc(latest.by || "담당")} 입력` : "AI 추천";
+  const v = latest.verdict ? `<span class="chip" style="color:${scoreCls(latest.score) === "go" ? "var(--green)" : scoreCls(latest.score) === "mid" ? "var(--amber)" : "var(--red)"};background:transparent;padding:0;font-size:11px">${esc(latest.verdict)}</span>` : "";
+  return `<span class="xs mute" style="white-space:nowrap">${v} ${who} ${d}</span>`;
+}
 export function ownerDot(o) { return o.owner ? `<span class="xs mute"><i class="who-dot"></i>${esc(o.owner)}</span>` : ""; }
 export function oursMark(o) { return o.ours ? `<span class="ours xs">★ 당사</span>` : ""; }
 export function outcomeMark(o) { return o.outcome ? `<span class="chip" style="color:${o.outcome === "won" ? "var(--green)" : "var(--red)"};background:${o.outcome === "won" ? "var(--green-2)" : "var(--red-2)"}">${{ won: "낙찰", lost: "탈락", cancelled: "취소·유찰" }[o.outcome]}</span>` : ""; }
@@ -32,7 +40,7 @@ export function oppRow(o, ms) {
     <div class="d">${ddayBadge(m?.dday, m?.label)}</div>
     <div><div class="t">${esc(o.name)}</div>
       <div class="m">${chipAxis(o.axis)}${chipStage(o.stage)}${outcomeMark(o)}<span>${esc(o.dem || o.org)}</span><span class="num">${fmtWon(o.budget)}</span>${m ? `<span>${esc(m.label)}${(m.also || []).map(x => ` · ${esc(x.label)} ${esc(x.date.slice(5, 10).replace("-", "/"))}`).join("")}</span>` : ""}${oursMark(o)}</div></div>
-    <div class="r">${scoreBadge(o.latest?.score)}${ownerDot(o)}</div>
+    <div class="r">${scoreBadge(o.latest?.score)}${judgedBy(o.latest)}${ownerDot(o)}</div>
   </div>`;
 }
 // 12항목 → 6영역 막대

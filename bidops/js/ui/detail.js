@@ -56,7 +56,7 @@ export function render(state, id) {
     <div class="sec"><h3>일정 <span class="xs" style="text-transform:none;font-weight:500">${next ? `${next.dday >= 0 ? "다음" : "마지막"} ${esc(next.label)} ${ddayBadge(next.dday)}` : "등록된 이정표 없음"}</span></h3>
       <div class="date-grid">${MILESTONES.map(m => `<div><label>${esc(m.label)}</label><input type="datetime-local" value="${esc((o.dates?.[m.k] || "").replace(" ", "T").slice(0, 16))}" data-action="date" data-id="${esc(id)}" data-k="${m.k}"></div>`).join("")}</div>
     </div>
-    <div class="sec"><h3>판정 ${latest ? `<span class="xs" style="text-transform:none;font-weight:500">${esc(latest.ymd || days[days.length - 1])} · ${scoreBadge(latest.score)} ${esc(latest.verdict || "")}${days.length > 1 ? ` · 이력 ${days.length}회` : ""}</span>` : ""}</h3>
+    <div class="sec"><h3>판정 ${latest ? `<span class="xs" style="text-transform:none;font-weight:500">${esc(latest.ymd || days[days.length - 1])} · ${scoreBadge(latest.score)} ${esc(latest.verdict || "")} · ${latest.manual ? `${esc(latest.by || "담당")} 입력` : "AI 추천(일일 판정)"}${days.length > 1 ? ` · 이력 ${days.length}회` : ""}</span>` : ""}</h3>
       ${latest ? `${latest.oneline ? `<p class="small" style="margin:0 0 10px">${esc(latest.oneline)}</p>` : ""}
         ${scoreBars(latest.scores)}
         ${Array.isArray(latest.gates) && latest.gates.length ? `<details><summary>탈락요건 6항목 확인</summary><ul class="bullets">${latest.gates.map((g, i) => `<li><b>${esc(GATES[i] || "")}</b> — ${esc(g)}</li>`).join("")}</ul></details>` : ""}

@@ -1,10 +1,10 @@
 // 「오늘」 — 첫 화면. 마감이 먼저, 그다음 변경 알림, 그다음 신규 공고(아직 검토 등록 안 한 건).
-import { oppsArray, dueList, groupByDay, recentChanges, inboxItems, isActive, fmtDate, fmtWon, dday } from "../derive.js";
+import { oppsArray, dueList, groupByDay, recentChanges, recentJudged, inboxItems, isActive, fmtDate, fmtWon, dday } from "../derive.js";
 import { esc, oppRow, chipAxis, chipKind, ddayBadge, empty } from "./components.js";
 
 export function render(state) {
   const opps = oppsArray(state);
-  const week = dueList(opps, 0, 7), later = dueList(opps, 8, 30), changes = recentChanges(opps, 3), inbox = inboxItems(state);
+  const week = dueList(opps, 0, 7), later = dueList(opps, 8, 30), changes = recentChanges(opps, 3), inbox = inboxItems(state), judged = recentJudged(opps, 7);
   const active = opps.filter(o => isActive(o) && ["go", "submitted"].includes(o.stage)).length;
   const review = opps.filter(o => o.stage === "review").length;
   const overdue = dueList(opps, -3650, -1).filter(x => x.ms.k === "submit" && ["go", "review"].includes(x.opp.stage)).length;
@@ -20,6 +20,9 @@ export function render(state) {
   <div class="grid kpi" style="margin-bottom:16px">${kpi.map(([h, n, l, c]) => `<a class="card kpi-tile ${c}" href="${h}"><b class="num">${n}</b><span>${l}</span></a>`).join("")}</div>
   <div class="grid two">
     <div>
+      <div class="card" style="margin-bottom:16px"><div class="hd"><h2>최근 판정</h2><span class="cnt">7일 이내 AI 판정 ${judged.length}건 · 점수순 · 마감이 멀어도 표시 · 「AI 추천」 = 일일 판정, 「입력」 = 팀원 수기</span></div><div class="bd">
+        ${judged.length ? `<div class="rows">${judged.slice(0, 8).map(o => oppRow(o)).join("")}</div>${judged.length > 8 ? `<div class="xs mute" style="margin-top:8px">상위 8건 · 나머지는 파이프라인 「검토」</div>` : ""}` : empty("최근 7일 판정이 없습니다")}
+      </div></div>
       <div class="card"><div class="hd"><h2>이번 주 마감</h2><span class="cnt">7일 이내 ${week.length}건</span></div><div class="bd">
         ${week.length ? groupByDay(week).map(([d, its]) => `<div class="daygroup"><h3>${esc(fmtDate(d))}</h3><div class="rows">${its.map(x => oppRow(x.opp, x.ms)).join("")}</div></div>`).join("") : empty("7일 이내 마감이 없습니다")}
       </div></div>

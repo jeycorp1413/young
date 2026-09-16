@@ -53,8 +53,8 @@ export const actions = {
   setScore(id, score) {
     score = score === "" || score == null ? null : Math.max(0, Math.min(60, Number(score)));
     const verdict = verdictOf(score); const d = ymd();
-    ref(`opps/${id}`).update(stamp({ latest: score == null ? null : { ymd: d, score, verdict, manual: true } }));
-    if (score != null) { ref(`analyses/${id}/${d}`).update({ score, verdict, manual: true, by: state.user || "?" }); log(id, "decision", `판정 ${score}점 · ${verdict}`); }
+    ref(`opps/${id}`).update(stamp({ latest: score == null ? null : { ymd: d, score, verdict, manual: true, by: state.user || "담당" } }));
+    if (score != null) { ref(`analyses/${id}/${d}`).update({ score, verdict, manual: true, by: state.user || "?" }); log(id, "decision", `판정 ${score}점 · ${verdict} (${state.user || "담당"} 입력)`); }
   },
   addNote(id, text) { text = (text || "").trim(); if (!text) return; log(id, "note", text); ref(`opps/${id}`).update(stamp()); },
   addFromInbox(item) {

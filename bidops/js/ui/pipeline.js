@@ -1,7 +1,7 @@
 // 파이프라인 — 단계별 칸반. 카드 = 축·사업명·기관·예산·다음 이정표·판정·담당
 import { STAGES, AXES } from "../config.js";
 import { oppsArray, sortPipeline, nextMilestone, fmtWon, filterOpps } from "../derive.js";
-import { esc, chipAxis, ddayBadge, scoreBadge, oursMark, outcomeMark, empty } from "./components.js";
+import { esc, chipAxis, ddayBadge, scoreBadge, judgedBy, oursMark, outcomeMark, empty } from "./components.js";
 
 export function render(state, ui) {
   let opps = filterOpps(oppsArray(state), ui.q);
@@ -11,7 +11,7 @@ export function render(state, ui) {
       <div class="km"><span>${chipAxis(o.axis)}</span>${ddayBadge(m?.dday, m?.label)}</div>
       <div class="kt">${esc(o.name)}</div>
       <div class="km"><span class="l">${esc(o.dem || o.org)} · <span class="num">${fmtWon(o.budget)}</span></span><span>${outcomeMark(o)}${oursMark(o)}${scoreBadge(o.latest?.score)}</span></div>
-      ${m ? `<div class="xs mute" style="margin-top:4px">${esc(m.label)} ${esc(m.date.slice(5, 16))}${o.owner ? ` · ${esc(o.owner)}` : ""}</div>` : (o.owner ? `<div class="xs mute" style="margin-top:4px">${esc(o.owner)}</div>` : "")}
+      <div class="xs mute" style="margin-top:4px;display:flex;justify-content:space-between;gap:6px"><span>${m ? `${esc(m.label)} ${esc(m.date.slice(5, 16))}` : ""}${o.owner ? ` · ${esc(o.owner)}` : ""}</span>${judgedBy(o.latest)}</div>
     </div>`; };
   return `
   <div class="page-h"><div><h1>파이프라인</h1><div class="sub">${opps.length}건 · 다음 마감이 가까운 순</div></div>

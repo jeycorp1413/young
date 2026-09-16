@@ -59,6 +59,12 @@ export function groupByDay(list) {
   for (const it of list) { const k = it.ms.date.slice(0, 10); if (!g.has(k)) g.set(k, []); g.get(k).push(it); }
   return [...g.entries()];
 }
+// 최근 판정: N일 안에 판정(점수)이 붙은 사업을 점수 높은 순으로 — 마감이 멀어도 첫 화면에 보이게
+export function recentJudged(opps, days = 7) {
+  const lim = ymd(new Date(Date.now() - days * 864e5));
+  return opps.filter(o => o.latest?.score != null && (o.latest.ymd || "") >= lim && o.stage !== "drop")   // 취소된 것도 배지 달아 보여준다
+    .sort((a, b) => (b.latest.score - a.latest.score) || (b.latest.ymd || "").localeCompare(a.latest.ymd || ""));
+}
 export function recentChanges(opps, days = 3) {
   const lim = ymd(new Date(Date.now() - days * 864e5));
   return opps.filter(o => (o.track?.changes || []).length && (o.track?.checked || "") >= lim);
