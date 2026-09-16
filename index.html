@@ -90,6 +90,8 @@
   .stampgrid button:hover{background:#fff8e6; border-color:#f3e3a8;} .stampgrid .e{font-size:1.5rem;}
 
   .addchip{cursor:pointer; background:var(--surface); border:1px dashed #f3b6cd; color:#b5446e;}
+  .track-link{display:inline-block; margin-top:8px; padding:6px 12px; border-radius:999px; background:var(--surface); border:1px solid #f3b6cd; color:#b5446e; font-size:13px; font-weight:600; text-decoration:none; transition:background-color .15s ease, transform .1s ease-out;}
+  .track-link:hover{background:#fdeef3;} .track-link:active{transform:scale(.97);}
   .tchip.evt{cursor:pointer;}
   .spin{font-size:1.875rem; font-weight:800; color:var(--pink-deep); text-align:center; padding:22px 0; min-height:84px; display:flex; align-items:center; justify-content:center;}
   .modal input[type=text],.modal input[type=date]{width:100%; border:1.5px solid var(--line); border-radius:11px; padding:11px 12px; font:inherit; font-size:.875rem; outline:0; background:var(--surface); color:var(--ink);}
@@ -222,7 +224,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="title"><h1>♥ AI 사업기획팀 ♥</h1><p>사랑 가득한 AI 사업기획팀 ♥</p></div>
+    <div class="title"><h1>♥ AI 사업기획팀 ♥</h1><p>사랑 가득한 AI 사업기획팀 ♥</p><a class="track-link" href="nara-tracking.html">📡 나라장터 추적기 · 경쟁사 원장 →</a></div>
     <div class="clock"><b id="clk">--:--</b><span id="cdate"></span></div>
   </div>
   <div class="ticker" id="ticker"></div>
