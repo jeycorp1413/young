@@ -1,0 +1,25 @@
+/* BidOps 디자인 토큰 — 토스 클린 × Apple HIG. 색은 포인트 한두 개, 나머지는 회색 위계. */
+:root{
+  --bg:#F2F2F7; --card:#FFFFFF; --card-2:#F9FAFB; --line:#E5E7EB; --line-2:#EEF0F4;
+  --ink:#111827; --ink-2:#374151; --sub:#6B7280; --mute:#9CA3AF;
+  --blue:#007AFF; --blue-2:#E8F1FF; --green:#1F9D5B; --green-2:#E7F6EE; --amber:#D97706; --amber-2:#FEF3E2;
+  --red:#DC2626; --red-2:#FDECEC; --violet:#6D5BD0; --violet-2:#EFECFF; --teal:#0F8B8D; --teal-2:#E3F4F4; --slate:#475569; --slate-2:#EDF1F5;
+  --sh-1:0 1px 2px rgba(17,24,39,.05),0 1px 1px rgba(17,24,39,.03);
+  --sh-2:0 8px 24px rgba(17,24,39,.08),0 2px 6px rgba(17,24,39,.05);
+  --r-s:8px; --r-m:12px; --r-l:16px;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Malgun Gothic",sans-serif;
+  --fs-xs:12px; --fs-s:13px; --fs-m:14.5px; --fs-l:16px; --fs-xl:20px; --fs-2xl:26px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:28px;
+  --topbar:56px; --drawer-w:540px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0F17; --card:#151A24; --card-2:#1B2130; --line:#2A3241; --line-2:#222937;
+    --ink:#F3F4F6; --ink-2:#D1D5DB; --sub:#9CA3AF; --mute:#6B7280;
+    --blue:#3B9CFF; --blue-2:#12263F; --green:#34C27A; --green-2:#11291D; --amber:#F5A524; --amber-2:#33260E;
+    --red:#F26A6A; --red-2:#3A1A1A; --violet:#9B8CFF; --violet-2:#241F3F; --teal:#3FB9BB; --teal-2:#10302F; --slate:#A6B3C4; --slate-2:#1E2633;
+    --sh-1:0 1px 2px rgba(0,0,0,.4); --sh-2:0 12px 30px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
