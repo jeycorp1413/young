@@ -173,7 +173,7 @@ export function competitorProfile(state, id) {
   const axisCorps = []; for (const t of tags) { for (const c of byTag(t)) if (!axisCorps.includes(c) && axisCorps.length < 6) axisCorps.push(c); if (axisCorps.length >= 4) break; }
   // 판정문의 「현행 수행사 ○○」 — 회사명처럼 보이는 것만 (㈜·주식회사 표기, 원장에 있는 이름, 흔한 회사명 어미)
   const STOP = /^(협조|협력|지원|확인|선정|변경|참여|배제|유리|우위|대비|여부|기준|없음|있음|경우|등|및|또는|외|중|측|와|과)$/;
-  const looksCorp = nm => /^(㈜|\(주\)|주식회사)/.test(nm) || corps.some(c => corpShort(c.corp) === corpShort(nm)) || /(소프트|테크|시스템|시스템즈|넷|정보|아이티|IT|랩|랩스|데이터|솔루션|솔루션즈|컨설팅|글로벌|노트|웍스|웨어|닉스|텍|링크|온|원)$/.test(nm);
+  const looksCorp = nm => /^(㈜|\(주\)|주식회사)/.test(nm) || corps.some(c => corpShort(c.corp) === corpShort(nm)) || /(소프트|테크|시스템|시스템즈|넷|정보|아이티|IT|랩|랩스|데이터|솔루션|솔루션즈|컨설팅|글로벌|노트|웍스|웨어|닉스|텍|링크|온|원|SDS|CNS|AX|SI|DS|ICT|CT)$/.test(nm) || /^[가-힣]{1,4}[A-Z]{2,4}$/.test(nm);
   const mentioned = []; let m; INCUMBENT_RX.lastIndex = 0;
   while ((m = INCUMBENT_RX.exec(text))) { const nm = m[1].replace(/(이|가|는|은|을|를|와|과|의|에|에서|로|으로)$/, ""); if (nm.length >= 2 && !STOP.test(nm) && looksCorp(nm) && !mentioned.includes(nm)) mentioned.push(nm); }
   const cited = corps.map(c => c.corp).filter(c => { const sh = corpShort(c); return sh.length >= 2 && text.includes(sh) && !mentioned.some(x => x.includes(sh) || sh.includes(x)); });
@@ -201,6 +201,21 @@ export function competitorProfile(state, id) {
   if (parts.length >= 3) { pts -= 2; R("−2", `개찰 참가 ${parts.length}개사 — 실제 경쟁이 성립함`, { type: "parts", items: parts }); }
   else if (parts.length) { pts += 2; R("+2", `개찰 참가 ${parts.length}개사 — ${parts.map(p => p.corp).join(", ")}`, { type: "parts", items: parts }); }
   if (prev?.participants?.length) { const n = prev.participants.length; if (n <= 1) pts += 1; R(n <= 1 ? "+1" : "·", `원공고 ${prev.no} 참가 ${n}개사 — ${prev.participants.map(p => p.corp).join(", ")}`, { type: "parts", items: prev.participants }); }
+  // RFP 첨부 문서 속성 — 작성자·최종 저장자에 발주기관이 아닌 업체·사람 이름이 남아 있으면 강한 신호 (동기화가 RFP_* 폴더 파일에서 읽음)
+  const dm = Array.isArray(o.docmeta) ? o.docmeta : [];
+  const dmRows = dm.map(d => `${d.file} — 작성자 ${d.author || "(없음)"}${d.saved_by ? ` · 최종 저장 ${d.saved_by}` : ""}${d.company ? ` · 회사 ${d.company}` : ""}${d.modified ? ` · 수정 ${d.modified}` : ""}`);
+  const flagged = dm.filter(d => d.flag);
+  const weak = dm.filter(d => d.weak && !d.flag);
+  if (flagged.length) { pts += 3; const names = [...new Set(flagged.flatMap(d => d.traces || []))]; R("+3", `RFP 문서 속성에 외부 회사·담당자 — ${names.slice(0, 3).join(", ")} (${flagged.length}개 파일)`, { type: "list", items: dmRows }); }
+  else if (weak.length) { const names = [...new Set(weak.flatMap(d => d.traces || []))]; R("·", `RFP 문서 속성에 개인 계정명만 — ${names.slice(0, 3).join(", ")} (발주기관 직원으로 보임, 점수 없음)`, { type: "list", items: dmRows }); }
+  else if (dm.length) R("·", `RFP 문서 속성 확인 ${dm.length}개 파일 — 업체 흔적 없음(작성자 user 등)`, { type: "list", items: dmRows });
+  // 판정 과정에서 담당이 기록한 신호(일일 판정 파일 incumbent_signals) — 가중치를 그대로 더한다
+  for (const sg of (latest?.inc_signals || [])) {
+    let w = String(sg.w || "·"); let t = sg.t;
+    if (flagged.length && /문서\s*속성|작성자/.test(t)) { w = "·"; t += " (문서 속성 자동 확인과 같은 사실 — 점수 중복 없음)"; }   // 자동 신호와 같은 사실이면 점수는 한 번만
+    const n = parseInt(w.replace("−", "-"), 10); if (!Number.isNaN(n)) pts += n;
+    R(w, `[판정 기록] ${t}`, { type: "list", items: sg.ev || [] });
+  }
   const compBids = orgBids.filter(b => Number(b.n) >= 3);
   if (compBids.length) { pts -= 1; R("−1", `같은 발주처 최근 개찰이 3개사 이상 경쟁 — ${compBids.slice(0, 2).map(b => `${String(b.name).slice(0, 20)}${String(b.name).length > 20 ? "…" : ""} ${b.n}개사`).join(", ")}`, { type: "bids", items: compBids }); }
   const hasData = reasons.length > 0 || cited.length > 0;
