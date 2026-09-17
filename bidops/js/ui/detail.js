@@ -1,9 +1,53 @@
 // 사업 상세 드로어 — 기본정보 · 결정(단계/결과/담당/판정/축) · 일정 · 판정 근거 · 추적(추적기 원본 포함) · 로그
-import { STAGES, OUTCOMES, MEMBERS, MILESTONES, GATES, LINKS, AXES, TRACK_KIND } from "../config.js";
-import { milestones, fmtWon, trackRow } from "../derive.js";
+import { STAGES, OUTCOMES, MEMBERS, MILESTONES, GATES, LINKS, AXES, TRACK_KIND, INCUMBENT_LEVELS, INCUMBENT_BY } from "../config.js";
+import { milestones, fmtWon, trackRow, competitorProfile } from "../derive.js";
 import { esc, chipAxis, chipStage, chipKind, ddayBadge, scoreBadge, oursMark, outcomeMark, scoreBars, empty } from "./components.js";
 
 const fmtN = v => (v == null || v === "") ? "" : Number(v).toLocaleString("ko-KR", { maximumFractionDigits: 2 });
+
+// 긴 판정문을 문장 단위로 끊는다. "…다. " 뒤에서 나누고, ①②③ 열거는 줄을 바꿔 들여쓴다.
+function sentences(text) {
+  return String(text || "").replace(/([다요음함임됨였됐]\.)\s+(?=[가-힣A-Za-z0-9「(①-⑳\d])/g, "$1\u0001").split("\u0001").map(x => x.trim()).filter(Boolean);
+}
+function lines(sent) {   // 한 문장 안의 ①…②… 열거를 줄로
+  const n = (sent.match(/[①-⑳]/g) || []).length;
+  if (n < 2) return esc(sent);
+  const parts = sent.split(/\s(?=[①-⑳])/);
+  return esc(parts[0]) + parts.slice(1).map(p => `<span class="sub">${esc(p)}</span>`).join("");
+}
+const prose = text => text ? `<div class="prose">${sentences(text).map(x => `<p>${lines(x)}</p>`).join("")}</div>` : "";
+const li = arr => Array.isArray(arr) && arr.length ? `<ul class="bullets">${arr.map(x => `<li>${sentences(x).map(lines).join("<br>")}</li>`).join("")}</ul>` : "";
+
+// 근거 펼침 — 어떤 문장·이력이 신호였는지 그대로 보여준다 (이름은 형광)
+function hl(text, names) { let h = esc(text); for (const nm of names || []) { const e = esc(nm); if (e) h = h.split(e).join(`<mark>${e}</mark>`); } return h; }
+function evidenceHtml(ev) {
+  if (!ev || !ev.items?.length) return `<div class="xs mute">세부 근거 없음</div>`;
+  if (ev.type === "sent") return ev.items.map(x => `<p><span class="src">${esc(x.src)}</span>${hl(x.text, x.hl)}</p>`).join("");
+  if (ev.type === "corps") return ev.items.map(x => `<p><b>${esc(x.corp)}</b> — 이 발주처 참가 ${x.n}건 · 1위·낙찰 ${x.wins}건${x.sole ? ` · 수의계약 ${x.sole}건` : ""}${x.tech ? ` · 평균 기술 ${x.tech}` : ""}${x.won?.length ? `<br><span class="src">1위</span>${x.won.map(esc).join(" / ")}` : ""}${x.recent?.length ? `<br><span class="src">최근 사업</span>${x.recent.map(esc).join(" / ")}` : ""}</p>`).join("");
+  if (ev.type === "bids") return ev.items.map(b => `<p><b>${esc(b.name)}</b> <span class="mute">${esc(b.open || "")} · 참가 ${esc(b.n ?? "")}</span><br>${(b.parts || []).slice(0, 5).map(p => `${esc(p.rank)}위 ${esc(p.corp)}${p.total ? ` <span class="num mute">${fmtN(p.total)}</span>` : ""}`).join(" · ")}</p>`).join("");
+  if (ev.type === "parts") return `<p>${ev.items.map(p => `${p.rank ? `${esc(p.rank)}위 ` : ""}${esc(p.corp)}${p.total ? ` <span class="num mute">${fmtN(p.total)}</span>` : ""}${p.result ? ` <span class="mute">${esc(p.result)}</span>` : ""}`).join(" · ")}</p>`;
+  return ev.items.map(x => `<p>${esc(x)}</p>`).join("");
+}
+
+// 경쟁 구도 · 내정 가늠 — 원장·추적기·판정문 신호를 합산한 자동 가늠 + 팀 판단
+function competitionHtml(state, id) {
+  const c = competitorProfile(state, id); const team = c.team;
+  const chip = (corp, meta) => `<span><b>${esc(corp)}</b>${meta ? ` ${esc(meta)}` : ""}</span>`;
+  return `
+    <div class="inc ${c.level}"><b>${esc(INCUMBENT_BY[c.level])}</b><span class="pts">자동 가늠 ${c.pts > 0 ? "+" : ""}${c.pts}점 · 근거 ${c.reasons.length}건</span>${team?.level ? `<span class="chip" style="margin-left:auto">팀 판단 ${esc(INCUMBENT_BY[team.level] || "")}</span>` : ""}</div>
+    ${c.reasons.length ? `<div class="reasons">${c.reasons.map(r => `<details class="rs"><summary><span class="w ${r.w.startsWith("+") ? "up" : r.w.startsWith("−") ? "down" : ""}">${esc(r.w)}</span><span>${esc(r.t)}<span class="more">근거 보기</span></span></summary><div class="ev">${evidenceHtml(r.ev)}</div></details>`).join("")}</div>` : `<div class="xs mute">원장·추적기·판정문 어디에도 이 발주처의 이력 신호가 없습니다. 개찰 후 참가업체로 확인됩니다.</div>`}
+    ${c.orgCorps.length ? `<div class="lbl">같은 발주처(${esc(c.org)}) 이력 업체 — 참가/1위·낙찰</div><div class="corps">${c.orgCorps.map(x => chip(x.corp, `${x.n}/${x.wins}${x.sole ? ` · 수의 ${x.sole}` : ""}`)).join("")}</div>` : ""}
+    ${c.orgBids.length ? `<div class="lbl">같은 발주처 개찰 이력</div><table class="tb"><thead><tr><th>개찰</th><th>사업</th><th>참가</th><th>1위</th></tr></thead><tbody>${c.orgBids.map(b => `<tr data-open="${esc(b.no)}" style="cursor:pointer"><td class="num">${esc(b.open || "")}</td><td>${esc(b.name)}</td><td class="num">${esc(b.n ?? "")}</td><td>${esc((b.parts || [])[0]?.corp || "")}</td></tr>`).join("")}</tbody></table>` : ""}
+    ${c.mentioned.length || c.cited.length ? `<div class="lbl">판정문에 등장한 업체</div><div class="corps">${c.mentioned.map(x => chip(x, "현행 수행사")).join("")}${c.cited.map(x => chip(x, "언급")).join("")}</div>` : ""}
+    ${c.axisCorps.length ? `<div class="lbl">같은 분야(${esc(c.o.axis || "")})에서 자주 만나는 업체</div><div class="corps">${c.axisCorps.map(x => chip(x.corp, `${x.n}/${x.wins}`)).join("")}</div>` : ""}
+    <div class="lbl">팀 판단</div>
+    <form class="incform" data-action="inc-memo" data-id="${esc(id)}">
+      <select data-action="inc-level" data-id="${esc(id)}"><option value="">미정</option>${INCUMBENT_LEVELS.filter(([v]) => v !== "none").map(([v, l]) => `<option value="${v}" ${team?.level === v ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>
+      <input name="memo" value="${esc(team?.memo || "")}" placeholder="내정 여부 근거 · 현행사 · 확인한 사실" autocomplete="off"><button class="btn primary sm" type="submit">저장</button>
+    </form>
+    ${team?.memo ? `<div class="small" style="margin-top:6px">${esc(team.memo)} <span class="xs mute">· ${esc(team.by || "")} ${esc((team.at || "").slice(5, 10))}</span></div>` : ""}
+    <div class="xs mute" style="margin-top:8px">자동 가늠은 경쟁사 원장(같은 발주처 낙찰·수의 이력)·추적기 신호·판정문의 현행사 언급을 규칙으로 더한 값입니다. 확정은 개찰 참가업체로 합니다.</div>`;
+}
 
 // 추적기 원본(참가업체 전체·규격의견·낙찰·계약·원공고)을 그린다. o.track(동기화 요약)보다 자세하다.
 function trackingHtml(tr, o) {
@@ -32,7 +76,6 @@ export function render(state, id) {
   const an = state.analyses[id] || {}; const days = Object.keys(an).sort(); const latest = days.length ? an[days[days.length - 1]] : null;
   const logs = Object.values(state.log[id] || {}).sort((a, b) => (b.t || "").localeCompare(a.t || ""));
   const ms = milestones(o); const next = ms.find(m => m.dday >= 0) || ms[ms.length - 1];
-  const li = arr => Array.isArray(arr) && arr.length ? `<ul class="bullets">${arr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
   const tracked = tr || o.track?.status;
   return `
   <div class="dh"><div style="min-width:0">
@@ -53,24 +96,27 @@ export function render(state, id) {
       <div class="small" style="margin-top:8px">${o.url ? `<a href="${esc(o.url)}" target="_blank" rel="noopener">나라장터 ↗</a>` : "<span class=\"mute\">나라장터 링크 없음</span>"} · <a href="${LINKS.tracking}">추적 현황</a> · <a href="${LINKS.competitors}">경쟁사 원장</a></div>
       ${o.stageBy === "auto" ? `<div class="xs mute" style="margin-top:6px">단계는 동기화가 자동 추정한 값입니다. 바꾸면 이후 자동 갱신에서 덮이지 않습니다.</div>` : ""}
     </div>
-    <div class="sec"><h3>일정 <span class="xs" style="text-transform:none;font-weight:500">${next ? `${next.dday >= 0 ? "다음" : "마지막"} ${esc(next.label)} ${ddayBadge(next.dday)}` : "등록된 이정표 없음"}</span></h3>
+    <div class="sec"><h3>일정 <span class="xs h3m">${next ? `${next.dday >= 0 ? "다음" : "마지막"} ${esc(next.label)} ${ddayBadge(next.dday)}` : "등록된 이정표 없음"}</span></h3>
       <div class="date-grid">${MILESTONES.map(m => `<div><label>${esc(m.label)}</label><input type="datetime-local" value="${esc((o.dates?.[m.k] || "").replace(" ", "T").slice(0, 16))}" data-action="date" data-id="${esc(id)}" data-k="${m.k}"></div>`).join("")}</div>
     </div>
-    <div class="sec"><h3>판정 ${latest ? `<span class="xs" style="text-transform:none;font-weight:500">${esc(latest.ymd || days[days.length - 1])} · ${scoreBadge(latest.score)} ${esc(latest.verdict || "")} · ${latest.manual ? `${esc(latest.by || "담당")} 입력` : "AI 추천(일일 판정)"}${days.length > 1 ? ` · 이력 ${days.length}회` : ""}</span>` : ""}</h3>
-      ${latest ? `${latest.oneline ? `<p class="small" style="margin:0 0 10px">${esc(latest.oneline)}</p>` : ""}
+    <div class="sec"><h3>경쟁 구도 · 내정 가늠 <span class="xs h3m">원장 · 추적기 · 판정문 합산</span></h3>
+      ${competitionHtml(state, id)}
+    </div>
+    <div class="sec"><h3>판정 ${latest ? `<span class="xs h3m">${esc(latest.ymd || days[days.length - 1])} · ${scoreBadge(latest.score)} ${esc(latest.verdict || "")} · ${latest.manual ? `${esc(latest.by || "담당")} 입력` : "AI 추천(일일 판정)"}${days.length > 1 ? ` · 이력 ${days.length}회` : ""}</span>` : ""}</h3>
+      ${latest ? `${prose(latest.oneline)}
         ${scoreBars(latest.scores)}
         ${Array.isArray(latest.gates) && latest.gates.length ? `<details><summary>탈락요건 6항목 확인</summary><ul class="bullets">${latest.gates.map((g, i) => `<li><b>${esc(GATES[i] || "")}</b> — ${esc(g)}</li>`).join("")}</ul></details>` : ""}
-        ${latest.edge ? `<details open><summary>승부처</summary><p class="small" style="margin:4px 0">${esc(latest.edge)}</p></details>` : ""}
+        ${latest.edge ? `<details open><summary>승부처</summary>${prose(latest.edge)}</details>` : ""}
         ${latest.pros?.length ? `<details><summary>강점 ${latest.pros.length}</summary>${li(latest.pros)}</details>` : ""}
         ${latest.risks?.length ? `<details open><summary>리스크 ${latest.risks.length}</summary>${li(latest.risks)}</details>` : ""}
         ${latest.actions?.length ? `<details open><summary>액션 ${latest.actions.length}</summary>${li(latest.actions)}</details>` : ""}
         ${latest.docs?.length ? `<details><summary>분석 문서 ${latest.docs.length} (PC 프로젝트1 폴더)</summary>${li(latest.docs)}</details>` : ""}`
       : empty("아직 판정이 없습니다. 위 「판정 점수」에 점수를 넣거나 일일 판정 파일을 동기화하세요.")}
     </div>
-    <div class="sec"><h3>추적 <span class="xs" style="text-transform:none;font-weight:500">${tracked ? `점검 ${esc(tr?.checked || o.track?.checked || "")}` : "추적기 미등록"}</span></h3>
+    <div class="sec"><h3>추적 <span class="xs h3m">${tracked ? `점검 ${esc(tr?.checked || o.track?.checked || "")}` : "추적기 미등록"}</span></h3>
       ${tracked ? trackingHtml(tr, o) : `<div class="xs mute">추적기에 등록하려면 PC에서 <code>python 나라장터_추적.py add ${esc(id)}</code></div>`}
     </div>
-    <div class="sec"><h3>로그 <span class="xs" style="text-transform:none;font-weight:500">${logs.length}건</span></h3>
+    <div class="sec"><h3>로그 <span class="xs h3m">${logs.length}건</span></h3>
       <form class="noteform" data-action="note" data-id="${esc(id)}"><input name="text" placeholder="메모 · 통화 내용 · 결정 근거" autocomplete="off"><button class="btn primary sm" type="submit">기록</button></form>
       <div class="log" style="margin-top:10px">${logs.length ? logs.map(l => `<div class="it ${esc(l.type)}"><span class="t num">${esc((l.t || "").slice(5, 16))}</span><span>${esc(l.text)}<span class="xs mute"> · ${esc(l.by || "")}</span></span></div>`).join("") : `<div class="xs mute">기록 없음</div>`}</div>
     </div>

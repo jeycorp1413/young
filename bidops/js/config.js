@@ -13,6 +13,11 @@ export const LINKS = { board: "../index.html", competitors: "#/competitors", tra
 export const TRACK_KIND = { bid: "본공고", spec: "사전규격", kw: "이름 감시", manual: "국방 D2B" };
 // 경쟁사 원장의 분야 태그(경쟁사_원장.py domain_tags) — 표시 순서
 export const LEDGER_TAGS = ["LLM·RAG", "AI데이터", "국방", "농업·식품", "피지컬AI", "데이터플랫폼", "AI일반", "운영·유지", "감리"];
+// 사업 축 → 원장 분야 태그. 드로어 「경쟁 구도」가 같은 분야에서 자주 만나는 업체를 고를 때 쓴다
+export const AXIS_TAGS = { "농업AI": ["농업·식품", "AI일반"], "국방AI": ["국방", "AI데이터"], "AI Agent·LLM": ["LLM·RAG", "AI일반"], "피지컬AI": ["피지컬AI", "AI일반"], "데이터·AI구축": ["AI데이터", "데이터플랫폼"], "모빌리티": ["데이터플랫폼"], "기타": [] };
+// 내정 가늠 수준 — 자동 규칙과 팀 판단이 같은 척도를 쓴다
+export const INCUMBENT_LEVELS = [["none", "자료 부족 · 판단 보류"], ["low", "내정 가능성 낮음"], ["mid", "내정 의심 신호 있음"], ["high", "내정 가능성 높음"]];
+export const INCUMBENT_BY = Object.fromEntries(INCUMBENT_LEVELS);
 
 // 승산 축 (2026-09-08 확정) — 순서가 표시 순서
 export const AXES = [

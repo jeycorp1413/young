@@ -43,6 +43,7 @@ opps/{id}                 id = 공고번호(R26BK…)·사전규격번호(R26BD�
   dates: {opinion, reg, agree, submit, present, open, award}   (ISO 'YYYY-MM-DD' 또는 'YYYY-MM-DD HH:MM')
   latest: {ymd, score, verdict}        ← analyses 최신본 요약
   track: {status, n_part, winner, signals[], changes[], checked, participants[≤10]}   ← 추적기 스냅샷
+  incumbent: {level(low|mid|high|''), memo, by, at}   ← 내정 가늠 팀 판단 (사람 입력, 동기화가 보존)
   docs: [파일명…]   alias: 원공고번호   createdAt, updatedAt, by, src[]
 analyses/{id}/{ymd}
   score, verdict(적극참여|검토|비추천), scores[12], gates[6], oneline, pros[], risks[], actions[], edge, rfp, docs[]
@@ -56,7 +57,7 @@ meta                       {updatedAt, counts, sources}
 index.html  셸: 상단바(브랜드·뷰 탭·담당자·동기화 시각) + <main> + 드로어 + 토스트
 js/app.js   해시 라우터  #/today #/pipeline #/calendar #/axis #/opp/{id}(드로어)
 js/store.js 상태 {opps, analyses, log, nara, meta, user} · Firebase 구독 · actions
-js/derive.js 순수 함수: dday · nextMilestone · urgency · sort · group · axisStats · inbox diff
+js/derive.js 순수 함수: dday · nextMilestone · urgency · sort · group · axisStats · inbox diff · competitorProfile(경쟁 구도·내정 가늠: 원장 같은 발주처 이력 + 추적기 신호 + 판정문 현행사 언급을 규칙 합산, 근거마다 ev 첨부)
 js/ui/components.js  esc · chip · ddayBadge · scoreBars · drawer · toast · empty
 js/ui/today.js       KPI 4 · 이번 주 마감 · 다가오는 마감 · 변경 알림 · 신규 공고
 js/ui/pipeline.js    칸반(후보→검토→참여·작성→제출→결과, 관찰/보류/불참은 토글)
@@ -64,7 +65,7 @@ js/ui/calendar.js    월간 이정표 캘린더
 js/ui/axis.js        축별 파이프라인·평균 판정·경쟁사·보유 자산
 js/ui/tracking.js    추적: 등록 건의 상태(공고 중·개찰·낙찰·계약)·달라진 것·눈여겨볼 점  ← /nara_tracking.rows
 js/ui/competitors.js 경쟁사: 분야별 자주 만나는 업체·업체별 표·개찰 결과            ← /nara_tracking.ledger
-js/ui/detail.js      드로어: 기본정보·일정 편집·결정(단계/결과/담당/축)·판정·추적(추적기 원본: 참가업체·규격의견·낙찰·계약·원공고)·로그
+js/ui/detail.js      드로어: 기본정보·결정(단계/결과/담당/축)·일정 편집·경쟁 구도·내정 가늠(자동 가늠 + 근거 펼침 + 팀 판단 저장)·판정(문장 단위 줄바꿈)·추적(추적기 원본: 참가업체·규격의견·낙찰·계약·원공고)·로그
 css/tokens.css       색·타이포·간격·라운드·그림자·다크모드 토큰
 css/app.css          레이아웃·컴포넌트 (모바일 퍼스트, 768/1080 브레이크포인트)
 ```

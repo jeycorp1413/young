@@ -1,5 +1,5 @@
 // 순수 함수만. 상태를 바꾸지 않고 파생값을 계산한다 (D-day · 이정표 · 정렬 · 통계 · 신규 공고).
-import { MILESTONES, STAGE_BY, AXES } from "./config.js";
+import { MILESTONES, STAGE_BY, AXES, AXIS_TAGS } from "./config.js";
 
 export function today() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
 export function parseDate(s) {
@@ -148,3 +148,62 @@ export function ledgerCorps(state, tag, q) {
   return c;
 }
 export function ledgerBids(state) { return state.tracking?.ledger?.bids || []; }
+
+// ── 경쟁 구도 · 내정 가늠 (드로어) ──
+// 원장(같은 발주처 이력·같은 분야 업체) + 추적기 신호 + 판정문에 지목된 현행사를 규칙으로 합산한다. 확정이 아니라 가늠이다.
+const orgKey = s => String(s || "").replace(/\(.*?\)/g, "").replace(/[\s·]/g, "").slice(0, 8);
+const sameOrg = (a, b) => { const x = orgKey(a), y = orgKey(b); return !!x && !!y && (x.startsWith(y.slice(0, 6)) || y.startsWith(x.slice(0, 6))); };
+const corpShort = c => String(c || "").replace(/^(㈜|\(주\)|주식회사)\s*/, "").replace(/\s*(㈜|\(주\)|주식회사)$/, "").trim();
+// 판정문을 문장으로 (드로어 표시와 같은 규칙)
+export const splitSentences = text => String(text || "").replace(/([다요음함임됨였됐]\.)\s+(?=[가-힣A-Za-z0-9「(①-⑳\d])/g, "$1\u0001").split("\u0001").map(x => x.trim()).filter(Boolean);
+const INCUMBENT_RX = /(?:현행|기존|현재)\s*(?:고도화\s*|운영\s*|유지관리\s*|구축\s*|시스템\s*)?(?:수행사|운영사|사업자|용역사|개발사|유지관리사)\s*(?:는|은|인|:|=)?\s*((?:㈜|\(주\)|주식회사\s?)?[가-힣A-Za-z0-9&]{2,20})/g;
+export function competitorProfile(state, id) {
+  const o = state.opps[id] || {}; const tr = trackRow(state, id); const L = state.tracking?.ledger || {};
+  const an = state.analyses[id] || {}; const days = Object.keys(an).sort(); const latest = days.length ? an[days[days.length - 1]] : null;
+  const fields = latest ? [["한 줄 요약", latest.oneline], ["승부처", latest.edge], ["메모", latest.note], ...(latest.gates || []).map(x => ["탈락요건", x]), ...(latest.pros || []).map(x => ["강점", x]), ...(latest.risks || []).map(x => ["리스크", x]), ...(latest.actions || []).map(x => ["액션", x])].filter(f => f[1]) : [];
+  const text = fields.map(f => f[1]).join(" ");
+  // 이름이 들어간 문장만 뽑는다 (근거 펼침용)
+  const sentWith = names => { const out = []; for (const [src, t] of fields) for (const sent of splitSentences(t)) { const hit = names.filter(nm => sent.includes(corpShort(nm))); if (hit.length) out.push({ src, text: sent, hl: hit.map(corpShort) }); } return out; };
+  const org = o.dem || o.org || tr?.org || "";
+  const corps = L.corps || [];
+  const orgCorps = org ? corps.filter(c => (c.orgs || []).some(x => sameOrg(x, org))).sort((a, b) => (b.wins - a.wins) || (b.n - a.n)) : [];
+  const orgBids = org ? (L.bids || []).filter(b => b.no !== id && sameOrg(b.org, org)) : [];
+  const tags = AXIS_TAGS[o.axis] || [];   // 주 태그 우선, 모자라면 보조 태그로 채운다 (데이터플랫폼 같은 넓은 태그가 목록을 덮지 않게)
+  const byTag = t => corps.filter(c => (c.tags || []).includes(t) && !orgCorps.includes(c) && c.n >= 2).sort((a, b) => (b.wins - a.wins) || (b.n - a.n));
+  const axisCorps = []; for (const t of tags) { for (const c of byTag(t)) if (!axisCorps.includes(c) && axisCorps.length < 6) axisCorps.push(c); if (axisCorps.length >= 4) break; }
+  // 판정문의 「현행 수행사 ○○」 — 회사명처럼 보이는 것만 (㈜·주식회사 표기, 원장에 있는 이름, 흔한 회사명 어미)
+  const STOP = /^(협조|협력|지원|확인|선정|변경|참여|배제|유리|우위|대비|여부|기준|없음|있음|경우|등|및|또는|외|중|측|와|과)$/;
+  const looksCorp = nm => /^(㈜|\(주\)|주식회사)/.test(nm) || corps.some(c => corpShort(c.corp) === corpShort(nm)) || /(소프트|테크|시스템|시스템즈|넷|정보|아이티|IT|랩|랩스|데이터|솔루션|솔루션즈|컨설팅|글로벌|노트|웍스|웨어|닉스|텍|링크|온|원)$/.test(nm);
+  const mentioned = []; let m; INCUMBENT_RX.lastIndex = 0;
+  while ((m = INCUMBENT_RX.exec(text))) { const nm = m[1].replace(/(이|가|는|은|을|를|와|과|의|에|에서|로|으로)$/, ""); if (nm.length >= 2 && !STOP.test(nm) && looksCorp(nm) && !mentioned.includes(nm)) mentioned.push(nm); }
+  const cited = corps.map(c => c.corp).filter(c => { const sh = corpShort(c); return sh.length >= 2 && text.includes(sh) && !mentioned.some(x => x.includes(sh) || sh.includes(x)); });
+  const parts = tr?.participants?.length ? tr.participants : (o.track?.participants || []);
+  const signals = tr?.signals || o.track?.signals || []; const prev = tr?.prev || null;
+  // 규격 의견 제출자 — 발주기관 자신·진흥원 답변은 빼고 업체만, 중복 제거
+  const opinions = [...new Map((tr?.opinions || []).filter(x => x.corp && !sameOrg(x.corp, org) && !/진흥원|조달청$/.test(x.corp)).map(x => [x.corp, x])).values()];
+  // 근거 한 줄마다 ev(펼치면 보이는 실제 문장·이력)를 붙인다. ev.type: sent(판정문 문장) · corps(업체 이력) · bids(개찰) · parts(참가업체) · list(문자열)
+  const reasons = []; let pts = 0;
+  const R = (w, t, ev) => reasons.push({ w, t, ev });
+  if (mentioned.length) { pts += 2; R("+2", `판정문이 현행 수행사를 지목 — ${mentioned.join(", ")}`, { type: "sent", items: sentWith(mentioned) }); }
+  const repeat = orgCorps.filter(c => c.wins >= 2);
+  const corpEv = list => ({ type: "corps", items: list.map(c => ({ corp: c.corp, n: c.n, wins: c.wins, sole: c.sole, tech: c.tech, recent: c.recent || [], orgs: c.orgs || [], won: orgBids.filter(b => (b.parts || [])[0]?.corp === c.corp).map(b => `${b.open || ""} ${b.name}`) })) });
+  if (repeat.length) { const w = repeat.some(c => c.wins >= 3) ? 2 : 1; pts += w; R(`+${w}`, `같은 발주처에서 반복 낙찰 — ${repeat.slice(0, 4).map(c => `${c.corp} ${c.wins}승/${c.n}건${c.sole ? ` (수의 ${c.sole})` : ""}`).join(", ")}`, corpEv(repeat)); }
+  else if (orgCorps.length) R("·", `같은 발주처 이력 업체 ${orgCorps.length}개 — 반복 낙찰은 없음`, corpEv(orgCorps));
+  const sole = orgCorps.filter(c => c.sole && !repeat.includes(c));
+  if (sole.length) { pts += 1; R("+1", `같은 발주처 수의계약 이력 — ${sole.slice(0, 3).map(c => c.corp).join(", ")}`, corpEv(sole)); }
+  const sig = signals.join(" ");
+  const strong = signals.filter(x => /단독\s*(응찰|참가|입찰)|참가\s*1개사|참가 1\b|1개사\s*(참가|응찰|입찰)|단독/.test(x) && !/부적격/.test(x));
+  if (strong.length) { pts += 2; R("+2", `추적기 신호 — ${strong.join(" / ")}`, { type: "list", items: [...signals.map(x => `신호: ${x}`), tr?.status ? `상태: ${tr.status}` : ""].filter(Boolean) }); }
+  const nobody = signals.filter(x => /참가 0|유찰/.test(x) && !/단독|1개사/.test(x));
+  if (nobody.length) { pts -= 1; R("−1", `원공고 유찰·참가 0 — 관심 업체가 없었다는 뜻이라 내정보다는 무관심 신호 (${nobody[0]})`, { type: "list", items: signals.map(x => `신호: ${x}`) }); }
+  if (/의견\s*0건|규격의견\s*0|의견 없음/.test(sig)) { pts += 1; R("+1", "사전규격 의견 0건 — 내용을 이미 아는 업체가 있거나 관심 업체가 적다는 뜻일 수 있음", { type: "list", items: signals.map(x => `신호: ${x}`) }); }
+  if (opinions.length) R("·", `사전규격 의견 제출 ${opinions.length}개사 — ${opinions.map(x => x.corp).join(", ")} (참여 의사 노출)`, { type: "list", items: opinions.map(x => `${x.corp}${x.date ? ` · ${x.date}` : ""}${x.title ? ` · ${x.title}` : ""}`) });
+  if (parts.length >= 3) { pts -= 2; R("−2", `개찰 참가 ${parts.length}개사 — 실제 경쟁이 성립함`, { type: "parts", items: parts }); }
+  else if (parts.length) { pts += 2; R("+2", `개찰 참가 ${parts.length}개사 — ${parts.map(p => p.corp).join(", ")}`, { type: "parts", items: parts }); }
+  if (prev?.participants?.length) { const n = prev.participants.length; if (n <= 1) pts += 1; R(n <= 1 ? "+1" : "·", `원공고 ${prev.no} 참가 ${n}개사 — ${prev.participants.map(p => p.corp).join(", ")}`, { type: "parts", items: prev.participants }); }
+  const compBids = orgBids.filter(b => Number(b.n) >= 3);
+  if (compBids.length) { pts -= 1; R("−1", `같은 발주처 최근 개찰이 3개사 이상 경쟁 — ${compBids.slice(0, 2).map(b => `${String(b.name).slice(0, 20)}${String(b.name).length > 20 ? "…" : ""} ${b.n}개사`).join(", ")}`, { type: "bids", items: compBids }); }
+  const hasData = reasons.length > 0 || cited.length > 0;
+  const level = !hasData ? "none" : pts >= 4 ? "high" : pts >= 2 ? "mid" : "low";
+  return { o, tr, latest, org, orgCorps: orgCorps.slice(0, 6), orgBids: orgBids.slice(0, 4), axisCorps, mentioned, cited: cited.slice(0, 8), parts, signals, opinions, reasons, pts, level, team: o.incumbent || null };
+}

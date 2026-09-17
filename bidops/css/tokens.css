@@ -10,7 +10,7 @@
   --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Malgun Gothic",sans-serif;
   --fs-xs:12px; --fs-s:13px; --fs-m:14.5px; --fs-l:16px; --fs-xl:20px; --fs-2xl:26px;
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:28px;
-  --topbar:56px; --drawer-w:540px;
+  --topbar:56px; --drawer-w:620px;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){

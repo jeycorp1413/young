@@ -61,6 +61,7 @@ document.addEventListener("change", e => {
   else if (a === "axis") { actions.setAxis(id, v); toast("축 변경"); }
   else if (a === "ours") actions.setField(id, "ours", v ? true : null);
   else if (a === "score") { actions.setScore(id, v); toast("판정 저장"); }
+  else if (a === "inc-level") { actions.setIncumbent(id, v, null); toast("내정 판단 저장"); }
   else if (a === "date") { actions.setDate(id, el.dataset.k, v ? v.replace("T", " ") : ""); toast("일정 저장"); }
   else if (a === "axis-filter") { ui.axisFilter = v; render(); }
   else if (a === "who") setUser(v);
@@ -71,7 +72,8 @@ document.addEventListener("input", e => {
   else { ui.ledgerQ = el.value; rerenderKeep("[data-action=ledger-q]"); }
 });
 document.addEventListener("submit", e => {
-  const f = e.target.closest("form[data-action=note]"); if (!f) return; e.preventDefault();
+  const f = e.target.closest("form[data-action=note],form[data-action=inc-memo]"); if (!f) return; e.preventDefault();
+  if (f.dataset.action === "inc-memo") { actions.setIncumbent(f.dataset.id, null, f.memo.value); toast("내정 판단 메모 저장"); return; }
   actions.addNote(f.dataset.id, f.text.value); f.text.value = ""; toast("기록했습니다");
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && location.hash.startsWith("#/opp/")) close(); });

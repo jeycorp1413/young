@@ -1,5 +1,5 @@
 // 데이터 계층 — Firebase 구독 + 액션. 화면은 여기 actions 로만 쓴다.
-import { FIREBASE, NODE, FEED_NODE, TRACK_NODE, STAGE_BY, verdictOf } from "./config.js";
+import { FIREBASE, NODE, FEED_NODE, TRACK_NODE, STAGE_BY, INCUMBENT_BY, verdictOf } from "./config.js";
 import { keyOf, ymd } from "./derive.js";
 
 export const state = { opps: {}, analyses: {}, log: {}, meta: {}, nara: {}, tracking: {}, user: "", ready: false, error: null };
@@ -55,6 +55,14 @@ export const actions = {
     const verdict = verdictOf(score); const d = ymd();
     ref(`opps/${id}`).update(stamp({ latest: score == null ? null : { ymd: d, score, verdict, manual: true, by: state.user || "담당" } }));
     if (score != null) { ref(`analyses/${id}/${d}`).update({ score, verdict, manual: true, by: state.user || "?" }); log(id, "decision", `판정 ${score}점 · ${verdict} (${state.user || "담당"} 입력)`); }
+  },
+  // 내정 가늠 — 팀 판단(수준·메모). 동기화는 opps의 알 수 없는 필드를 보존하므로 덮이지 않는다
+  setIncumbent(id, level, memo) {
+    const cur = state.opps[id]?.incumbent || {};
+    const inc = { level: level == null ? (cur.level || "") : level, memo: memo == null ? (cur.memo || "") : memo.trim(), by: state.user || "담당", at: nowIso() };
+    ref(`opps/${id}`).update(stamp({ incumbent: inc }));
+    if (memo != null && inc.memo) log(id, "decision", `내정 판단 ${INCUMBENT_BY[inc.level] || "미정"} — ${inc.memo}`);
+    else if (level != null) log(id, "decision", `내정 판단 ${INCUMBENT_BY[level] || "미정"}`);
   },
   addNote(id, text) { text = (text || "").trim(); if (!text) return; log(id, "note", text); ref(`opps/${id}`).update(stamp()); },
   addFromInbox(item) {
