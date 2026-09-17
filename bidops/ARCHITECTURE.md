@@ -44,8 +44,10 @@ opps/{id}                 id = 공고번호(R26BK…)·사전규격번호(R26BD�
   latest: {ymd, score, verdict}        ← analyses 최신본 요약
   track: {status, n_part, winner, signals[], changes[], checked, participants[≤10]}   ← 추적기 스냅샷
   incumbent: {level(low|mid|high|''), memo, by, at}   ← 내정 가늠 팀 판단 (사람 입력, 동기화가 보존)
+  docmeta: [{file, author, saved_by, company, created, modified, flag, weak, traces[]}]   ← RFP_*/{번호}_* 첨부 문서 속성 (rfp_meta.py, 동기화가 매일 갱신)
   docs: [파일명…]   alias: 원공고번호   createdAt, updatedAt, by, src[]
 analyses/{id}/{ymd}
+  inc_signals: [{w:'+3'|'·', t, ev[]}]   ← 일일 판정 파일 incumbent_signals (담당이 확인한 내정·경쟁 신호)
   score, verdict(적극참여|검토|비추천), scores[12], gates[6], oneline, pros[], risks[], actions[], edge, rfp, docs[]
 log/{id}/{pushId}          {t, type(auto|note|stage|decision), text, by}
 meta                       {updatedAt, counts, sources}
