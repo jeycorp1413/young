@@ -39,15 +39,18 @@ export function nextMilestone(opp) {
   return ms.find(m => m.dday != null && m.dday >= 0) || ms[ms.length - 1] || null;
 }
 export function isActive(o) { return !["drop", "hold"].includes(o.stage) && o.outcome !== "cancelled"; }
+// 당사 참여 건: ★ 당사 입찰 표시 또는 참여·제출 단계. 첫 화면의 마감 목록은 이 건만 보여준다 (2026-09-21 사용자 지시 — 안 내는 공고의 마감은 관심 밖)
+export function isOurs(o) { return !!o.ours || ["go", "submitted"].includes(o.stage); }
 export function scoreCls(s) { return s == null ? "" : s >= 48 ? "go" : s >= 30 ? "mid" : "no"; }
 
 // 마감 목록: days 이내 이정표를 사업당 1행(가장 가까운 것)으로, 같은 창의 나머지 이정표는 also 에 붙인다.
 // 관찰(watch) 사업은 우리가 내는 게 아니므로 개찰·낙찰만 본다.
-export function dueList(opps, from = 0, to = 7) {
+export function dueList(opps, from = 0, to = 7, oursOnly = false) {
   const out = [];
   for (const o of opps) {
     if (!isActive(o) || o.stage === "result") continue;
-    const hit = milestones(o).filter(m => m.dday != null && m.dday >= from && m.dday <= to && (o.stage !== "watch" || ["open", "award"].includes(m.k)));
+    if (oursOnly && !isOurs(o)) continue;
+    const hit = milestones(o).filter(m => m.dday != null && m.dday >= from && m.dday <= to && (o.stage !== "watch" || isOurs(o) || ["open", "award"].includes(m.k)));   // 당사 건은 관찰 단계여도 제출 마감까지
     if (!hit.length) continue;
     const ms = Object.assign({}, hit[0], { also: hit.slice(1) });
     out.push({ opp: o, ms });
@@ -99,7 +102,7 @@ export function axisStats(opps) {
     s.byStage[o.stage] = (s.byStage[o.stage] || 0) + 1;
     if (o.latest?.score != null) s.scores.push(o.latest.score);
     if (o.ours) s.ours++;
-    const nm = nextMilestone(o); if (isActive(o) && nm && nm.dday != null && nm.dday >= 0 && nm.dday <= 30) s.due.push({ opp: o, ms: nm });
+    const nm = nextMilestone(o); if (isActive(o) && isOurs(o) && nm && nm.dday != null && nm.dday >= 0 && nm.dday <= 30) s.due.push({ opp: o, ms: nm });   // 마감 임박도 당사 참여 건만
     for (const p of o.track?.participants || []) {
       if (!p.corp || /더아이엠씨/.test(p.corp)) continue;
       const c = s.corps.get(p.corp) || { corp: p.corp, n: 0, wins: 0 }; c.n++; if (String(p.rank).trim() === "1") c.wins++; s.corps.set(p.corp, c);

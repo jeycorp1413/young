@@ -4,30 +4,32 @@ import { esc, oppRow, chipAxis, chipKind, ddayBadge, empty } from "./components.
 
 export function render(state) {
   const opps = oppsArray(state);
-  const week = dueList(opps, 0, 7), later = dueList(opps, 8, 30), changes = recentChanges(opps, 3), inbox = inboxItems(state), judged = recentJudged(opps, 7);
+  // 마감 목록은 당사 참여 건(★ 당사 입찰 · 참여 · 제출 단계)만 — 검토·관찰 중인 공고의 마감은 캘린더에서만 본다
+  const week = dueList(opps, 0, 7, true), later = dueList(opps, 8, 30, true), changes = recentChanges(opps, 3), inbox = inboxItems(state), judged = recentJudged(opps, 7);
   const active = opps.filter(o => isActive(o) && ["go", "submitted"].includes(o.stage)).length;
   const review = opps.filter(o => o.stage === "review").length;
-  const overdue = dueList(opps, -3650, -1).filter(x => x.ms.k === "submit" && ["go", "review"].includes(x.opp.stage)).length;
+  const overdue = dueList(opps, -3650, -1, true).filter(x => x.ms.k === "submit" && ["go", "submitted"].includes(x.opp.stage)).length;
   const kpi = [
-    ["#/pipeline", week.length, "이번 주 마감", week.some(x => x.ms.dday <= 1) ? "warn" : ""],
+    ["#/calendar", week.length, "이번 주 마감 (참여 건)", week.some(x => x.ms.dday <= 1) ? "warn" : ""],
     ["#/pipeline", active, "참여·작성·제출 중", ""],
     ["#/pipeline", review, "검토 대기", ""],
     ["#/today", inbox.length, "신규 공고 (검토 전)", ""],
   ];
   return `
   <div class="page-h"><div><h1>오늘</h1><div class="sub">${esc(fmtDate(new Date().toISOString().slice(0, 10)))} · 마감 → 변경 → 새 후보 순</div></div>
-    <div class="toolbar"><a class="btn sm" href="#/calendar">캘린더</a>${overdue ? `<span class="chip" style="color:var(--red);background:var(--red-2)">마감 지났는데 검토 중 ${overdue}건</span>` : ""}</div></div>
+    <div class="toolbar"><a class="btn sm" href="#/calendar">캘린더</a>${overdue ? `<span class="chip" style="color:var(--red);background:var(--red-2)">참여 건인데 제출 마감 지남 ${overdue}건</span>` : ""}</div></div>
   <div class="grid kpi" style="margin-bottom:16px">${kpi.map(([h, n, l, c]) => `<a class="card kpi-tile ${c}" href="${h}"><b class="num">${n}</b><span>${l}</span></a>`).join("")}</div>
   <div class="grid two">
     <div>
       <div class="card" style="margin-bottom:16px"><div class="hd"><h2>최근 판정</h2><span class="cnt">7일 이내 AI 판정 ${judged.length}건 · 점수순 · 마감이 멀어도 표시 · 「AI 추천」 = 일일 판정, 「입력」 = 팀원 수기</span></div><div class="bd">
         ${judged.length ? `<div class="rows">${judged.slice(0, 8).map(o => oppRow(o)).join("")}</div>${judged.length > 8 ? `<div class="xs mute" style="margin-top:8px">상위 8건 · 나머지는 파이프라인 「검토」</div>` : ""}` : empty("최근 7일 판정이 없습니다")}
       </div></div>
-      <div class="card"><div class="hd"><h2>이번 주 마감</h2><span class="cnt">7일 이내 ${week.length}건</span></div><div class="bd">
-        ${week.length ? groupByDay(week).map(([d, its]) => `<div class="daygroup"><h3>${esc(fmtDate(d))}</h3><div class="rows">${its.map(x => oppRow(x.opp, x.ms)).join("")}</div></div>`).join("") : empty("7일 이내 마감이 없습니다")}
+      <div class="card"><div class="hd"><h2>이번 주 마감</h2><span class="cnt">★ 당사 참여 건만 · 7일 이내 ${week.length}건</span></div><div class="bd">
+        ${week.length ? groupByDay(week).map(([d, its]) => `<div class="daygroup"><h3>${esc(fmtDate(d))}</h3><div class="rows">${its.map(x => oppRow(x.opp, x.ms)).join("")}</div></div>`).join("") : empty("7일 이내 참여 건 마감이 없습니다")}
       </div></div>
-      <div class="card" style="margin-top:16px"><div class="hd"><h2>다가오는 마감</h2><span class="cnt">8~30일 ${later.length}건</span></div><div class="bd">
-        ${later.length ? `<div class="rows">${later.map(x => oppRow(x.opp, x.ms)).join("")}</div>` : empty("30일 이내 예정된 이정표가 없습니다")}
+      <div class="card" style="margin-top:16px"><div class="hd"><h2>다가오는 마감</h2><span class="cnt">★ 당사 참여 건만 · 8~30일 ${later.length}건</span></div><div class="bd">
+        ${later.length ? `<div class="rows">${later.map(x => oppRow(x.opp, x.ms)).join("")}</div>` : empty("30일 이내 참여 건 이정표가 없습니다")}
+        <div class="xs mute" style="margin-top:8px">검토·관찰 중인 공고의 마감은 여기 안 보입니다 · 전체 일정은 <a href="#/calendar">캘린더</a>, 참여 표시는 상세 화면 「당사 입찰」</div>
       </div></div>
     </div>
     <div>
