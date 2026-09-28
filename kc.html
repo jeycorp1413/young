@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>경창산업 수익성 보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#F2F4F6; --card:#fff; --line:#E5E8EB; --line2:#F2F4F6;
+  --t1:#191F28; --t2:#4E5968; --t3:#8B95A1; --t4:#B0B8C1;
+  --blue:#3182F6; --blue-bg:#E8F3FF; --red:#F04452; --red-bg:#FFEEEE;
+  --amber:#FF9F0A; --amber-bg:#FFF4E0; --green:#0CA678; --green-bg:#E6F7F1;
+  --brand:#0B4EA2;
+  --r:20px; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--t1);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+button,input,select{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+/* 상단 */
+.top{position:sticky;top:0;z-index:20;background:rgba(242,244,246,.82);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid rgba(0,0,0,.05)}
+.top-in{max-width:1320px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:16px}
+.logo{height:30px;width:auto;display:block}
+.logo-fallback{font-weight:800;font-size:18px;color:var(--brand);letter-spacing:-.03em}
+.top h1{font-size:16px;font-weight:700;color:var(--t1);padding-left:16px;border-left:1px solid var(--line)}
+.top .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:14px;font-size:12px;font-weight:600;background:#fff;color:var(--t2);border:1px solid var(--line);white-space:nowrap}
+.chip.demo{background:var(--amber-bg);color:#B25E00;border-color:transparent}
+.sel{height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:0 30px 0 12px;font-weight:600;font-size:13px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238B95A1' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;cursor:pointer}
+
+/* 레이아웃 */
+.wrap{max-width:1320px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:208px 1fr;gap:24px}
+nav.side{position:sticky;top:76px;align-self:start;display:flex;flex-direction:column;gap:2px}
+nav.side .grp{font-size:11px;font-weight:700;color:var(--t3);padding:14px 12px 6px}
+nav.side button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:9px 12px;border-radius:10px;font-weight:600;color:var(--t2);cursor:pointer;transition:background .15s}
+nav.side button:hover{background:rgba(0,0,0,.04)}
+nav.side button.on{background:#fff;color:var(--t1);box-shadow:var(--shadow)}
+nav.side button .no{font-size:11px;color:var(--t4);width:18px}
+nav.side button.on .no{color:var(--blue)}
+main{min-width:0}
+.page{display:none}
+.page.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.ph{margin:4px 0 18px}
+.ph .eyebrow{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:4px}
+.ph h2{font-size:24px;font-weight:700;letter-spacing:-.03em}
+.ph p{color:var(--t2);margin-top:6px;max-width:760px}
+
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g21{grid-template-columns:2fr 1fr}
+.g12{grid-template-columns:1fr 1.4fr}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;min-width:0}
+.card h3{font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card .sub{font-size:12.5px;color:var(--t3);margin-bottom:14px}
+.mt{margin-top:16px}
+
+.kpi .lb{font-size:13px;color:var(--t2);font-weight:600}
+.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.03em;margin-top:6px}
+.kpi .d{font-size:12.5px;margin-top:4px;color:var(--t3)}
+.up{color:var(--blue)} .dn{color:var(--red)} .warn{color:#C77700}
+
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.b-ok{background:var(--blue-bg);color:var(--blue)}
+.b-warn{background:var(--amber-bg);color:#C77700}
+.b-bad{background:var(--red-bg);color:var(--red)}
+.b-gray{background:var(--line2);color:var(--t2)}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;color:var(--t3);font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line2);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+tbody tr.click{cursor:pointer;transition:background .12s}
+tbody tr.click:hover{background:#F9FAFB}
+td .pn{font-size:11.5px;color:var(--t3);display:block}
+.tbl-wrap{overflow-x:auto;margin:0 -10px;padding:0 10px}
+
+.alerts{display:flex;flex-direction:column;gap:10px}
+.alert{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:12px 14px;border-radius:14px;background:#F9FAFB;cursor:pointer;transition:background .12s}
+.alert:hover{background:var(--line2)}
+.alert .tag{font-size:11px;font-weight:700;color:var(--t3);margin-bottom:2px}
+.alert .msg{font-weight:600;font-size:13.5px}
+.alert .dot{width:8px;height:8px;border-radius:50%;margin-top:6px}
+
+/* 입력 */
+.field{margin-bottom:16px}
+.field .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.field label{font-size:13px;font-weight:600;color:var(--t2)}
+.field .val{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.field .hint{font-size:11.5px;color:var(--t3);margin-top:4px}
+input[type=range]{width:100%;height:24px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--blue) var(--p,50%),var(--line) var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;margin-top:-8px;box-shadow:0 1px 4px rgba(0,0,0,.2),0 0 0 .5px rgba(0,0,0,.06)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--blue)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.seg{display:inline-flex;background:var(--line2);border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:9px;font-weight:600;font-size:13px;color:var(--t2);cursor:pointer}
+.seg button.on{background:#fff;color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+.result{background:#F9FAFB;border-radius:16px;padding:18px}
+.result .big{font-size:30px;font-weight:700;letter-spacing:-.03em}
+.result .cap{font-size:12.5px;color:var(--t2);font-weight:600}
+.rows{display:flex;flex-direction:column}
+.rows .r{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.rows .r:last-child{border-bottom:0}
+.rows .r span:first-child{color:var(--t2)}
+.rows .r b{font-variant-numeric:tabular-nums}
+.say{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--blue-bg);color:#1B64DA;font-weight:600;font-size:13.5px}
+.say.bad{background:var(--red-bg);color:#D22030}
+.say.warn{background:var(--amber-bg);color:#B25E00}
+
+.chart{position:relative;height:240px}
+.chart.tall{height:300px}
+.chart.short{height:190px}
+
+/* 원가 막대 */
+.stack{display:flex;height:34px;border-radius:9px;overflow:hidden;margin:8px 0 6px}
+.stack div{height:100%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;transition:flex-basis .3s ease}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--t2)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.opt{border:1.5px solid var(--line);border-radius:16px;padding:16px;position:relative}
+.opt.best{border-color:var(--blue);background:#F7FAFF}
+.opt .nm{font-weight:700;font-size:14px}
+.opt .ct{font-size:22px;font-weight:700;margin:6px 0 2px;letter-spacing:-.02em}
+.opt .ds{font-size:12px;color:var(--t3)}
+.opt .pick{position:absolute;top:12px;right:12px}
+
+.phase{border-radius:16px;padding:18px;background:#F9FAFB}
+.phase .when{font-size:12px;font-weight:700;color:var(--blue)}
+.phase h4{font-size:16px;margin:4px 0 10px}
+.phase ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.phase li{font-size:13px;color:var(--t2);padding-left:16px;position:relative}
+.phase li:before{content:"";position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--t4)}
+
+.co-fact{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:4px}
+.co-fact>div{padding:4px 16px;border-left:1px solid var(--line)}
+.co-fact>div:first-child{border-left:0;padding-left:0}
+.co-fact .k{font-size:12px;color:var(--t3);font-weight:600}
+.co-fact .v{font-size:15px;font-weight:700;margin-top:2px}
+.src{font-size:11.5px;color:var(--t3);margin-top:14px}
+.sec{display:flex;align-items:center;gap:10px;margin:34px 0 14px}
+.sec h3{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.src a{color:var(--t3)}
+
+footer{max-width:1320px;margin:0 auto;padding:0 24px 40px;color:var(--t3);font-size:12px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}.g21,.g12{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr;padding:12px 16px 40px}
+  nav.side{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}
+  nav.side .grp{display:none}
+  nav.side button{white-space:nowrap;flex:none}
+  .top-in{padding:10px 16px;flex-wrap:wrap}
+  .top h1{font-size:14px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .co-fact{grid-template-columns:1fr 1fr;gap:12px}
+  .co-fact>div{border-left:0;padding-left:0}
+}
+
+/* ===================== Apple glass + 반응형 (2026-09-28) ===================== */
+:root{
+  --r:22px;
+  --glass:rgba(255,255,255,.72);
+  --glass-strong:rgba(255,255,255,.86);
+  --hair:rgba(255,255,255,.75);
+  --edge:rgba(9,20,38,.07);
+  --shadow:0 .5px 1px rgba(9,20,38,.04),0 6px 18px rgba(9,20,38,.06),0 18px 44px rgba(9,20,38,.05);
+  --shadow-lift:0 1px 2px rgba(9,20,38,.05),0 10px 28px rgba(9,20,38,.09),0 28px 64px rgba(9,20,38,.07);
+  --blur:saturate(180%) blur(22px);
+}
+html,body{
+  background:
+    radial-gradient(1100px 620px at 12% -8%, #DCE9FF 0%, rgba(220,233,255,0) 62%),
+    radial-gradient(900px 560px at 92% 4%, #E7E1FA 0%, rgba(231,225,250,0) 58%),
+    radial-gradient(760px 520px at 60% 100%, #DFF3EC 0%, rgba(223,243,236,0) 60%),
+    #EEF1F5;
+  background-attachment:fixed;
+}
+.top{
+  background:rgba(255,255,255,.62);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-bottom:1px solid var(--edge);
+}
+.card,.result,.alert,.phase{
+  background:var(--glass);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--hair);
+  box-shadow:var(--shadow);
+}
+.card{transition:box-shadow .25s ease, transform .25s ease}
+.card:hover{box-shadow:var(--shadow-lift)}
+.result{background:rgba(255,255,255,.55)}
+.alert{background:rgba(255,255,255,.55);border-radius:16px}
+.alert:hover{background:rgba(255,255,255,.8)}
+.chip{background:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-color:var(--hair)}
+.sel{background-color:var(--glass-strong);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-color:var(--hair)}
+nav.side button.on{
+  background:var(--glass-strong);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--hair);box-shadow:var(--shadow);
+}
+nav.side button:hover{background:rgba(255,255,255,.5)}
+.seg{background:rgba(9,20,38,.05);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.seg button.on{background:var(--glass-strong);box-shadow:0 1px 3px rgba(9,20,38,.1)}
+tbody tr.click:hover{background:rgba(255,255,255,.6)}
+
+/* 데이터 품질 */
+.dq-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 22px}
+.dq-strip .go{border:1px solid var(--hair);background:var(--glass-strong);border-radius:12px;padding:9px 14px;font-weight:700;font-size:13px;color:var(--blue);cursor:pointer;white-space:nowrap}
+.dq-strip .go:hover{box-shadow:var(--shadow)}
+.pipe{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin-top:4px}
+.pipe .node{flex:1 1 150px;min-width:0;border-radius:16px;border:1px solid var(--hair);background:rgba(255,255,255,.55);padding:14px}
+.pipe .node .k{font-size:11.5px;font-weight:700;color:var(--t3)}
+.pipe .node .v{font-weight:700;margin-top:3px}
+.pipe .node .d{font-size:12px;color:var(--t2);margin-top:4px}
+.pipe .node.live{border-color:rgba(12,166,120,.35);background:rgba(230,247,241,.7)}
+
+/* ── 반응형 ── */
+.wrap{max-width:1360px}
+.top-in,footer{max-width:1360px}
+@media (max-width:1200px){
+  .wrap{grid-template-columns:184px 1fr;gap:18px}
+  .g4{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:1000px){
+  .g3,.g21,.g12{grid-template-columns:1fr}
+  .chart{height:220px}.chart.tall{height:260px}
+}
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr;padding:12px 16px 48px}
+  nav.side{position:sticky;top:60px;z-index:15;flex-direction:row;overflow-x:auto;gap:6px;
+    padding:8px;margin:0 -4px;border-radius:16px;
+    background:rgba(255,255,255,.6);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    border:1px solid var(--hair);box-shadow:var(--shadow);scrollbar-width:none}
+  nav.side::-webkit-scrollbar{display:none}
+  nav.side .grp{display:none}
+  nav.side button{white-space:nowrap;flex:none;padding:8px 12px}
+  .card{padding:18px}
+  .ph h2{font-size:21px}
+}
+@media (max-width:620px){
+  .top-in{padding:10px 14px;gap:10px}
+  .top h1{font-size:13px;padding-left:10px}
+  .logo{height:24px}
+  .wrap{padding:10px 12px 40px}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .grid{gap:12px}
+  .card{padding:16px;border-radius:18px}
+  .ph h2{font-size:19px}
+  .ph p{font-size:13px}
+  .kpi .v{font-size:24px}
+  .result .big{font-size:25px}
+  .chart{height:200px}.chart.tall{height:230px}
+  th,td{padding:9px 8px;font-size:12.5px}
+  .dq-strip{align-items:flex-start;flex-direction:column}
+  .dq-strip .go{width:100%}
+  footer{flex-direction:column;gap:6px;padding:0 12px 28px}
+}
+@media (max-width:420px){
+  .g4{grid-template-columns:1fr 1fr}
+  .kpi .v{font-size:20px}
+  .kpi .lb{font-size:12px}
+}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <img id="logo" class="logo" src="assets/kc_logo_horizontal_brown.svg" alt="경창산업" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'logo-fallback',textContent:'경창산업'}))">
+  <h1>수익성 의사결정 보드</h1>
+  <span class="sp"></span>
+  <select class="sel" id="plantSel" aria-label="사업장"></select>
+  <span class="chip num" id="monthChip">2026년 9월 기준</span>
+  <span class="chip demo">품번 수치는 예시</span>
+</div></header>
+
+<div class="wrap">
+<nav class="side" id="nav">
+  <div class="grp">한눈에</div>
+  <button data-p="home" class="on"><span class="no">●</span>종합 현황</button>
+  <div class="grp">5대 모듈</div>
+  <button data-p="m1"><span class="no">01</span>품번별 원가 차이</button>
+  <button data-p="m2"><span class="no">02</span>추가 물량 대응</button>
+  <button data-p="m3"><span class="no">03</span>운반비</button>
+  <button data-p="m4"><span class="no">04</span>인건비</button>
+  <button data-p="m5"><span class="no">05</span>수선비</button>
+  <div class="grp">바로 계산</div>
+  <button data-p="sim"><span class="no">▶</span>변수 시뮬레이션</button>
+  <div class="grp">데이터 기반</div>
+  <button data-p="dq"><span class="no">◆</span>데이터 품질</button>
+</nav>
+
+<main>
+
+<!-- ============ 종합 ============ -->
+<section class="page on" id="p-home">
+  <div class="ph">
+    <div class="eyebrow" id="homeEyebrow">경창산업 · 전 사업장</div>
+    <h2>원가율 1%p가 영업이익 1년치입니다</h2>
+    <p>2025년 경창산업 매출원가는 6,494억원, 영업이익은 73억원이었습니다. 원가를 1%만 줄여도 65억원이 남습니다. 어느 품번, 어느 비용에서 그 1%가 새는지 찾는 화면입니다.</p>
+  </div>
+
+
+
+  <div class="card dq-strip mt" id="dqStrip">
+    <div>
+      <h3>데이터 품질 <span class="badge b-bad" id="dqStripBadge">확인 필요</span></h3>
+      <div class="sub" style="margin:0">어제 미입력 <b id="dqStripN">–</b>건 · 이 숫자가 0이 되어야 위 금액을 그대로 믿을 수 있습니다</div>
+    </div>
+    <button class="go" data-goto="dq">데이터 품질 보기 →</button>
+  </div>
+
+  <div class="grid g4 mt" id="kpiReal"></div>
+
+  <div class="grid g3 mt">
+    <div class="card">
+      <h3>분기 매출과 영업이익률 <span class="badge b-gray">공시</span></h3>
+      <div class="sub">연결 기준 · 2025년 1분기~2026년 2분기</div>
+      <div class="chart"><canvas id="cTrend"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>비용 구조 <span class="badge b-gray">공시</span></h3>
+      <div class="sub">2026년 상반기 매출 대비 · 괄호는 담당 모듈</div>
+      <div class="chart"><canvas id="cCost"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>제품별 매출 <span class="badge b-gray">공시</span></h3>
+      <div class="sub">2025년 별도 기준 6,612억원</div>
+      <div class="chart"><canvas id="cMix"></canvas></div>
+    </div>
+  </div>
+  <div class="src" id="coSrc"></div>
+
+  <div class="sec"><h3>품번별로 들여다보면</h3><span class="badge b-warn">예시</span></div>
+  <p style="color:var(--t2);margin:-6px 0 14px">경창산업 실제 제품군과 공시된 평균 판매단가를 기준으로 만든 예시입니다. 원가계산서를 받으면 실제 품번으로 바꿔 보여드립니다.</p>
+
+  <div class="grid g4" id="kpis"></div>
+
+  <div class="grid g21 mt">
+    <div class="card">
+      <h3>품번별 수익성</h3>
+      <div class="sub">결정가 = 고객이 정한 납품 단가 · 자체원가 = 재료비+노무비+경비+운반비 실제값 · 행을 누르면 상세</div>
+      <div class="tbl-wrap"><table id="prodTbl"></table></div>
+    </div>
+    <div class="card">
+      <h3>조치가 필요한 항목</h3>
+      <div class="sub">기준을 넘은 순서대로</div>
+      <div class="alerts" id="alerts"></div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <h3>품번별 연간 이익 기여</h3>
+    <div class="sub">개당 이익 × 연간 물량</div>
+    <div class="chart"><canvas id="cContrib"></canvas></div>
+  </div>
+</section>
+
+<!-- ============ M1 ============ -->
+<section class="page" id="p-m1">
+  <div class="ph">
+    <div class="eyebrow">모듈 01 · 원가절감</div>
+    <h2>결정가와 자체원가, 어디서 벌어지나</h2>
+    <p>품번을 고르면 원가를 재료비·노무비·경비·운반비로 나눠 결정가와 비교합니다. 아래 절감 활동 값을 움직이면 개당 이익과 연간 이익이 바로 다시 계산됩니다.</p>
+  </div>
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <select class="sel" id="m1Prod" aria-label="품번"></select>
+      <span class="chip" id="m1Meta"></span>
+    </div>
+    <div class="grid g2 mt" style="gap:24px">
+      <div>
+        <div class="cap" style="font-size:12.5px;color:var(--t2);font-weight:600">현재</div>
+        <div class="stack" id="m1StackNow"></div>
+        <div class="cap" style="font-size:12.5px;color:var(--t2);font-weight:600;margin-top:10px">절감 활동 반영 후</div>
+        <div class="stack" id="m1StackAfter"></div>
+        <div class="legend mt">
+          <span><i style="background:#3182F6"></i>재료비</span><span><i style="background:#6BA6FF"></i>노무비</span><span><i style="background:#A9CBFF"></i>경비</span><span><i style="background:#C9D6E6"></i>운반비</span><span><i style="background:#E5E8EB;border:1px solid #cfd4da"></i>이익</span>
+        </div>
+      </div>
+      <div class="rows" id="m1Rows"></div>
+    </div>
+  </div>
+  <div class="grid g12 mt">
+    <div class="card">
+      <h3>절감 활동 넣어 보기</h3>
+      <div class="sub">현장에서 실제로 할 수 있는 범위로 잡았습니다</div>
+      <div class="field"><div class="row"><label>C/T 단축</label><span class="val" id="m1ctV"></span></div><input type="range" id="m1ct" min="0" max="25" value="8"><div class="hint">병목 공정 사이클 타임을 줄이면 개당 노무비가 줄어듭니다</div></div>
+      <div class="field"><div class="row"><label>가동률 향상</label><span class="val" id="m1oeeV"></span></div><input type="range" id="m1oee" min="0" max="10" value="3"><div class="hint">비가동(대기·고장·품번 교체)을 줄이면 같은 설비로 더 만듭니다</div></div>
+      <div class="field"><div class="row"><label>라인 인원 조정</label><span class="val" id="m1opV"></span></div><input type="range" id="m1op" min="0" max="4" value="1"><div class="hint">작업 재배치로 줄일 수 있는 인원</div></div>
+      <div class="field"><div class="row"><label>불량·스크랩 감소</label><span class="val" id="m1scV"></span></div><input type="range" id="m1sc" min="0" max="3" step="0.1" value="1"><div class="hint">버려지는 재료가 줄어든 만큼 재료비가 내려갑니다</div></div>
+      <div class="field" style="margin-bottom:0"><div class="row"><label>단가 재협상</label><span class="val" id="m1prV"></span></div><input type="range" id="m1pr" min="0" max="5" step="0.5" value="0"><div class="hint">원자재 연동·설계변경 근거로 결정가를 올리는 경우</div></div>
+    </div>
+    <div class="card">
+      <h3>개선 전후 개당 이익</h3>
+      <div class="sub">활동별로 얼마씩 보태지는지</div>
+      <div class="chart tall"><canvas id="cM1"></canvas></div>
+      <div class="say" id="m1Say"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ M2 ============ -->
+<section class="page" id="p-m2">
+  <div class="ph">
+    <div class="eyebrow">모듈 02 · 생산 판단</div>
+    <h2>추가 물량, 잔업·특근·3교대·외주 중 뭐가 싼가</h2>
+    <p>고객이 물량을 더 달라고 할 때 네 가지 방법의 비용을 같은 기준으로 계산합니다. 지금 라인 여력으로 기간 안에 만들 수 있는지도 함께 봅니다.</p>
+  </div>
+  <div class="grid g12">
+    <div class="card">
+      <h3>조건</h3>
+      <div class="sub">품번과 추가 물량을 넣으세요</div>
+      <div class="field"><select class="sel" id="m2Prod" style="width:100%"></select></div>
+      <div class="field"><div class="row"><label>추가 물량</label><span class="val" id="m2qV"></span></div><input type="range" id="m2q" min="1000" max="30000" step="500" value="8000"></div>
+      <div class="field"><div class="row"><label>납기까지 남은 기간</label><span class="val" id="m2dV"></span></div><input type="range" id="m2d" min="5" max="40" value="20"></div>
+      <div class="field"><div class="row"><label>외주 단가 (개당 가공비)</label><span class="val" id="m2oV"></span></div><input type="range" id="m2o" min="50" max="200" value="118"><div class="hint">자체 노무비 대비 %</div></div>
+      <div class="rows" id="m2Base"></div>
+    </div>
+    <div class="card">
+      <h3>방법별 추가 비용</h3>
+      <div class="sub">추가 물량 전체를 만드는 데 드는 노무·경비 증가분 (재료비는 네 방법이 같아 제외)</div>
+      <div class="grid g2" id="m2Opts"></div>
+      <div class="say" id="m2Say"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ M3 ============ -->
+<section class="page" id="p-m3">
+  <div class="ph">
+    <div class="eyebrow">모듈 03 · 운반비</div>
+    <h2>고객이 인정하는 운반비보다 더 쓰고 있나</h2>
+    <p>납품처별로 단가에 포함된 운반비와 실제 지급한 운반비를 맞춰 봅니다. 긴급 용차는 따로 모아 원인과 금액을 봅니다.</p>
+  </div>
+  <div class="grid g4" id="m3Kpi"></div>
+  <div class="grid g21 mt">
+    <div class="card">
+      <h3>납품처별 운반비 (9월)</h3>
+      <div class="sub">인정 운반비 = 결정가에 들어 있는 개당 운반비 × 납품 수량</div>
+      <div class="tbl-wrap"><table id="m3Tbl"></table></div>
+    </div>
+    <div class="card">
+      <h3>줄이면 얼마나 남나</h3>
+      <div class="sub">연간 기준</div>
+      <div class="field"><div class="row"><label>적재율 개선</label><span class="val" id="m3lV"></span></div><input type="range" id="m3l" min="0" max="20" value="8"><div class="hint">혼적·팔레트 규격 조정으로 차량 수를 줄이는 경우</div></div>
+      <div class="field"><div class="row"><label>긴급 용차 감소</label><span class="val" id="m3eV"></span></div><input type="range" id="m3e" min="0" max="100" step="5" value="50"><div class="hint">생산계획 조기 확정으로 막을 수 있는 비율</div></div>
+      <div class="result"><div class="cap">연간 절감 예상</div><div class="big num up" id="m3Save"></div><div class="rows mt" id="m3Rows"></div></div>
+    </div>
+  </div>
+  <div class="card mt">
+    <h3>긴급 용차 발생 원인 (최근 3개월)</h3>
+    <div class="sub">건수 기준</div>
+    <div class="chart short"><canvas id="cM3"></canvas></div>
+  </div>
+</section>
+
+<!-- ============ M4 ============ -->
+<section class="page" id="p-m4">
+  <div class="ph">
+    <div class="eyebrow">모듈 04 · 인건비</div>
+    <h2>직영·도급·외주, 공정마다 뭐가 맞나</h2>
+    <p>공정별로 필요한 공수에서 적정 인원을 뽑고, 직영으로 둘 때와 도급·외주로 돌릴 때 1년 비용을 비교합니다. 전환 비용이 있으면 몇 개월 만에 본전이 되는지도 계산합니다.</p>
+  </div>
+  <div class="card">
+    <h3>공정별 인원과 인건비</h3>
+    <div class="sub">적정 인원 = 월 필요 공수 ÷ (1인 월 가용시간 × 가동률)</div>
+    <div class="tbl-wrap"><table id="m4Tbl"></table></div>
+  </div>
+  <div class="grid g12 mt">
+    <div class="card">
+      <h3>도급 전환 계산</h3>
+      <div class="sub">공정을 골라 조건을 바꿔 보세요</div>
+      <div class="field"><select class="sel" id="m4Proc" style="width:100%"></select></div>
+      <div class="field"><div class="row"><label>직영 1인 연간 인건비</label><span class="val" id="m4wV"></span></div><input type="range" id="m4w" min="5000" max="9000" step="100" value="7100"><div class="hint">공시 2025년 1인 평균 급여 7,100만원 기준, 만원</div></div>
+      <div class="field"><div class="row"><label>도급 1인 연간 단가</label><span class="val" id="m4cV"></span></div><input type="range" id="m4c" min="3800" max="7000" step="100" value="5100"><div class="hint">도급사 관리비 포함, 만원</div></div>
+      <div class="field"><div class="row"><label>전환 비용</label><span class="val" id="m4tV"></span></div><input type="range" id="m4t" min="0" max="80000" step="1000" value="30000"><div class="hint">교육·품질 안정화 기간 손실·지그 보완 등, 만원</div></div>
+      <div class="field" style="margin-bottom:0"><div class="row"><label>전환 초기 효율 저하</label><span class="val" id="m4eV"></span></div><input type="range" id="m4e" min="0" max="20" value="8"><div class="hint">처음 6개월 동안 생산성이 떨어지는 정도</div></div>
+    </div>
+    <div class="card">
+      <h3>누적 손익 (36개월)</h3>
+      <div class="sub">직영 유지 대비 도급 전환 시 누적 차이</div>
+      <div class="chart tall"><canvas id="cM4"></canvas></div>
+      <div class="say" id="m4Say"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ M5 ============ -->
+<section class="page" id="p-m5">
+  <div class="ph">
+    <div class="eyebrow">모듈 05 · 수선비</div>
+    <h2>수선비가 기준을 넘은 설비, 고칠까 바꿀까</h2>
+    <p>설비별 연간 수선비를 취득가 대비 비율로 보고, 표준 기준(12%)을 넘은 설비를 먼저 올립니다. 기준값은 회사 사정에 맞게 바꿀 수 있습니다. 계속 고쳐 쓸 때와 새로 바꿀 때 5년 총비용을 비교합니다.</p>
+  </div>
+  <div class="grid g4" id="m5Kpi"></div>
+  <div class="card mt">
+    <h3>설비별 수선비</h3>
+    <div class="sub">수선비율 = 최근 12개월 수선비 ÷ 취득가 · 기준 12%</div>
+    <div class="tbl-wrap"><table id="m5Tbl"></table></div>
+  </div>
+  <div class="grid g12 mt">
+    <div class="card">
+      <h3>수리 vs 교체</h3>
+      <div class="sub" id="m5Sub"></div>
+      <div class="field"><select class="sel" id="m5Eq" style="width:100%"></select></div>
+      <div class="field"><div class="row"><label>수선비 연 증가율</label><span class="val" id="m5gV"></span></div><input type="range" id="m5g" min="0" max="30" value="12"><div class="hint">노후 설비는 해마다 수선비가 오릅니다</div></div>
+      <div class="field"><div class="row"><label>신규 설비 가격</label><span class="val" id="m5pV"></span></div><input type="range" id="m5p" min="50" max="150" value="100"><div class="hint">현 설비 취득가 대비 %</div></div>
+      <div class="field" style="margin-bottom:0"><div class="row"><label>고장 정지 손실 (연)</label><span class="val" id="m5dV"></span></div><input type="range" id="m5d" min="0" max="60000" step="1000" value="24000"><div class="hint">고장으로 라인이 선 시간의 공헌이익 손실, 만원</div></div>
+    </div>
+    <div class="card">
+      <h3>5년 누적 비용</h3>
+      <div class="sub">수선비 + 정지 손실 vs 교체비 + 신규 설비 유지비</div>
+      <div class="chart tall"><canvas id="cM5"></canvas></div>
+      <div class="say" id="m5Say"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIM ============ -->
+<section class="page" id="p-sim">
+  <div class="ph">
+    <div class="eyebrow">바로 계산</div>
+    <h2>변수 하나 바꾸면 손익이 어떻게 되나</h2>
+    <p>원가계산서 항목이 모두 수식으로 이어져 있어서, 중량·C/T·재료 단가·자동화·생산량 중 하나만 바꿔도 개당 원가와 연간 이익이 다시 계산됩니다.</p>
+  </div>
+  <div class="card" style="padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <div class="seg" id="simTabs">
+      <button data-s="s1" class="on">중량 변경</button>
+      <button data-s="s2">C/T 개선</button>
+      <button data-s="s3">재료 단가</button>
+      <button data-s="s4">자동화 투자</button>
+      <button data-s="s5">생산량 변경</button>
+    </div>
+    <span class="sp" style="flex:1"></span>
+    <select class="sel" id="simProd" aria-label="품번"></select>
+  </div>
+  <div class="grid g12 mt">
+    <div class="card" id="simIn"></div>
+    <div class="card" id="simOut">
+      <div class="grid g2" id="simRes"></div>
+      <div class="chart mt"><canvas id="cSim"></canvas></div>
+      <div class="say" id="simSay"></div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- ============ 데이터 품질 ============ -->
+<section class="page" id="p-dq">
+  <div class="ph">
+    <div class="eyebrow">데이터 기반</div>
+    <h2>숫자를 믿을 수 있는 상태인지 먼저 봅니다</h2>
+    <p>이 보드의 모든 금액은 ERP·MES에 입력된 값에서 나옵니다. 입력이 빠지거나 부서마다 다르게 적히면 계산 결과가 같이 흔들립니다. 아래 다섯 가지를 매일 아침 확인합니다.</p>
+  </div>
+
+  <div class="grid g4" id="dqKpi"></div>
+
+  <div class="grid g21 mt">
+    <div class="card">
+      <h3>부서별 어제 미입력 건수</h3>
+      <div class="sub">전표·실적 입력이 하루 이상 밀린 건 · 0이 아니면 빨간색</div>
+      <div class="chart"><canvas id="cDq"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>오늘 확인할 것</h3>
+      <div class="sub">기준을 넘은 순서대로</div>
+      <div class="alerts" id="dqAlerts"></div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <h3>매일 확인하는 다섯 가지</h3>
+    <div class="sub">항목을 누르면 해당 전표·지시번호까지 내려갑니다</div>
+    <div class="tbl-wrap"><table id="dqTbl"></table></div>
+  </div>
+
+  <div class="sec"><h3>부서마다 다르게 적히는 지점</h3><span class="badge b-warn">표준화 대상</span></div>
+  <p style="color:var(--t2);margin:-6px 0 14px">연동만 해서는 풀리지 않는 부분입니다. 같은 말을 같은 뜻으로 쓰게 만드는 게 먼저입니다.</p>
+  <div class="card">
+    <div class="tbl-wrap"><table id="gapTbl"></table></div>
+  </div>
+
+  <div class="card mt">
+    <h3>데이터 연동 상태</h3>
+    <div class="sub">ERP 운영 DB는 건드리지 않고, 읽기 전용으로 5분마다 가져옵니다</div>
+    <div class="pipe" id="pipe"></div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  <span>㈜더아이엠씨 AI 기획팀 · 영업 시연용 화면</span>
+  <span id="footNote">실적·비용 구조·제품 매출은 DART 공시 기준, 품번·원가·설비·운반·인원 수치는 설명용 예시값입니다.</span>
+</footer>
+
+<script>
+/* ============ 데이터 품질 (ERP 데이터 AI 활용 접근법 · 5장) ============ */
+const DQ = {
+  dept:[['생산1부',0],['생산2부',14],['품질부',3],['자재부',26],['영업부',0],['보전부',5]],
+  items:[
+    ['어제 미입력 건수','부서별 막대로 표시 · 0이 아니면 빨간색','48건','생산2부 14 · 자재부 26 · 보전부 5 · 품질부 3','bad'],
+    ['품번이 마스터에 없는 건수','건수와 해당 전표 번호까지 표시','7건','신규 품번 등록 전에 실적부터 올라온 경우','bad'],
+    ['공정 실적이 비어 있는 작업지시','지시번호 목록으로 확인','12건','도장·조립 공정에 집중','warn'],
+    ['수량 단위가 섞인 건수','EA·박스·kg 단위별 집계','31건','환산 기준이 문서로 없는 상태','warn'],
+    ['입력 지연 일수','작업일과 입력일의 평균 차이','2.4일','월말에 몰아서 입력하는 패턴','warn'],
+  ],
+  gaps:[
+    ['불량의 정의','재작업해서 살린 건을 생산부는 불량에서 빼고 품질부는 넣는다','불량률이 부서마다 다르게 나온다'],
+    ['품번 표기','같은 제품을 부서마다 다르게 적는다 · 앞 기호와 하이픈 유무가 다르다','같은 제품이 여러 건으로 집계된다'],
+    ['날짜 기준','한쪽은 작업한 날, 한쪽은 전표를 올린 날을 쓴다','월말·월초 물량이 서로 어긋난다'],
+    ['수량 단위','EA와 박스와 kg이 섞여 들어간다','합계가 맞지 않는다'],
+    ['미입력','바쁘면 나중에 몰아서 넣는다','입력 시각과 실제 작업 시각이 며칠 벌어진다'],
+  ],
+  pipe:[
+    ['1','ERP 운영 DB','읽지 않습니다 · 부하를 주지 않기 위해',''],
+    ['2','읽기 전용 복제본','ERP 업체가 발급한 조회 전용 계정','live'],
+    ['3','표준 저장소','품목·거래처·생산실적·검사·불량을 같은 이름으로','live'],
+    ['4','이 화면','5분마다 갱신 · 실시간이 아닙니다','live'],
+  ]
+};
+
+function renderDQ(){
+  const total = DQ.dept.reduce((a,d)=>a+d[1],0);
+  const bad = DQ.dept.filter(d=>d[1]>0).length;
+
+  $('#dqKpi').innerHTML = [
+    ['어제 미입력', total+'건', bad+'개 부서에서 발생', total>0?'dn':'up'],
+    ['품번 마스터 미등록', '7건', '전표 번호까지 확인 가능', 'dn'],
+    ['공정 실적 공란', '12건', '작업지시 기준', 'warn'],
+    ['입력 지연 평균', '2.4일', '작업일 대비', 'warn'],
+  ].map(([lb,v,d,c])=>`<div class="card kpi"><div class="lb">${lb}</div><div class="v ${c}">${v}</div><div class="d">${d}</div></div>`).join('');
+
+  $('#dqAlerts').innerHTML = DQ.items.filter(i=>i[4]!=='ok').map(i=>{
+    const col = i[4]==='bad'?'var(--red)':'var(--amber)';
+    return `<div class="alert"><div class="dot" style="background:${col}"></div>
+      <div><div class="tag">${i[2]}</div><div class="msg">${i[0]}</div>
+      <div class="tag" style="margin-top:4px;font-weight:600">${i[3]}</div></div></div>`;
+  }).join('');
+
+  $('#dqTbl').innerHTML = `<thead><tr><th class="l">확인 항목</th><th class="l">보여주는 방식</th><th>현재</th><th class="l">내용</th></tr></thead>
+    <tbody>${DQ.items.map(i=>`<tr class="click"><td class="l"><b>${i[0]}</b></td><td class="l" style="color:var(--t2)">${i[1]}</td>
+      <td><span class="badge ${i[4]==='bad'?'b-bad':'b-warn'}">${i[2]}</span></td>
+      <td class="l" style="color:var(--t2)">${i[3]}</td></tr>`).join('')}</tbody>`;
+
+  $('#gapTbl').innerHTML = `<thead><tr><th class="l">어긋나는 지점</th><th class="l">실제로 벌어지는 일</th><th class="l">그래서 생기는 문제</th></tr></thead>
+    <tbody>${DQ.gaps.map(g=>`<tr><td class="l"><b>${g[0]}</b></td><td class="l" style="color:var(--t2)">${g[1]}</td><td class="l" style="color:var(--t2)">${g[2]}</td></tr>`).join('')}</tbody>`;
+
+  $('#pipe').innerHTML = DQ.pipe.map(p=>`<div class="node ${p[3]}"><div class="k">${p[0]}</div><div class="v">${p[1]}</div><div class="d">${p[2]}</div></div>`).join('');
+
+  const el=$('#dqStripN'); if(el) el.textContent = total;
+  const bg=$('#dqStripBadge'); if(bg){ bg.textContent = total>0?'확인 필요':'정상'; bg.className = 'badge '+(total>0?'b-bad':'b-ok'); }
+
+  const c=$('#cDq');
+  if(c && !c._done){
+    c._done=1;
+    new Chart(c,{type:'bar',data:{labels:DQ.dept.map(d=>d[0]),
+      datasets:[{data:DQ.dept.map(d=>d[1]),
+        backgroundColor:DQ.dept.map(d=>d[1]>0?'#F04452':'#0CA678'),borderRadius:8,maxBarThickness:46}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:x=>x.parsed.y+'건'}}},
+        scales:{y:{beginAtZero:true,grid:{color:'rgba(9,20,38,.06)'},ticks:{precision:0}},x:{grid:{display:false}}}}});
+  }
+}
+
+/* ================= 데이터 ================= */
+const CO = {
+  name:'경창산업',
+  facts:[['설립','1961년 (법인 1977년)'],['본사','대구 달서구 성서'],['임직원','1,274명 (’26.6)'],['국내 공장','대구 4곳'],['해외','중국·미국·멕시코'],['주요 고객','현대차·기아·트랜시스·모비스']],
+  src:'출처: <a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260323000235" target="_blank">DART 2025 사업보고서</a> · <a href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814002675" target="_blank">2026 반기보고서</a> · <a href="https://www.kc.co.kr" target="_blank">회사 홈페이지</a>',
+  plants:['전 사업장','본사공장','현풍공장','샤시공장','전동화공장'],
+  salesY:7053e8, cogsY:6494e8,
+  quarters:[['’25 1Q',1681,36],['2Q',1844,20],['3Q',1734,-25],['4Q',1794,43],['’26 1Q',1716,45],['2Q',1865,84]],
+  cost:[['원재료·상품',60.2,''],['인건비',12.6,'04'],['외주용역비',5.4,'02'],['소모품비',4.9,'05'],['감가상각비',3.4,'05'],['전력비',2.3,''],['운반비',1.5,'03']],
+  mix:[['A/T 부품',62.5],['액추에이터',12.4],['레버',7.3],['페달',6.6],['케이블',1.4],['전동화 등',9.8]]
+};
+
+// 품번 (예시). mat: 원/kg(구매부품 포함), wt: kg, sc: 스크랩률, ct: 병목 C/T(초), op: 라인 인원, oee: 가동률, fix: 라인 연간 고정경비(원), vol: 연간 물량, fr: 개당 운반비, frA: 결정가에 포함된 개당 운반비
+let PRODUCTS = [
+  {pn:'KC-AD-8D21', nm:'A/T 드럼 (8속)', plant:'본사공장', cust:'현대트랜시스', price:18400, mat:6380, wt:2.1, sc:0.045, ct:14, op:12, oee:0.86, fix:2.429e+09, vol:2400000, fr:258, frA:239, pass:0.9},
+  {pn:'KC-AH-8H14', nm:'A/T 허브', plant:'현풍공장', cust:'현대트랜시스', price:12600, mat:7490, wt:1.25, sc:0.05, ct:11, op:10, oee:0.87, fix:1.953e+09, vol:3100000, fr:176, frA:176, pass:0.9},
+  {pn:'KC-RC-6R30', nm:'리테이너 & 캐리어', plant:'현풍공장', cust:'현대차', price:14900, mat:6720, wt:1.6, sc:0.05, ct:16, op:10, oee:0.85, fix:1.557e+09, vol:1900000, fr:224, frA:224, pass:0.9},
+  {pn:'KC-GA-7T05', nm:'DCT 기어 액추에이터', plant:'샤시공장', cust:'현대차', price:157000, mat:38610, wt:3.4, sc:0.02, ct:52, op:16, oee:0.82, fix:1.272e+09, vol:180000, fr:1884, frA:1727, pass:0.4},
+  {pn:'KC-ES-1B40', nm:'e-Shifter (버튼형)', plant:'샤시공장', cust:'기아', price:42600, mat:29950, wt:1.1, sc:0.02, ct:38, op:11, oee:0.8, fix:7.455e+08, vol:350000, fr:554, frA:511, pass:0.4},
+  {pn:'KC-AP-2M60', nm:'가속페달 모듈(APM)', plant:'샤시공장', cust:'현대차', price:9800, mat:9890, wt:0.75, sc:0.025, ct:19, op:5, oee:0.83, fix:7.84e+08, vol:1600000, fr:176, frA:157, pass:0.4},
+  {pn:'KC-BP-3N20', nm:'브레이크 페달 ASSY', plant:'샤시공장', cust:'기아', price:11500, mat:3260, wt:2.6, sc:0.05, ct:24, op:6, oee:0.81, fix:5.692e+08, vol:900000, fr:253, frA:196, pass:0.4},
+  {pn:'KC-CC-4K10', nm:'컨트롤 케이블', plant:'샤시공장', cust:'현대차', price:1450, mat:2940, wt:0.35, sc:0.04, ct:6, op:4, oee:0.8, fix:2.088e+08, vol:3200000, fr:44, frA:32, pass:0.4},
+  {pn:'KC-HS-9E50', nm:'헤어핀 스테이터', plant:'전동화공장', cust:'현대모비스', price:95000, mat:7750, wt:9.5, sc:0.03, ct:58, op:14, oee:0.78, fix:1.71e+09, vol:300000, fr:1140, frA:1140, pass:0.6},
+];
+const WAGE = 38000; // 시간당 임률(원, 수당·보험 포함 평균)
+
+/* ================= 유틸 ================= */
+const $ = s=>document.querySelector(s);
+const won = v => (v<0?'−':'')+'₩'+Math.round(Math.abs(v)).toLocaleString('ko-KR');
+const eok = v => { const a=Math.abs(v), s=v<0?'−':''; if(a>=1e8) return s+(a>=1e10?Math.round(a/1e8).toLocaleString('ko-KR'):(a/1e8).toFixed(1))+'억원'; if(a>=1e4) return s+Math.round(a/1e4).toLocaleString('ko-KR')+'만원'; return s+Math.round(a).toLocaleString('ko-KR')+'원'; };
+const man = v => Math.round(v).toLocaleString('ko-KR')+'만원';
+const pct = (v,d=1)=> (v*100).toFixed(d)+'%';
+const sgn = (v,f)=> (v>0?'+':v<0?'−':'')+f(Math.abs(v));
+const fill = el => { const p=(el.value-el.min)/(el.max-el.min)*100; el.style.setProperty('--p',p+'%'); };
+const C = {blue:'#3182F6',blue2:'#6BA6FF',blue3:'#A9CBFF',gray:'#C9D6E6',red:'#F04452',amber:'#FF9F0A',t3:'#8B95A1',line:'#E5E8EB'};
+Chart.defaults.font.family = 'Pretendard,-apple-system,"Malgun Gothic",sans-serif';
+Chart.defaults.font.size = 12; Chart.defaults.color = '#8B95A1';
+Chart.defaults.plugins.legend.labels.boxWidth = 10; Chart.defaults.plugins.legend.labels.boxHeight = 10;
+Chart.defaults.plugins.legend.labels.useBorderRadius = true; Chart.defaults.plugins.legend.labels.borderRadius = 3;
+Chart.defaults.plugins.tooltip.backgroundColor='#191F28'; Chart.defaults.plugins.tooltip.padding=10; Chart.defaults.plugins.tooltip.cornerRadius=10;
+const charts = {};
+function chart(id, cfg){ if(charts[id]){ charts[id].data=cfg.data; if(cfg.options) charts[id].options=cfg.options; charts[id].update('none'); return; } charts[id]=new Chart(document.getElementById(id), cfg); }
+const gridY = {grid:{color:'#F2F4F6'},border:{display:false}};
+const gridX = {grid:{display:false},border:{display:false}};
+
+/* ================= 원가 모델 ================= */
+function cost(p, o={}){
+  const wt = o.wt ?? p.wt, mat = o.mat ?? p.mat, sc = o.sc ?? p.sc, ct = o.ct ?? p.ct, op = o.op ?? p.op, oee = o.oee ?? p.oee, vol = o.vol ?? p.vol, fix = o.fix ?? p.fix, price = o.price ?? p.price;
+  const m = wt*mat*(1+sc);
+  const l = ct/3600*op*WAGE/oee;
+  const e = fix/vol + ct/3600*9000/oee;       // 라인 고정경비 배부 + 시간당 변동경비(전력·소모품)
+  const f = p.fr;
+  const total = m+l+e+f;
+  return {m,l,e,f,total,price,profit:price-total,rate:(price-total)/price,vol};
+}
+function status(rate){ return rate<0?['적자','b-bad']:rate<.03?['주의','b-warn']:['정상','b-ok']; }
+
+/* ================= 페이지 전환 ================= */
+function go(p){
+  document.querySelectorAll('nav.side button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
+  window.scrollTo({top:0,behavior:'instant'});
+  RENDER[p] && RENDER[p]();
+}
+document.querySelectorAll('nav.side button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+
+/* ================= 사업장 필터 ================= */
+let PLANT = '전 사업장';
+function plantProducts(){ return PLANT==='전 사업장'?PRODUCTS:PRODUCTS.filter(p=>p.plant===PLANT); }
+
+/* ================= 종합 ================= */
+function renderHome(){
+  $('#homeEyebrow').textContent = CO.name+' · '+PLANT;
+  $('#coSrc').innerHTML = CO.src;
+  $('#kpiReal').innerHTML = [
+    ['2025년 매출','7,053억원','연결 · 수출 비중 57%'],
+    ['2025년 영업이익률','1.0%','<span class="dn">영업이익 73억원 · 원가율 92.1%</span>'],
+    ['2026년 상반기 영업이익률','3.6%','<span class="up">영업이익 129억원 · 원가율 87.8%</span>'],
+    ['원가 1% 절감 효과','연 65억원','2025년 매출원가 6,494억원 기준'],
+  ].map(([a,b,c])=>`<div class="card kpi"><div class="lb">${a}</div><div class="v num">${b}</div><div class="d">${c}</div></div>`).join('');
+
+  const ps = plantProducts();
+  const rows = ps.map(p=>({p,c:cost(p)}));
+  const sales = rows.reduce((a,r)=>a+r.p.price*r.p.vol,0);
+  const prof = rows.reduce((a,r)=>a+r.c.profit*r.p.vol,0);
+  const bad = rows.filter(r=>r.c.rate<.03);
+  const lossAmt = bad.reduce((a,r)=>a+Math.min(0,r.c.profit - r.p.price*.03)*r.p.vol,0);
+  const alerts = buildAlerts(rows);
+  $('#kpis').innerHTML = [
+    ['예시 품번 연 매출', eok(sales), `${ps.length}개 품번 · 연간 물량 기준`],
+    ['예시 품번 이익률', pct(prof/sales), `<span class="${prof/sales>=.03?'up':'dn'}">연 ${eok(prof)}</span>`],
+    ['목표 이익률(3%) 미달', bad.length+'개 품번', `<span class="dn">목표까지 연 ${eok(-lossAmt)} 부족</span>`],
+    ['조치 필요 항목', alerts.length+'건', '운반비·인건비·수선비·생산 포함'],
+  ].map(([a,b,c])=>`<div class="card kpi"><div class="lb">${a}</div><div class="v num">${b}</div><div class="d">${c}</div></div>`).join('');
+
+  $('#prodTbl').innerHTML = `<thead><tr><th>품번</th><th>결정가</th><th>자체원가</th><th>개당 이익</th><th>이익률</th><th>상태</th></tr></thead><tbody>`+
+    rows.sort((a,b)=>a.c.rate-b.c.rate).map(({p,c})=>{const [s,k]=status(c.rate);return `<tr class="click" data-pn="${p.pn}"><td>${p.nm}<span class="pn">${p.pn}${p.plant?' · '+p.plant:''}</span></td><td>${won(p.price)}</td><td>${won(c.total)}</td><td class="${c.profit<0?'dn':''}">${won(c.profit)}</td><td class="${c.rate<0?'dn':c.rate<.03?'warn':''}">${pct(c.rate)}</td><td><span class="badge ${k}">${s}</span></td></tr>`}).join('')+'</tbody>';
+  document.querySelectorAll('#prodTbl tr.click').forEach(tr=>tr.onclick=()=>{ m1Sel=tr.dataset.pn; go('m1'); });
+
+  $('#alerts').innerHTML = alerts.map(a=>`<div class="alert" data-go="${a.go}"><span class="dot" style="background:${a.c}"></span><div><div class="tag">${a.tag}</div><div class="msg">${a.msg}</div></div></div>`).join('');
+  document.querySelectorAll('.alert').forEach(el=>el.onclick=()=>go(el.dataset.go));
+
+  const q=CO.quarters;
+  chart('cTrend',{type:'bar',data:{labels:q.map(x=>x[0]),datasets:[
+    {type:'line',label:'영업이익률(%)',data:q.map(x=>+(x[2]/x[1]*100).toFixed(1)),yAxisID:'y2',borderColor:C.red,backgroundColor:C.red,tension:.35,pointRadius:3,borderWidth:2},
+    {label:'매출(억원)',data:q.map(x=>x[1]),backgroundColor:C.blue3,hoverBackgroundColor:C.blue,borderRadius:6,maxBarThickness:26}]},
+    options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',align:'end'}},scales:{x:gridX,y:{...gridY,min:0,ticks:{callback:v=>v.toLocaleString()}},y2:{position:'right',grid:{display:false},border:{display:false},ticks:{callback:v=>v+'%'}}}}});
+  chart('cCost',{type:'bar',data:{labels:CO.cost.map(c=>c[0]+(c[2]?' ('+c[2]+')':'')),datasets:[{data:CO.cost.map(c=>c[1]),backgroundColor:CO.cost.map(c=>c[2]?C.blue:C.gray),borderRadius:5,maxBarThickness:16}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' 매출 대비 '+c.raw+'%'}}},scales:{x:{...gridY,ticks:{callback:v=>v+'%'}},y:{...gridX,ticks:{color:'#4E5968'}}}}});
+  chart('cMix',{type:'doughnut',data:{labels:CO.mix.map(m=>m[0]),datasets:[{data:CO.mix.map(m=>m[1]),backgroundColor:['#3182F6','#6BA6FF','#A9CBFF','#C9D6E6','#E5E8EB','#8B95A1'],borderWidth:2,borderColor:'#fff'}]},
+    options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{color:'#4E5968',padding:10,generateLabels:ch=>ch.data.labels.map((l,i)=>({text:l+' '+ch.data.datasets[0].data[i]+'%',fillStyle:ch.data.datasets[0].backgroundColor[i],strokeStyle:'#fff',index:i}))}},tooltip:{callbacks:{label:c=>' '+c.label+' '+c.raw+'%'}}}}});
+
+  const cs = rows.slice().sort((a,b)=>b.c.profit*b.p.vol-a.c.profit*a.p.vol);
+  chart('cContrib',{type:'bar',data:{labels:cs.map(r=>r.p.nm),datasets:[{data:cs.map(r=>r.c.profit*r.p.vol/1e8),backgroundColor:cs.map(r=>r.c.profit<0?C.red:C.blue),borderRadius:6,maxBarThickness:20}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw.toFixed(1)+'억원'}}},scales:{x:{...gridY,ticks:{callback:v=>v+'억'}},y:{...gridX,ticks:{color:'#4E5968'}}}}});
+}
+
+function buildAlerts(rows){
+  const out = [];
+  rows.filter(r=>r.c.profit<0).forEach(r=>out.push({tag:'원가 · '+r.p.pn,msg:`${r.p.nm} 개당 ${won(-r.c.profit)} 손해, 연 ${eok(-r.c.profit*r.p.vol)}`,c:C.red,go:'m1'}));
+  const fr = FREIGHT.reduce((a,x)=>a+(x.act+x.emg-x.allow),0);
+  if(fr>0) out.push({tag:'운반비',msg:`9월 인정 운반비보다 ${eok(fr)} 더 지급, 긴급 용차 ${FREIGHT.reduce((a,x)=>a+x.emgN,0)}건`,c:C.red,go:'m3'});
+  const over = EQUIP.filter(e=>e.rep/e.acq>.12);
+  if(over.length) out.push({tag:'수선비',msg:`수선비 기준(12%) 넘은 설비 ${over.length}대, 최고 ${pct(Math.max(...over.map(e=>e.rep/e.acq)),0)}`,c:C.amber,go:'m5'});
+  const pr = PROCS.map(pc=>({pc,need:need(pc)})).filter(x=>x.pc.head-x.need>=2);
+  pr.sort((a,b)=>(b.pc.head-b.need)-(a.pc.head-a.need)); if(pr.length) out.push({tag:'인건비',msg:`${pr[0].pc.nm} 등 ${pr.length}개 공정, 적정 인원보다 합계 ${pr.reduce((a,x)=>a+x.pc.head-Math.ceil(x.need),0)}명 많음`,c:C.amber,go:'m4'});
+  const low=rows.filter(r=>r.c.rate>=0&&r.c.rate<.03).sort((x,y)=>x.c.rate-y.c.rate); if(low.length) out.push({tag:'원가',msg:`이익률 3% 미달 ${low.length}개 품번: ${low.slice(0,2).map(r=>r.p.nm+' '+pct(r.c.rate)).join(', ')}${low.length>2?' 외':''}`,c:C.amber,go:'m1'});
+  const m2P=PRODUCTS.find(p=>p.pn==='KC-ES-1B40'), m2=m2Calc(m2P,8000,20,1.18); out.push({tag:'생산 · '+m2P.pn,msg:`${m2P.nm} 추가 물량 8,000개는 ${m2.best.nm}이 가장 쌈 (${eok(m2.best.total)})`,c:C.blue,go:'m2'});
+  return out;
+}
+
+/* ================= M1 ================= */
+let m1Sel = null;
+function fillProdSel(sel, cur){ sel.innerHTML = PRODUCTS.map(p=>`<option value="${p.pn}">${p.nm} (${p.pn})</option>`).join(''); if(cur) sel.value=cur; }
+function renderM1(){
+  const sel = $('#m1Prod'); fillProdSel(sel, m1Sel||PRODUCTS.slice().sort((a,b)=>cost(a).rate-cost(b).rate)[0].pn); m1Sel = sel.value;
+  const p = PRODUCTS.find(x=>x.pn===m1Sel);
+  $('#m1Meta').textContent = `연 ${p.vol.toLocaleString()}개 · C/T ${p.ct}초 · 라인 ${p.op}명`+(p.plant?' · '+p.plant:'');
+  const ct=+$('#m1ct').value, oe=+$('#m1oee').value, op=+$('#m1op').value, sc=+$('#m1sc').value, pr=+$('#m1pr').value;
+  $('#m1ctV').textContent = ct?`−${ct}% (${(p.ct*(1-ct/100)).toFixed(1)}초)`:'없음';
+  $('#m1oeeV').textContent = oe?`+${oe}%p (${pct(p.oee+oe/100,0)})`:'없음';
+  $('#m1opV').textContent = op?`−${op}명`:'없음';
+  $('#m1scV').textContent = sc?`−${sc.toFixed(1)}%p`:'없음';
+  $('#m1prV').textContent = pr?`+${pr}%`:'없음';
+  ['#m1ct','#m1oee','#m1op','#m1sc','#m1pr'].forEach(s=>fill($(s)));
+  $('#m1op').max = Math.max(1,Math.floor(p.op*.3));
+
+  const a = cost(p);
+  const steps = [
+    ['현재', {}],
+    ['C/T 단축', {ct:p.ct*(1-ct/100)}],
+    ['가동률', {oee:p.oee+oe/100}],
+    ['인원 조정', {op:p.op-op}],
+    ['스크랩', {sc:Math.max(0,p.sc-sc/100)}],
+    ['단가 재협상', {price:p.price*(1+pr/100)}],
+  ];
+  let acc = {}, prev = a.profit; const deltas=[];
+  steps.slice(1).forEach(([n,o])=>{ acc={...acc,...o}; const c=cost(p,acc); deltas.push([n,c.profit-prev]); prev=c.profit; });
+  const b = cost(p,acc);
+
+  const stack = (c)=>{ const tot=Math.max(c.price,c.total); const parts=[[c.m,'#3182F6','재료'],[c.l,'#6BA6FF','노무'],[c.e,'#A9CBFF','경비'],[c.f,'#C9D6E6','운반']];
+    let h = parts.map(([v,col,n])=>`<div style="flex-basis:${v/tot*100}%;background:${col}" title="${n} ${won(v)}">${v/tot>.09?n+' '+pct(v/c.price,0):''}</div>`).join('');
+    h += c.profit>0?`<div style="flex-basis:${c.profit/tot*100}%;background:#E5E8EB;color:#4E5968" title="이익">${c.profit/tot>.06?'이익 '+pct(c.rate):''}</div>`:'';
+    return h; };
+  $('#m1StackNow').innerHTML = stack(a); $('#m1StackAfter').innerHTML = stack(b);
+
+  $('#m1Rows').innerHTML = [
+    ['결정가', won(a.price)+(pr?` → ${won(b.price)}`:'')],
+    ['재료비', won(a.m)+(Math.round(b.m)!==Math.round(a.m)?` → ${won(b.m)}`:'')],
+    ['노무비', won(a.l)+(Math.round(b.l)!==Math.round(a.l)?` → ${won(b.l)}`:'')],
+    ['경비', won(a.e)+(Math.round(b.e)!==Math.round(a.e)?` → ${won(b.e)}`:'')],
+    ['운반비', won(a.f)],
+    ['개당 이익', `<span class="${a.profit<0?'dn':''}">${won(a.profit)}</span> → <span class="${b.profit<0?'dn':'up'}">${won(b.profit)}</span>`],
+    ['이익률', `${pct(a.rate)} → <span class="${b.rate<0?'dn':'up'}">${pct(b.rate)}</span>`],
+    ['연간 이익', `${eok(a.profit*p.vol)} → <b class="${b.profit<0?'dn':'up'}">${eok(b.profit*p.vol)}</b>`],
+  ].map(([k,v])=>`<div class="r"><span>${k}</span><b>${v}</b></div>`).join('');
+
+  const labels = ['현재',...deltas.map(d=>d[0]),'개선 후'];
+  let run=a.profit; const floating=[[0,a.profit]];
+  deltas.forEach(([,d])=>{ floating.push([run,run+d]); run+=d; });
+  floating.push([0,b.profit]);
+  chart('cM1',{type:'bar',data:{labels,datasets:[{data:floating,backgroundColor:floating.map((f,i)=>i===0||i===floating.length-1?(f[1]<0?C.red:C.blue):(f[1]>=f[0]?C.blue3:C.red)),borderRadius:6,maxBarThickness:44}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const [x,y]=c.raw;return ' '+(c.dataIndex===0||c.dataIndex===floating.length-1?won(y):sgn(y-x,won));}}}},scales:{x:gridX,y:{...gridY,ticks:{callback:v=>'₩'+v.toLocaleString()}}}}});
+
+  const gain = (b.profit-a.profit)*p.vol;
+  const need3 = p.price*.03 - a.profit;
+  const say=$('#m1Say');
+  if(!gain){ say.className='say'+(a.profit<0?' bad':a.rate<.03?' warn':''); say.textContent = a.rate<.03 ? `이익률 3%를 맞추려면 개당 ${won(need3)}, 연 ${eok(need3*p.vol)}을 줄여야 합니다. 위 활동 값을 움직여 보세요.` : `현재 이익률 ${pct(a.rate)}로 목표(3%)를 넘습니다.`; }
+  else { const best = deltas.slice().sort((x,y)=>y[1]-x[1])[0]; say.className='say'+(b.rate<.03?' warn':''); say.textContent = `연 ${eok(gain)} 늘어납니다. 가장 큰 건 ${best[0]}(개당 ${won(best[1])})` + (b.rate<.03?`. 아직 목표 3%까지 개당 ${won(p.price*.03-b.profit)} 모자랍니다.`:`. 목표 이익률 3%를 넘깁니다.`); }
+}
+['#m1ct','#m1oee','#m1op','#m1sc','#m1pr'].forEach(s=>$(s).addEventListener('input',renderM1));
+$('#m1Prod').onchange = e=>{ m1Sel=e.target.value; renderM1(); };
+
+/* ================= M2 ================= */
+let m2Sel=null;
+function m2Calc(p,q,d,o){
+  const perH = 3600/p.ct*p.oee;               // 시간당 생산량
+  const lab = p.ct/3600*p.op*WAGE/p.oee;      // 개당 정상 노무비
+  const varE = p.ct/3600*9000/p.oee;          // 개당 변동경비
+  const hrs = q/perH;                          // 필요한 라인 시간
+  const days = d, wkd = Math.round(d*5/7), wke = d-wkd;
+  const capOT = wkd*2*perH;                    // 평일 잔업 2시간
+  const capWE = Math.floor(wke/7*2)*8*perH || Math.round(d/7)*8*perH; // 토요일 8시간
+  const capNight = wkd*7.5*perH*.9;            // 야간조 7.5시간, 초기 효율 90%
+  const opt = [
+    {nm:'평일 잔업', ds:'하루 2시간, 임금 1.5배', unit:lab*1.5+varE, cap:capOT, fixed:0},
+    {nm:'주말 특근', ds:'토요일 8시간, 임금 1.5배 + 식대·교통', unit:lab*1.5+varE+ (12000*p.op/(8*perH)), cap:capWE, fixed:0},
+    {nm:'3교대 전환', ds:`야간조 ${p.op}명 채용·교육, 야간수당 1.5배`, unit:lab*1.5+varE*1.1, cap:capNight, fixed:p.op*2800000},
+    {nm:'외주 가공', ds:`외주 단가 = 자체 노무비의 ${Math.round(o*100)}% + 운송·검사`, unit:lab*o+ p.fr*.6 + 150, cap:Infinity, fixed:3000000},
+  ].map(x=>({...x,total:x.unit*q+x.fixed,ok:x.cap>=q}));
+  const okOpts = opt.filter(x=>x.ok);
+  const best = (okOpts.length?okOpts:opt).slice().sort((a,b)=>a.total-b.total)[0];
+  return {opt,best,perH,lab,hrs};
+}
+
+function renderM2(){
+  const sel=$('#m2Prod'); fillProdSel(sel, m2Sel||'KC-ES-1B40'); m2Sel=sel.value;
+  const p=PRODUCTS.find(x=>x.pn===m2Sel);
+  const q=+$('#m2q').value, d=+$('#m2d').value, o=+$('#m2o').value/100;
+  $('#m2qV').textContent=q.toLocaleString()+'개'; $('#m2dV').textContent=d+'일'; $('#m2oV').textContent=o*100+'%';
+  ['#m2q','#m2d','#m2o'].forEach(s=>fill($(s)));
+  const {opt,best,perH,lab,hrs}=m2Calc(p,q,d,o);
+  $('#m2Opts').innerHTML = opt.map(x=>`<div class="opt ${x===best?'best':''}">${x===best?'<span class="badge b-ok pick">가장 쌈</span>':!x.ok?'<span class="badge b-bad pick">기간 부족</span>':''}<div class="nm">${x.nm}</div><div class="ct num">${eok(x.total)}</div><div class="ds">개당 ${won(x.total/q)} · 가능 ${x.cap===Infinity?'제한 없음':Math.floor(x.cap).toLocaleString()+'개'}</div><div class="ds">${x.ds}</div></div>`).join('');
+  $('#m2Base').innerHTML = [['시간당 생산량',Math.round(perH).toLocaleString()+'개'],['필요 라인 시간',hrs.toFixed(0)+'시간'],['개당 정상 노무비',won(lab)],['추가 물량 매출',eok(p.price*q)]].map(([k,v])=>`<div class="r"><span>${k}</span><b>${v}</b></div>`).join('');
+  const others = opt.filter(x=>x!==best&&x.ok).sort((a,b)=>a.total-b.total);
+  const combo = !opt[0].ok ? ` 평일 잔업으로는 ${Math.floor(opt[0].cap).toLocaleString()}개까지만 가능해서, 나머지 ${(q-Math.floor(opt[0].cap)).toLocaleString()}개는 다른 방법과 나눠야 합니다.`:'';
+  $('#m2Say').className='say'; $('#m2Say').textContent = `가장 싼 방법은 ${best.nm}(${eok(best.total)})입니다`+(others[0]?`. 다음으로 싼 ${others[0].nm}보다 ${eok(others[0].total-best.total)} 적게 듭니다.`:'.')+combo;
+}
+['#m2q','#m2d','#m2o'].forEach(s=>$(s).addEventListener('input',renderM2));
+$('#m2Prod').onchange=e=>{m2Sel=e.target.value;renderM2();};
+
+/* ================= M3 ================= */
+// 9월 납품처별 (원). allow: 인정 운반비, act: 정기 운송 실지급, emg: 긴급 용차, emgN: 건수, qty: 납품 수량
+let FREIGHT = [
+  {to:'현대트랜시스 서산', qty:1480000, allow:210000000, act:202000000, emg:12000000, emgN:2},
+  {to:'부산신항 (수출 선적)', qty:1920000, allow:155000000, act:162000000, emg:26000000, emgN:3},
+  {to:'현대차 울산공장', qty:610000, allow:135000000, act:141000000, emg:18000000, emgN:3},
+  {to:'기아 화성공장', qty:352000, allow:92000000, act:106000000, emg:21000000, emgN:4},
+  {to:'현대모비스 충주공장', qty:26000, allow:64000000, act:70000000, emg:9000000, emgN:1},
+  {to:'기아 광주공장', qty:118000, allow:48000000, act:61000000, emg:15000000, emgN:4},
+];
+function renderM3(){
+  const allow=FREIGHT.reduce((a,x)=>a+x.allow,0), act=FREIGHT.reduce((a,x)=>a+x.act,0), emg=FREIGHT.reduce((a,x)=>a+x.emg,0), n=FREIGHT.reduce((a,x)=>a+x.emgN,0);
+  const sales = CO.salesY/12;
+  $('#m3Kpi').innerHTML=[
+    ['인정 운반비',eok(allow),'결정가에 포함된 금액'],
+    ['실제 지급',eok(act+emg),`<span class="dn">${sgn(act+emg-allow,eok)}</span>`],
+    ['긴급 용차',n+'건',eok(emg)+' · 건당 '+eok(emg/n)],
+    ['매출 대비 운반비',pct((act+emg)/sales,2),'인정 기준 '+pct(allow/sales,2)+' · 공시 ’26 상반기 1.45%'],
+  ].map(([a,b,c])=>`<div class="card kpi"><div class="lb">${a}</div><div class="v num">${b}</div><div class="d">${c}</div></div>`).join('');
+  $('#m3Tbl').innerHTML=`<thead><tr><th>납품처</th><th>인정</th><th>정기 운송</th><th>긴급 용차</th><th>차이</th><th>상태</th></tr></thead><tbody>`+
+    FREIGHT.map(x=>{const g=x.act+x.emg-x.allow;const s=g/x.allow;return `<tr><td>${x.to}<span class="pn">${x.qty.toLocaleString()}개</span></td><td>${eok(x.allow)}</td><td>${eok(x.act)}</td><td>${x.emg?eok(x.emg)+` <span class="pn" style="display:inline">${x.emgN}건</span>`:'—'}</td><td class="${g>0?'dn':'up'}">${sgn(g,eok)}</td><td><span class="badge ${s>.15?'b-bad':s>0?'b-warn':'b-ok'}">${s>.15?'초과':s>0?'주의':'정상'}</span></td></tr>`}).join('')+'</tbody>';
+  const l=+$('#m3l').value/100, e=+$('#m3e').value/100;
+  $('#m3lV').textContent=(l*100)+'%'; $('#m3eV').textContent=Math.round(e*100)+'%'; fill($('#m3l')); fill($('#m3e'));
+  const sLoad = act*12*(1-1/(1+l)), sEmg = emg*12*e;
+  $('#m3Save').textContent=eok(sLoad+sEmg);
+  $('#m3Rows').innerHTML=[['적재율 개선',eok(sLoad)],['긴급 용차 감소',eok(sEmg)],['개선 후 월 초과분',sgn((act/(1+l)+emg*(1-e))-allow,eok)]].map(([k,v])=>`<div class="r"><span>${k}</span><b>${v}</b></div>`).join('');
+  chart('cM3',{type:'bar',data:{labels:['고객 물량 급변경','설비 고장으로 생산 지연','품질 재작업','협력사 부품 지연','출하 계획 누락'],datasets:[{data:[19,14,9,7,3],backgroundColor:[C.blue,C.blue2,C.blue3,C.gray,C.gray],borderRadius:6,maxBarThickness:18}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+'건'}}},scales:{x:{...gridY,ticks:{callback:v=>v+'건'}},y:{...gridX,ticks:{color:'#4E5968'}}}}});
+}
+['#m3l','#m3e'].forEach(s=>$(s).addEventListener('input',renderM3));
+
+/* ================= M4 ================= */
+// 공정: need 월 필요 공수(시간), head 현 인원, type 현재 운영
+let PROCS = [
+  {nm:'트랜스퍼 프레스', hrs:24500, head:152, type:'직영'},
+  {nm:'롤다이·플로우 포밍', hrs:13800, head:88, type:'직영'},
+  {nm:'전자빔 용접', hrs:7900, head:49, type:'직영'},
+  {nm:'인서트 사출', hrs:6100, head:41, type:'직영'},
+  {nm:'샤시 조립', hrs:21300, head:139, type:'직영'},
+  {nm:'구동모터 조립', hrs:15200, head:96, type:'직영'},
+  {nm:'검사·포장', hrs:9400, head:64, type:'도급'},
+  {nm:'자재 물류', hrs:5300, head:37, type:'도급'},
+];
+const need = pc => pc.hrs/(209*0.8);
+let m4Sel = '샤시 조립';
+function renderM4(){
+  const w=+$('#m4w').value, c=+$('#m4c').value, t=+$('#m4t').value, ef=+$('#m4e').value/100;
+  $('#m4wV').textContent=man(w); $('#m4cV').textContent=man(c); $('#m4tV').textContent=man(t); $('#m4eV').textContent=Math.round(ef*100)+'%';
+  ['#m4w','#m4c','#m4t','#m4e'].forEach(s=>fill($(s)));
+  $('#m4Tbl').innerHTML=`<thead><tr><th>공정</th><th>운영</th><th>월 필요 공수</th><th>현 인원</th><th>적정 인원</th><th>차이</th><th>연 인건비</th></tr></thead><tbody>`+
+    PROCS.map(pc=>{const n=need(pc);const g=pc.head-Math.ceil(n);const unit=pc.type==='직영'?w:c;return `<tr><td>${pc.nm}</td><td><span class="badge ${pc.type==='직영'?'b-gray':'b-ok'}">${pc.type}</span></td><td>${pc.hrs.toLocaleString()}시간</td><td>${pc.head}명</td><td>${Math.ceil(n)}명</td><td class="${g>=2?'dn':''}">${g>0?'+'+g+'명':g<0?g+'명':'—'}</td><td>${eok(pc.head*unit*1e4)}</td></tr>`}).join('')+'</tbody>';
+  const sel=$('#m4Proc'); sel.innerHTML=PROCS.filter(p=>p.type==='직영').map(p=>`<option>${p.nm}</option>`).join(''); sel.value=m4Sel;
+  const pc=PROCS.find(p=>p.nm===m4Sel); const h=Math.ceil(need(pc));
+  const mDir = h*w/12, mCon = h*c/12;
+  const cum=[]; let s=-t; let be=null;
+  for(let m=1;m<=36;m++){ const loss = m<=6 ? h*w/12*ef : 0; s += (mDir-mCon) - loss; cum.push(s); if(be===null&&s>=0) be=m; }
+  chart('cM4',{type:'line',data:{labels:cum.map((_,i)=>i+1+'개월'),datasets:[{data:cum,borderColor:C.blue,borderWidth:2.5,pointRadius:0,tension:.2,fill:{target:'origin',above:'rgba(49,130,246,.10)',below:'rgba(240,68,82,.10)'}}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' 누적 '+sgn(c.raw,v=>man(v))}}},scales:{x:{...gridX,ticks:{maxTicksLimit:7}},y:{...gridY,ticks:{callback:v=>(v/1e4).toFixed(1)+'억'}}}}});
+  const yr = (mDir-mCon)*12;
+  const say=$('#m4Say');
+  if(yr<=0){ say.className='say bad'; say.textContent=`${pc.nm}은 도급 단가가 직영보다 높거나 같아 전환해도 남지 않습니다.`; }
+  else if(!be){ say.className='say warn'; say.textContent=`${pc.nm} ${h}명 기준 연 ${eok(yr*1e4)} 줄지만, 전환 비용 때문에 36개월 안에 본전이 안 됩니다.`; }
+  else { say.className='say'; say.textContent=`${pc.nm} 적정 ${h}명을 도급으로 돌리면 연 ${eok(yr*1e4)} 줄고, 전환 비용을 ${be}개월 만에 회수합니다. 현재 ${pc.head}명이라 인원 조정만으로도 연 ${eok((pc.head-h)*w*1e4)} 줄일 수 있습니다.`; }
+}
+['#m4w','#m4c','#m4t','#m4e'].forEach(s=>$(s).addEventListener('input',renderM4));
+$('#m4Proc').onchange=e=>{m4Sel=e.target.value;renderM4();};
+
+/* ================= M5 ================= */
+// acq 취득가(원), rep 최근 12개월 수선비, age 사용 연수, stop 고장정지(시간/년)
+let EQUIP = [
+  {id:'PR-1500', nm:'1,500톤 트랜스퍼 프레스', line:'트랜스퍼 프레스', acq:6.2e9, rep:8.9e8, age:14, stop:188},
+  {id:'RF-0210', nm:'롤다이 포밍기', line:'롤다이·플로우 포밍', acq:1.8e9, rep:2.5e8, age:12, stop:96},
+  {id:'EB-0112', nm:'전자빔 용접기(EBW)', line:'전자빔 용접', acq:2.3e9, rep:3.1e8, age:13, stop:121},
+  {id:'AP-0615', nm:'가속페달 모듈 자동 조립 라인', line:'샤시 조립', acq:9.5e8, rep:1.02e8, age:10, stop:41},
+  {id:'FF-0305', nm:'플로우 포밍기 #3', line:'롤다이·플로우 포밍', acq:1.4e9, rep:1.3e8, age:9, stop:54},
+  {id:'GA-0921', nm:'기어 액추에이터 자동 조립 라인', line:'샤시 조립', acq:2.6e9, rep:2.2e8, age:8, stop:47},
+  {id:'IM-0718', nm:'로봇 인서트 사출 라인', line:'인서트 사출', acq:1.1e9, rep:8.0e7, age:7, stop:38},
+  {id:'HS-2101', nm:'헤어핀 스테이터 라인', line:'구동모터 조립', acq:8.5e9, rep:3.6e8, age:5, stop:29},
+];
+let m5Sel='PR-1500';
+function renderM5(){
+  const tot=EQUIP.reduce((a,e)=>a+e.rep,0), acq=EQUIP.reduce((a,e)=>a+e.acq,0), over=EQUIP.filter(e=>e.rep/e.acq>.12);
+  $('#m5Kpi').innerHTML=[
+    ['연간 수선비',eok(tot),'주요 설비 '+EQUIP.length+'대'],
+    ['평균 수선비율',pct(tot/acq),'기준 12%'],
+    ['기준 초과 설비',over.length+'대',`<span class="dn">기준 대비 ${eok(over.reduce((a,e)=>a+e.rep-e.acq*.12,0))} 초과</span>`],
+    ['고장 정지',EQUIP.reduce((a,e)=>a+e.stop,0)+'시간','최근 12개월'],
+  ].map(([a,b,c])=>`<div class="card kpi"><div class="lb">${a}</div><div class="v num">${b}</div><div class="d">${c}</div></div>`).join('');
+  $('#m5Tbl').innerHTML=`<thead><tr><th>설비</th><th>라인</th><th>연식</th><th>취득가</th><th>연 수선비</th><th>수선비율</th><th>고장 정지</th><th>상태</th></tr></thead><tbody>`+
+    EQUIP.slice().sort((a,b)=>b.rep/b.acq-a.rep/a.acq).map(e=>{const r=e.rep/e.acq;return `<tr class="click" data-id="${e.id}"><td>${e.nm}<span class="pn">${e.id}</span></td><td>${e.line}</td><td>${e.age}년</td><td>${eok(e.acq)}</td><td>${eok(e.rep)}</td><td class="${r>.12?'dn':''}">${pct(r)}</td><td>${e.stop}시간</td><td><span class="badge ${r>.12?'b-bad':r>.09?'b-warn':'b-ok'}">${r>.12?'초과':r>.09?'주의':'정상'}</span></td></tr>`}).join('')+'</tbody>';
+  document.querySelectorAll('#m5Tbl tr.click').forEach(tr=>tr.onclick=()=>{m5Sel=tr.dataset.id;renderM5();$('#m5Eq').scrollIntoView({behavior:'smooth',block:'center'});});
+  const sel=$('#m5Eq'); sel.innerHTML=EQUIP.map(e=>`<option value="${e.id}">${e.nm} (${e.id})</option>`).join(''); sel.value=m5Sel;
+  const e=EQUIP.find(x=>x.id===m5Sel);
+  const g=+$('#m5g').value/100, np=+$('#m5p').value/100, dl=+$('#m5d').value*1e4;
+  $('#m5gV').textContent='연 '+Math.round(g*100)+'%'; $('#m5pV').textContent=Math.round(np*100)+'% ('+eok(e.acq*np)+')'; $('#m5dV').textContent=man(dl/1e4);
+  ['#m5g','#m5p','#m5d'].forEach(s=>fill($(s)));
+  $('#m5Sub').textContent=`${e.nm} · ${e.age}년 사용 · 수선비율 ${pct(e.rep/e.acq)}`;
+  const keep=[], rep=[]; let k=0, r=e.acq*np;
+  for(let y=1;y<=5;y++){ k += e.rep*Math.pow(1+g,y-1) + dl*Math.pow(1+g*.5,y-1); r += e.acq*np*.03 + dl*.15; keep.push(k); rep.push(r); }
+  chart('cM5',{type:'line',data:{labels:['1년','2년','3년','4년','5년'],datasets:[
+    {label:'계속 수리',data:keep,borderColor:C.red,backgroundColor:C.red,borderWidth:2.5,tension:.25,pointRadius:4},
+    {label:'교체',data:rep,borderColor:C.blue,backgroundColor:C.blue,borderWidth:2.5,tension:.25,pointRadius:4}]},
+    options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',align:'end'},tooltip:{callbacks:{label:c=>' '+c.dataset.label+' '+eok(c.raw)}}},scales:{x:gridX,y:{...gridY,ticks:{callback:v=>(v/1e8).toFixed(0)+'억'}}}}});
+  const cross = keep.findIndex((v,i)=>v>rep[i]);
+  const say=$('#m5Say');
+  if(cross<0){ say.className='say'; say.textContent=`5년 안에는 계속 고쳐 쓰는 편이 ${eok(rep[4]-keep[4])} 쌉니다. 수선비가 더 오르면 다시 보세요.`; }
+  else { say.className='say bad'; say.textContent=`${cross+1}년 차부터 교체가 더 쌉니다. 5년 누적으로 ${eok(keep[4]-rep[4])} 차이가 납니다.`; }
+}
+['#m5g','#m5p','#m5d'].forEach(s=>$(s).addEventListener('input',renderM5));
+$('#m5Eq').onchange=e=>{m5Sel=e.target.value;renderM5();};
+
+/* ================= SIM ================= */
+let simTab='s1', simSel=null;
+const SIM = {
+  s1:{
+    inputs:p=>[
+      ['wt','변경 후 중량', p.wt*.7, p.wt*1.1, p.wt*.96, .01, v=>v.toFixed(2)+'kg', `현재 ${p.wt}kg · 설계 변경·소재 두께 조정`],
+      ['mat','재료 단가(원/kg)', p.mat*.8, p.mat*1.2, p.mat, 10, v=>won(v), '구매부품 포함 kg당 평균'],
+    ],
+    calc:(p,v)=>{ const a=cost(p), b=cost(p,{wt:v.wt,mat:v.mat}); return {a,b,say:`중량 ${sgn(v.wt-p.wt,x=>x.toFixed(2)+'kg')}이면 개당 재료비 ${sgn(b.m-a.m,won)}, 연 ${sgn((b.profit-a.profit)*p.vol,eok)}.`}; },
+    chart:(p,v)=>{ const xs=[]; for(let i=0;i<=10;i++){ xs.push(p.wt*(.8+i*.03)); } return {labels:xs.map(x=>x.toFixed(2)+'kg'),data:xs.map(x=>cost(p,{wt:x,mat:v.mat}).rate*100),xl:'중량별 이익률(%)',mark:v.wt,xs}; }
+  },
+  s2:{
+    inputs:p=>[
+      ['ct','개선 후 C/T', p.ct*.6, p.ct, p.ct*.85, .5, v=>v.toFixed(1)+'초', `현재 ${p.ct}초 · 병목 공정 기준`],
+      ['op','라인 인원', Math.max(1,p.op-4), p.op, p.op, 1, v=>v+'명', `현재 ${p.op}명`],
+    ],
+    calc:(p,v)=>{ const a=cost(p), b=cost(p,{ct:v.ct,op:v.op}); const capUp=(p.ct/v.ct-1); return {a,b,say:`C/T ${p.ct}초 → ${v.ct.toFixed(1)}초면 개당 노무비 ${sgn(b.l-a.l,won)}, 같은 시간에 ${pct(capUp,0)} 더 만듭니다. 연 이익 ${sgn((b.profit-a.profit)*p.vol,eok)}.`}; },
+    chart:(p,v)=>{ const xs=[]; for(let i=0;i<=10;i++) xs.push(p.ct*(1-i*.04)); return {labels:xs.map(x=>x.toFixed(1)+'초'),data:xs.map(x=>cost(p,{ct:x,op:v.op}).profit),xl:'C/T별 개당 이익(원)',mark:v.ct,xs}; }
+  },
+  s3:{
+    inputs:p=>[
+      ['chg','재료 단가 변화율', -15, 25, 8, 1, v=>(v>0?'+':'')+v+'%', '공시 구매단가: 케이블류 289원(’24) → 663원(’26 상반기)'],
+      ['pass','단가 연동으로 돌려받는 비율', 0, 100, Math.round(p.pass*100), 5, v=>v+'%', p.plant==='샤시공장'||p.plant==='전동화공장'?'직접 사는 부품·소재 비중이 커서 연동 비율이 낮은 편':'A/T 부품은 철판 대부분을 완성차에서 사급으로 받음 (공시)'],
+    ],
+    calc:(p,v)=>{ const a=cost(p); const nm=p.mat*(1+v.chg/100); const dm=(nm-p.mat)*p.wt*(1+p.sc); const b=cost(p,{mat:nm,price:p.price+dm*v.pass/100});
+      const be = (a.profit)/(p.wt*(1+p.sc)*p.mat*(1-v.pass/100))*100;
+      return {a,b,say: v.pass>=100?'재료비 상승분을 모두 돌려받는 조건이면 손익 변화가 없습니다.':`연동 ${v.pass}% 조건에서 재료 단가가 ${be>0?'+'+be.toFixed(1)+'% 이상 오르면':'지금도'} 이 품번은 적자입니다.`}; },
+    chart:(p,v)=>{ const xs=[-10,-5,0,3,5,8,10,15,20]; return {labels:xs.map(x=>(x>0?'+':'')+x+'%'),data:xs.map(x=>{const nm=p.mat*(1+x/100);const dm=(nm-p.mat)*p.wt*(1+p.sc);return cost(p,{mat:nm,price:p.price+dm*v.pass/100}).profit*p.vol/1e8;}),xl:'재료 단가 변화별 연 이익(억원)',mark:v.chg,xs,bar:true}; }
+  },
+  s4:{
+    inputs:p=>[
+      ['inv','자동화 투자비', 1, 30, 8, .5, v=>v.toFixed(1)+'억원', '로봇·지그·비전 포함'],
+      ['cut','줄어드는 인원(2교대 합)', 1, Math.max(2,p.op), Math.min(6,p.op), 1, v=>v+'명', '라인당 교대 수 × 줄어드는 자리'],
+      ['ctd','C/T 변화', -20, 10, -8, 1, v=>(v>0?'+':'')+v+'%', '자동화 후 병목 C/T'],
+    ],
+    calc:(p,v)=>{ const a=cost(p); const opN=Math.max(1,p.op-v.cut/2); const b=cost(p,{op:opN,ct:p.ct*(1+v.ctd/100),fix:p.fix+v.inv*1e8/8+v.inv*1e8*.04});
+      const yr=(b.profit-a.profit)*p.vol; const pay = yr>0 ? v.inv*1e8/(yr + v.inv*1e8/8) *12 : Infinity;
+      return {a,b,extra:{pay,yr},say: yr<=0?`이 조건에서는 감가상각·유지비가 인건비 절감보다 커서 남지 않습니다.`:`투자비 ${v.inv.toFixed(1)}억원을 ${pay<12?Math.round(pay)+'개월':(pay/12).toFixed(1)+'년'}에 회수합니다. 감가상각 반영 후 연 이익 ${sgn(yr,eok)}.`}; },
+    chart:(p,v)=>{ const a=cost(p); const opN=Math.max(1,p.op-v.cut/2); const b=cost(p,{op:opN,ct:p.ct*(1+v.ctd/100),fix:p.fix+v.inv*1e8/8+v.inv*1e8*.04}); const cash=(b.profit-a.profit)*p.vol+v.inv*1e8/8; const xs=[0,1,2,3,4,5,6,7,8]; return {labels:xs.map(x=>x+'년'),data:xs.map(x=>(-v.inv*1e8+cash*x)/1e8),xl:'누적 현금 효과(억원)',xs,fill:true}; }
+  },
+  s5:{
+    inputs:p=>[
+      ['vol','연간 생산량', p.vol*.5, p.vol*1.5, p.vol*1.2, p.vol/100, v=>Math.round(v).toLocaleString()+'개', `현재 ${p.vol.toLocaleString()}개 · 신차 추가·단종 반영`],
+    ],
+    calc:(p,v)=>{ const a=cost(p), b=cost(p,{vol:v.vol}); const bev = p.fix/(p.price - (a.m+a.l+(a.e-p.fix/p.vol)+a.f));
+      return {a,b,say:`물량 ${sgn(v.vol/p.vol-1,x=>pct(x,0))}이면 개당 고정비가 ${won(p.fix/p.vol)} → ${won(p.fix/v.vol)}. 이 라인 손익분기 물량은 연 ${Math.round(bev).toLocaleString()}개입니다.`}; },
+    chart:(p,v)=>{ const xs=[]; for(let i=0;i<=10;i++) xs.push(p.vol*(.5+i*.1)); return {labels:xs.map(x=>Math.round(x/1000).toLocaleString()+'천'),data:xs.map(x=>cost(p,{vol:x}).profit*x/1e8),xl:'생산량별 연 이익(억원)',mark:v.vol,xs,fill:true}; }
+  }
+};
+let simVals={};
+function renderSimInputs(){
+  const p=PRODUCTS.find(x=>x.pn===simSel); const S=SIM[simTab];
+  const ins=S.inputs(p); simVals={};
+  $('#simIn').innerHTML=`<h3>입력</h3><div class="sub">${p.nm} · 결정가 ${won(p.price)} · 연 ${p.vol.toLocaleString()}개</div>`+
+    ins.map(([k,lb,mn,mx,df,st,f,h])=>{simVals[k]=+df;return `<div class="field"><div class="row"><label>${lb}</label><span class="val" id="sv-${k}"></span></div><input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${df}"><div class="hint">${h}</div></div>`}).join('')+
+    `<button class="chip" id="simReset" style="cursor:pointer">처음 값으로</button>`;
+  document.querySelectorAll('#simIn input[type=range]').forEach(el=>el.addEventListener('input',()=>{simVals[el.dataset.k]=+el.value;renderSimOut();}));
+  $('#simReset').onclick=renderSimInputs;
+  renderSimOut();
+}
+function renderSimOut(){
+  const p=PRODUCTS.find(x=>x.pn===simSel); const S=SIM[simTab]; const ins=S.inputs(p);
+  ins.forEach(([k,,,,,,f])=>{ $('#sv-'+k).textContent=f(simVals[k]); });
+  document.querySelectorAll('#simIn input[type=range]').forEach(fill);
+  const r=S.calc(p,simVals); const {a,b}=r;
+  const cards=[
+    ['개당 원가', won(b.total), sgn(b.total-a.total,won), b.total<=a.total],
+    ['개당 이익', won(b.profit), sgn(b.profit-a.profit,won), b.profit>=a.profit],
+    ['이익률', pct(b.rate), sgn((b.rate-a.rate)*100,x=>x.toFixed(1)+'%p'), b.rate>=a.rate],
+    simTab==='s4' ? ['투자 회수', r.extra.pay===Infinity?'회수 안 됨':r.extra.pay<12?Math.round(r.extra.pay)+'개월':(r.extra.pay/12).toFixed(1)+'년', '감가상각 8년 기준', r.extra.pay!==Infinity]
+                  : ['연간 이익', eok(b.profit*b.vol), sgn(b.profit*b.vol-a.profit*a.vol,eok), b.profit*b.vol>=a.profit*a.vol],
+  ];
+  $('#simRes').innerHTML=cards.map(([k,v,d,g])=>`<div class="result"><div class="cap">${k}</div><div class="big num ${k==='개당 이익'&&b.profit<0?'dn':''}">${v}</div><div class="d num ${g?'up':'dn'}" style="font-size:12.5px;font-weight:600;margin-top:2px">${d}</div></div>`).join('');
+  const ch=S.chart(p,simVals);
+  const markIdx = ch.mark!==undefined ? ch.xs.reduce((bi,x,i)=>Math.abs(x-ch.mark)<Math.abs(ch.xs[bi]-ch.mark)?i:bi,0) : -1;
+  const isBar = ch.bar;
+  chart('cSim',{type:isBar?'bar':'line',data:{labels:ch.labels,datasets:[{label:ch.xl,data:ch.data,borderColor:C.blue,borderWidth:2.5,tension:.25,
+      backgroundColor: isBar? ch.data.map((d,i)=>i===markIdx?C.blue:(d<0?'#FFC9CE':C.blue3)) : 'rgba(49,130,246,.10)',
+      fill: ch.fill?{target:'origin',above:'rgba(49,130,246,.10)',below:'rgba(240,68,82,.10)'}:false,
+      pointRadius: ch.data.map((_,i)=>i===markIdx?6:0), pointBackgroundColor:C.blue, pointBorderColor:'#fff', pointBorderWidth:2, borderRadius:6, maxBarThickness:32}]},
+    options:{maintainAspectRatio:false,animation:false,plugins:{legend:{position:'top',align:'start'},tooltip:{callbacks:{label:c=>' '+(typeof c.raw==='number'?(Math.abs(c.raw)>=1000?won(c.raw):c.raw.toFixed(1)):c.raw)}}},scales:{x:{...gridX,ticks:{maxTicksLimit:9}},y:gridY}}});
+  const say=$('#simSay'); say.className='say'+(b.profit<0?' bad':b.profit<a.profit?' warn':''); say.textContent=r.say;
+}
+document.querySelectorAll('#simTabs button').forEach(b=>b.onclick=()=>{ simTab=b.dataset.s; document.querySelectorAll('#simTabs button').forEach(x=>x.classList.toggle('on',x===b)); renderSimInputs(); });
+$('#simProd').onchange=e=>{simSel=e.target.value;renderSimInputs();};
+function renderSim(){ const sel=$('#simProd'); fillProdSel(sel, simSel||PRODUCTS[0].pn); simSel=sel.value; renderSimInputs(); }
+
+/* ================= 시작 ================= */
+const RENDER = {home:renderHome,m1:renderM1,m2:renderM2,m3:renderM3,m4:renderM4,m5:renderM5,sim:renderSim,dq:renderDQ};
+function initPlants(){
+  const s=$('#plantSel'); s.innerHTML=CO.plants.map(x=>`<option>${x}</option>`).join('');
+  s.onchange=()=>{PLANT=s.value;renderHome();go('home');};
+}
+initPlants();
+renderHome();
+renderDQ();                       // 홈 상단 품질 스트립 숫자 채우기
+document.querySelectorAll('[data-goto]').forEach(b=>b.onclick=()=>go(b.dataset.goto));
+if(location.hash&&RENDER[location.hash.slice(1)]) go(location.hash.slice(1));
+</script>
+</body>
+</html>
